@@ -17,6 +17,8 @@ import {
   Sparkles,
   CheckCircle,
   AlertCircle,
+  Globe,
+  Check,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -29,16 +31,22 @@ export default function Header() {
     toggleClock,
     openModal,
     sidebarCollapsed,
+    language,
+    setLanguage,
+    toggleLanguage,
+    t,
   } = useApp();
 
   const [personaOpen, setPersonaOpen] = useState(false);
   const [quickActionOpen, setQuickActionOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const personaRef = useRef<HTMLDivElement>(null);
   const actionRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
+  const langRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -51,6 +59,9 @@ export default function Header() {
       }
       if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
         setNotificationsOpen(false);
+      }
+      if (langRef.current && !langRef.current.contains(event.target as Node)) {
+        setLangOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -99,7 +110,7 @@ export default function Header() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input
             type="text"
-            placeholder="ស្វែងរកបុគ្គលិក, ផ្នែកការងារ... (Search employees, departments...)"
+            placeholder={t('search_placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-4 py-1.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-sans"
@@ -109,11 +120,63 @@ export default function Header() {
 
       {/* Action Controls */}
       <div className="flex items-center gap-3">
+        {/* Language Switcher Button */}
+        <div className="relative" ref={langRef}>
+          <button
+            onClick={() => setLangOpen(!langOpen)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+            title={language === 'km' ? 'ប្តូរភាសា / Switch Language' : 'Switch Language / ប្តូរភាសា'}
+          >
+            <Globe size={15} className="text-indigo-600" />
+            <span>{language === 'km' ? '🇰🇭 ភាសាខ្មែរ' : '🇬🇧 English'}</span>
+            <ChevronDown size={13} className={`text-slate-400 ${langOpen ? 'rotate-180 transition-transform' : ''}`} />
+          </button>
+
+          {langOpen && (
+            <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl py-1.5 z-50 text-slate-700 animate-in fade-in slide-in-from-top-1 duration-150">
+              <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                {language === 'km' ? 'ជ្រើសរើសភាសា' : 'Select Language'}
+              </div>
+              <button
+                onClick={() => {
+                  setLanguage('km');
+                  setLangOpen(false);
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2 text-xs transition-colors cursor-pointer ${
+                  language === 'km' ? 'bg-indigo-50 font-bold text-indigo-700' : 'hover:bg-slate-50'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-base">🇰🇭</span>
+                  <span>ភាសាខ្មែរ (Khmer)</span>
+                </div>
+                {language === 'km' && <Check size={14} className="text-indigo-600" />}
+              </button>
+
+              <button
+                onClick={() => {
+                  setLanguage('en');
+                  setLangOpen(false);
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2 text-xs transition-colors cursor-pointer ${
+                  language === 'en' ? 'bg-indigo-50 font-bold text-indigo-700' : 'hover:bg-slate-50'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-base">🇬🇧</span>
+                  <span>English</span>
+                </div>
+                {language === 'en' && <Check size={14} className="text-indigo-600" />}
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Live Clock-In / Out Toggle */}
         <button
           onClick={toggleClock}
-          title={isClockedIn ? 'ចុចដើម្បីចេញ (Clock Out)' : 'ចុចដើម្បីចូល (Clock In)'}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border shadow-xs ${
+          title={isClockedIn ? t('clock_out') : t('clock_in')}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border shadow-xs cursor-pointer ${
             isClockedIn
               ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
               : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
@@ -130,38 +193,38 @@ export default function Header() {
             ></span>
           </span>
           <Clock size={14} />
-          <span>{isClockedIn ? `បានកត់ត្រា (${clockInTime || '08:30 AM'})` : 'កត់ត្រាវត្តមាន (Clock In)'}</span>
+          <span>{isClockedIn ? `${t('clocked_in')} (${clockInTime || '08:30 AM'})` : t('clock_in')}</span>
         </button>
 
         {/* Quick Action Button */}
         <div className="relative" ref={actionRef}>
           <button
             onClick={() => setQuickActionOpen(!quickActionOpen)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 shadow-sm shadow-indigo-600/20 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 shadow-sm shadow-indigo-600/20 transition-colors cursor-pointer"
           >
             <Plus size={15} />
-            <span>សកម្មភាពរហ័ស</span>
+            <span>{t('quick_action')}</span>
             <ChevronDown size={14} className={quickActionOpen ? 'rotate-180 transition-transform' : ''} />
           </button>
 
           {quickActionOpen && (
             <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-xl py-1 z-50 text-slate-700 animate-in fade-in slide-in-from-top-1 duration-150">
               <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                បង្កើត & ស្នើសុំ (Actions)
+                {t('quick_actions_title')}
               </div>
               <button
                 onClick={() => {
                   setQuickActionOpen(false);
                   openModal('add-employee');
                 }}
-                className="w-full text-left px-3 py-2 text-xs flex items-center gap-2.5 hover:bg-slate-50 transition-colors"
+                className="w-full text-left px-3 py-2 text-xs flex items-center gap-2.5 hover:bg-slate-50 transition-colors cursor-pointer"
               >
                 <div className="p-1.5 rounded-md bg-blue-50 text-blue-600">
                   <UserCheck size={14} />
                 </div>
                 <div>
-                  <div className="font-semibold text-slate-800">បញ្ចូលបុគ្គលិកថ្មី (Add Staff)</div>
-                  <div className="text-[10px] text-slate-500">ចុះឈ្មោះ & កំណត់ប្រាក់ខែ</div>
+                  <div className="font-semibold text-slate-800">{t('action_add_employee')}</div>
+                  <div className="text-[10px] text-slate-500">{t('action_add_employee_sub')}</div>
                 </div>
               </button>
 
@@ -170,14 +233,14 @@ export default function Header() {
                   setQuickActionOpen(false);
                   openModal('request-leave');
                 }}
-                className="w-full text-left px-3 py-2 text-xs flex items-center gap-2.5 hover:bg-slate-50 transition-colors"
+                className="w-full text-left px-3 py-2 text-xs flex items-center gap-2.5 hover:bg-slate-50 transition-colors cursor-pointer"
               >
                 <div className="p-1.5 rounded-md bg-amber-50 text-amber-600">
                   <CalendarPlus size={14} />
                 </div>
                 <div>
-                  <div className="font-semibold text-slate-800">សុំច្បាប់ឈប់សម្រាក (Request Leave)</div>
-                  <div className="text-[10px] text-slate-500">ច្បាប់ប្រចាំឆ្នាំ, ឈឺ ឬធុរៈ</div>
+                  <div className="font-semibold text-slate-800">{t('action_request_leave')}</div>
+                  <div className="text-[10px] text-slate-500">{t('action_request_leave_sub')}</div>
                 </div>
               </button>
 
@@ -186,14 +249,14 @@ export default function Header() {
                   setQuickActionOpen(false);
                   openModal('post-job');
                 }}
-                className="w-full text-left px-3 py-2 text-xs flex items-center gap-2.5 hover:bg-slate-50 transition-colors"
+                className="w-full text-left px-3 py-2 text-xs flex items-center gap-2.5 hover:bg-slate-50 transition-colors cursor-pointer"
               >
                 <div className="p-1.5 rounded-md bg-purple-50 text-purple-600">
                   <Briefcase size={14} />
                 </div>
                 <div>
-                  <div className="font-semibold text-slate-800">ប្រកាសជ្រើសរើសបុគ្គលិក (Post Job)</div>
-                  <div className="text-[10px] text-slate-500">ផ្សាយដំណឹងការងារថ្មី</div>
+                  <div className="font-semibold text-slate-800">{t('action_post_job')}</div>
+                  <div className="text-[10px] text-slate-500">{t('action_post_job_sub')}</div>
                 </div>
               </button>
 
@@ -202,14 +265,14 @@ export default function Header() {
                   setQuickActionOpen(false);
                   openModal('run-payroll');
                 }}
-                className="w-full text-left px-3 py-2 text-xs flex items-center gap-2.5 hover:bg-slate-50 transition-colors"
+                className="w-full text-left px-3 py-2 text-xs flex items-center gap-2.5 hover:bg-slate-50 transition-colors cursor-pointer"
               >
                 <div className="p-1.5 rounded-md bg-emerald-50 text-emerald-600">
                   <DollarSign size={14} />
                 </div>
                 <div>
-                  <div className="font-semibold text-slate-800">បើកប្រាក់បៀវត្សរ៍ (Run Payroll)</div>
-                  <div className="text-[10px] text-slate-500">គណនាបៀវត្សរ៍ & ប.ស.ស (NSSF)</div>
+                  <div className="font-semibold text-slate-800">{t('action_run_payroll')}</div>
+                  <div className="text-[10px] text-slate-500">{t('action_run_payroll_sub')}</div>
                 </div>
               </button>
 
@@ -218,14 +281,14 @@ export default function Header() {
                   setQuickActionOpen(false);
                   openModal('post-announcement');
                 }}
-                className="w-full text-left px-3 py-2 text-xs flex items-center gap-2.5 hover:bg-slate-50 transition-colors"
+                className="w-full text-left px-3 py-2 text-xs flex items-center gap-2.5 hover:bg-slate-50 transition-colors cursor-pointer"
               >
                 <div className="p-1.5 rounded-md bg-pink-50 text-pink-600">
                   <Megaphone size={14} />
                 </div>
                 <div>
-                  <div className="font-semibold text-slate-800">សេចក្តីជូនដំណឹង (Announcement)</div>
-                  <div className="text-[10px] text-slate-500">ផ្សព្វផ្សាយដំណឹងក្នុងក្រុមហ៊ុន</div>
+                  <div className="font-semibold text-slate-800">{t('action_announcement')}</div>
+                  <div className="text-[10px] text-slate-500">{t('action_announcement_sub')}</div>
                 </div>
               </button>
             </div>

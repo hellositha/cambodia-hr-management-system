@@ -6,7 +6,7 @@ import { X, UserPlus, Calendar, Briefcase, Megaphone, DollarSign, Check } from '
 import { Department } from '@/lib/types';
 
 export default function GlobalModals() {
-  const { activeModal, closeModal, showToast, triggerRefresh, currentPersona } = useApp();
+  const { activeModal, closeModal, showToast, triggerRefresh, currentPersona, language, t } = useApp();
 
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(false);
@@ -242,18 +242,42 @@ export default function GlobalModals() {
             )}
             <div>
               <h2 className="text-base font-bold text-slate-900">
-                {activeModal === 'add-employee' && 'បញ្ចូលបុគ្គលិកថ្មី (Onboard New Employee)'}
-                {activeModal === 'request-leave' && 'ពាក្យស្នើសុំច្បាប់ឈប់សម្រាក (Request Leave)'}
-                {activeModal === 'post-job' && 'ប្រកាសជ្រើសរើសបុគ្គលិក (Post Job Opening)'}
-                {activeModal === 'post-announcement' && 'ផ្សាយដំណឹងក្នុងក្រុមហ៊ុន (Announcement)'}
-                {activeModal === 'run-payroll' && 'រៀបចំបើកប្រាក់បៀវត្សរ៍ (Run Monthly Payroll)'}
+                {language === 'km' ? (
+                  <>
+                    {activeModal === 'add-employee' && 'បញ្ចូលបុគ្គលិកថ្មី'}
+                    {activeModal === 'request-leave' && 'ពាក្យស្នើសុំច្បាប់ឈប់សម្រាក'}
+                    {activeModal === 'post-job' && 'ប្រកាសជ្រើសរើសបុគ្គលិក'}
+                    {activeModal === 'post-announcement' && 'ផ្សាយដំណឹងក្នុងក្រុមហ៊ុន'}
+                    {activeModal === 'run-payroll' && 'រៀបចំបើកប្រាក់បៀវត្សរ៍'}
+                  </>
+                ) : (
+                  <>
+                    {activeModal === 'add-employee' && 'Onboard New Employee'}
+                    {activeModal === 'request-leave' && 'Request Time Off'}
+                    {activeModal === 'post-job' && 'Post Job Opening'}
+                    {activeModal === 'post-announcement' && 'Broadcast Announcement'}
+                    {activeModal === 'run-payroll' && 'Process Monthly Payroll'}
+                  </>
+                )}
               </h2>
               <p className="text-xs text-slate-500">
-                {activeModal === 'add-employee' && 'បំពេញប្រវត្តិរូប ប្រាក់បៀវត្សរ៍ និងផ្នែកការងារ'}
-                {activeModal === 'request-leave' && 'ជ្រើសរើសប្រភេទច្បាប់ និងកាលបរិច្ឆេទសុំឈប់សម្រាក'}
-                {activeModal === 'post-job' && 'បន្ថែមតម្រូវការការងារថ្មីក្នុងប្រព័ន្ធ ATS ក្រុមហ៊ុន'}
-                {activeModal === 'post-announcement' && 'ផ្សព្វផ្សាយដំណឹងទូទៅដល់បុគ្គលិកទាំងអស់'}
-                {activeModal === 'run-payroll' && 'ដំណើរការគណនាបៀវត្សរ៍ & កាត់វិភាគទាន ប.ស.ស (NSSF)'}
+                {language === 'km' ? (
+                  <>
+                    {activeModal === 'add-employee' && 'បំពេញប្រវត្តិរូប ប្រាក់បៀវត្សរ៍ និងផ្នែកការងារ'}
+                    {activeModal === 'request-leave' && 'ជ្រើសរើសប្រភេទច្បាប់ និងកាលបរិច្ឆេទសុំឈប់សម្រាក'}
+                    {activeModal === 'post-job' && 'បន្ថែមតម្រូវការការងារថ្មីក្នុងប្រព័ន្ធ ATS ក្រុមហ៊ុន'}
+                    {activeModal === 'post-announcement' && 'ផ្សព្វផ្សាយដំណឹងទូទៅដល់បុគ្គលិកទាំងអស់'}
+                    {activeModal === 'run-payroll' && 'ដំណើរការគណនាបៀវត្សរ៍ & កាត់វិភាគទាន ប.ស.ស (NSSF)'}
+                  </>
+                ) : (
+                  <>
+                    {activeModal === 'add-employee' && 'Complete employee profile, department and salary'}
+                    {activeModal === 'request-leave' && 'Select leave type, duration and justification'}
+                    {activeModal === 'post-job' && 'Publish a new opening to the recruitment ATS pipeline'}
+                    {activeModal === 'post-announcement' && 'Broadcast message to the company notice board'}
+                    {activeModal === 'run-payroll' && 'Calculate batch payslips and deduct NSSF contributions'}
+                  </>
+                )}
               </p>
             </div>
           </div>

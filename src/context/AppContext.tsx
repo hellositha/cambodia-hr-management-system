@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { Language, TRANSLATIONS } from '@/lib/translations';
 
 export interface Persona {
   id: string;
@@ -60,6 +61,10 @@ interface AppContextType {
   triggerRefresh: () => void;
   sidebarCollapsed: boolean;
   toggleSidebar: () => void;
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  toggleLanguage: () => void;
+  t: (key: keyof typeof TRANSLATIONS['km']) => string;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -72,6 +77,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState<number>(0);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+  const [language, setLanguageState] = useState<Language>('km');
 
   const showToast = useCallback(
     (message: string, type: 'success' | 'error' | 'info' = 'success') => {
@@ -83,6 +89,40 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     },
     []
   );
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('pulsehr_lang') as Language | null;
+      if (saved === 'en' || saved === 'km') {
+        setLanguageState(saved);
+      }
+    } catch {
+      // localStorage may fail in SSR or restricted environments
+    }
+  }, []);
+
+  const setLanguage = useCallback((newLang: Language) => {
+    setLanguageState(newLang);
+    try {
+      localStorage.setItem('pulsehr_lang', newLang);
+    } catch {}
+    showToast(
+      newLang === 'km'
+        ? 'ភាសាត្រូវបានប្តូរទៅជា ភាសាខ្មែរ 🇰🇭'
+        : 'Language switched to English 🇬🇧',
+      'info'
+    );
+  }, [showToast]);
+
+  const toggleLanguage = useCallback(() => {
+    setLanguage(language === 'km' ? 'en' : 'km');
+  }, [language, setLanguage]);
+
+  const t = useCallback((key: keyof typeof TRANSLATIONS['km']) => {
+    const dict = TRANSLATIONS[language];
+    if (dict && dict[key]) return dict[key];
+    return TRANSLATIONS['km'][key] || key;
+  }, [language]);
 
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -150,6 +190,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         triggerRefresh,
         sidebarCollapsed,
         toggleSidebar,
+        language,
+        setLanguage,
+        toggleLanguage,
+        t,
       }}
     >
       {children}

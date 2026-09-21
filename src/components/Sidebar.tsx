@@ -22,18 +22,18 @@ import {
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { currentPersona, sidebarCollapsed, toggleSidebar } = useApp();
+  const { currentPersona, sidebarCollapsed, toggleSidebar, language, toggleLanguage, t } = useApp();
 
   const navItems = [
-    { label: 'ផ្ទាំងព័ត៌មាន (Dashboard)', href: '/', icon: LayoutDashboard },
-    { label: 'បញ្ជីបុគ្គលិក (Employees)', href: '/employees', icon: Users, badge: 'បុគ្គលិក' },
-    { label: 'វត្តមាន & ម៉ោងការងារ (Attendance)', href: '/attendance', icon: Clock },
-    { label: 'ច្បាប់ឈប់សម្រាក (Leaves)', href: '/leaves', icon: CalendarCheck, badge: 'ច្បាប់' },
-    { label: 'ប្រាក់បៀវត្សរ៍ (Payroll)', href: '/payroll', icon: CreditCard },
-    { label: 'ជ្រើសរើសបុគ្គលិក (Recruitment)', href: '/recruitment', icon: Briefcase, badge: 'ការងារ' },
-    { label: 'ការវាយតម្លៃការងារ (Performance)', href: '/performance', icon: Award },
-    { label: 'សេចក្តីជូនដំណឹង (Notices)', href: '/announcements', icon: Megaphone },
-    { label: 'ការកំណត់ប្រព័ន្ធ (Settings)', href: '/settings', icon: Settings },
+    { label: t('nav_dashboard'), href: '/', icon: LayoutDashboard },
+    { label: t('nav_employees'), href: '/employees', icon: Users, badge: language === 'km' ? 'បុគ្គលិក' : 'Staff' },
+    { label: t('nav_attendance'), href: '/attendance', icon: Clock },
+    { label: t('nav_leaves'), href: '/leaves', icon: CalendarCheck, badge: language === 'km' ? 'ច្បាប់' : 'Leaves' },
+    { label: t('nav_payroll'), href: '/payroll', icon: CreditCard },
+    { label: t('nav_recruitment'), href: '/recruitment', icon: Briefcase, badge: language === 'km' ? 'ការងារ' : 'Jobs' },
+    { label: t('nav_performance'), href: '/performance', icon: Award },
+    { label: t('nav_announcements'), href: '/announcements', icon: Megaphone },
+    { label: t('nav_settings'), href: '/settings', icon: Settings },
   ];
 
   return (
@@ -51,13 +51,13 @@ export default function Sidebar() {
           {!sidebarCollapsed && (
             <div className="flex flex-col">
               <span className="font-extrabold text-slate-900 text-base tracking-tight flex items-center gap-1.5">
-                PulseHR កម្ពុជា
+                {t('brand_name')}
                 <span className="text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-amber-50 text-amber-700 border border-amber-200">
                   HRMS
                 </span>
               </span>
               <span className="text-[10px] text-slate-400 font-medium truncate">
-                គ្រប់គ្រងធនធានមនុស្ស
+                {t('brand_tagline')}
               </span>
             </div>
           )}
@@ -115,8 +115,37 @@ export default function Sidebar() {
         })}
       </nav>
 
+      {/* Language Quick Toggle in Sidebar */}
+      <div className="px-3 pt-2 pb-1 border-t border-slate-100">
+        {!sidebarCollapsed ? (
+          <button
+            onClick={toggleLanguage}
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 hover:bg-indigo-50/70 border border-slate-200/80 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 text-xs font-bold transition-all cursor-pointer group shadow-2xs"
+            title={language === 'km' ? 'ប្តូរទៅ English' : 'Switch to ភាសាខ្មែរ'}
+          >
+            <div className="flex items-center gap-2">
+              <span className="text-base">{language === 'km' ? '🇰🇭' : '🇬🇧'}</span>
+              <span>{language === 'km' ? 'ភាសាខ្មែរ (KM)' : 'English (EN)'}</span>
+            </div>
+            <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded-md bg-white border border-slate-200 text-slate-600 group-hover:text-indigo-600 group-hover:border-indigo-200 transition-colors">
+              {language === 'km' ? 'ប្តូរ ⇄ EN' : 'Switch ⇄ KM'}
+            </span>
+          </button>
+        ) : (
+          <div className="flex justify-center">
+            <button
+              onClick={toggleLanguage}
+              className="p-2 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-200 text-base shadow-2xs transition-transform active:scale-95 cursor-pointer"
+              title={language === 'km' ? 'ប្តូរទៅ English' : 'Switch to ភាសាខ្មែរ'}
+            >
+              {language === 'km' ? '🇰🇭' : '🇬🇧'}
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Persona Footer Widget (Light) */}
-      <div className="p-3 border-t border-slate-100 bg-slate-50/60">
+      <div className="p-3 bg-slate-50/60">
         {!sidebarCollapsed ? (
           <div className="flex items-center gap-3 p-2 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
             <img
