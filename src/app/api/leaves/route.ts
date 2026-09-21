@@ -14,27 +14,44 @@ export async function GET(request: Request) {
     let sql = `
       SELECT 
         lr.*,
-        e.first_name || ' ' || e.last_name as employee_name,
-        e.role as employee_role,
-        e.avatar as employee_avatar,
-        d.name as department_name,
-        r.first_name || ' ' || r.last_name as reviewer_name
+        COALESCE(e.first_name || ' ' || e.last_name, u.name, 'Staff Member') as employee_name,
+        COALESCE(e.role, u.role, 'Employee') as employee_role,
+        COALESCE(e.avatar, u.avatar, 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces') as employee_avatar,
+        COALESCE(d.name, 'General') as department_name,
+        COALESCE(lm.first_name || ' ' || lm.last_name, lmu.name) as line_manager_name,
+        COALESCE(adm.first_name || ' ' || adm.last_name, admu.name) as admin_reviewer_name,
+        COALESCE(r.first_name || ' ' || r.last_name, ru.name) as reviewer_name
       FROM leave_requests lr
-      JOIN employees e ON e.id = lr.employee_id
+      LEFT JOIN employees e ON e.id = lr.employee_id
+      LEFT JOIN users u ON (u.id = lr.employee_id OR u.employee_id = lr.employee_id)
       LEFT JOIN departments d ON d.id = e.department_id
+      LEFT JOIN employees lm ON lm.id = lr.line_manager_id
+      LEFT JOIN users lmu ON (lmu.id = lr.line_manager_id OR lmu.employee_id = lr.line_manager_id)
+      LEFT JOIN employees adm ON adm.id = lr.admin_reviewer_id
+      LEFT JOIN users admu ON (admu.id = lr.admin_reviewer_id OR admu.employee_id = lr.admin_reviewer_id)
       LEFT JOIN employees r ON r.id = lr.reviewer_id
+      LEFT JOIN users ru ON (ru.id = lr.reviewer_id OR ru.employee_id = lr.reviewer_id)
       WHERE 1=1
     `;
     const params: any[] = [];
 
     if (status && status !== 'all') {
-      sql += ` AND lr.status = ?`;
-      params.push(status);
+      if (status === 'Pending') {
+        sql += ` AND (lr.status = 'Pending' OR lr.status = 'Pending Manager' OR lr.status = 'Pending Admin')`;
+      } else {
+        sql += ` AND lr.status = ?`;
+        params.push(status);
+      }
     }
 
     if (employeeId) {
-      sql += ` AND lr.employee_id = ?`;
-      params.push(employeeId);
+      let linkedEmpId = employeeId;
+      try {
+        const u = db.prepare('SELECT employee_id FROM users WHERE id = ?').get(employeeId) as any;
+        if (u && u.employee_id) linkedEmpId = u.employee_id;
+      } catch {}
+      sql += ` AND (lr.employee_id = ? OR lr.employee_id = ?)`;
+      params.push(employeeId, linkedEmpId);
     }
 
     sql += ` ORDER BY lr.created_at DESC`;
@@ -67,6 +84,15 @@ export async function POST(request: Request) {
       );
     }
 
+    let finalEmpId = employee_id;
+    const empExists = db.prepare('SELECT id FROM employees WHERE id = ?').get(employee_id);
+    if (!empExists) {
+      const u = db.prepare('SELECT employee_id FROM users WHERE id = ? OR username = ?').get(employee_id, employee_id) as any;
+      if (u && u.employee_id) {
+        finalEmpId = u.employee_id;
+      }
+    }
+
     // Calculate days if not provided
     let calculatedDays = Number(days_count);
     if (!calculatedDays || calculatedDays <= 0) {
@@ -79,21 +105,23 @@ export async function POST(request: Request) {
     const id = `leave-${Date.now()}`;
     const createdAt = new Date().toISOString();
 
+    // Initial status is 'Pending Manager' (First step: Line Manager approval)
     db.prepare(`
       INSERT INTO leave_requests (
         id, employee_id, leave_type, start_date, end_date,
         days_count, reason, status, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, 'Pending', ?)
-    `).run(id, employee_id, leave_type, start_date, end_date, calculatedDays, reason, createdAt);
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending Manager', ?)
+    `).run(id, finalEmpId, leave_type, start_date, end_date, calculatedDays, reason, createdAt);
 
     const record = db.prepare(`
       SELECT 
         lr.*,
-        e.first_name || ' ' || e.last_name as employee_name,
-        e.role as employee_role,
-        e.avatar as employee_avatar
+        COALESCE(e.first_name || ' ' || e.last_name, u.name, 'Staff Member') as employee_name,
+        COALESCE(e.role, u.role, 'Employee') as employee_role,
+        COALESCE(e.avatar, u.avatar, 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces') as employee_avatar
       FROM leave_requests lr
-      JOIN employees e ON e.id = lr.employee_id
+      LEFT JOIN employees e ON e.id = lr.employee_id
+      LEFT JOIN users u ON (u.id = lr.employee_id OR u.employee_id = lr.employee_id)
       WHERE lr.id = ?
     `).get(id);
 

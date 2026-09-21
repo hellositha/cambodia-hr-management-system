@@ -84,7 +84,7 @@ export default function UserManagementPage() {
     department_name: 'បច្ចេកវិទ្យា (Engineering)',
     employee_id: '',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces',
-    two_factor_enabled: true,
+    two_factor_enabled: false,
     permissions: ['self_service', 'clock_in', 'request_leave', 'view_payslips'],
   });
 
@@ -153,7 +153,7 @@ export default function UserManagementPage() {
       department_name: 'បច្ចេកវិទ្យា (Engineering)',
       employee_id: '',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces',
-      two_factor_enabled: true,
+      two_factor_enabled: false,
       permissions: ['self_service', 'clock_in', 'request_leave', 'view_payslips'],
     });
     setIsAddModalOpen(true);

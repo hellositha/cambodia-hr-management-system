@@ -15,25 +15,25 @@ export interface Persona {
 export const PERSONAS: Persona[] = [
   {
     id: 'emp-13',
-    name: 'សារ៉ាត់ (Sarath)',
+    name: 'Sarath',
     role: 'Admin',
-    title: 'ប្រធាននាយកដ្ឋានធនធានមនុស្ស (Head of HR)',
+    title: 'Head of Human Resources',
     email: 'sarath@hestra.kh',
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=256&h=256&fit=crop&crop=faces',
   },
   {
     id: 'emp-1',
-    name: 'វ៉ាន់ សុភ័ក្ត្រ (Van Sopheak)',
+    name: 'Van Sopheak',
     role: 'Manager',
-    title: 'នាយកផ្នែកបច្ចេកវិទ្យា (VP of Engineering)',
+    title: 'VP of Engineering',
     email: 'van.sopheak@hestra.kh',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=256&h=256&fit=crop&crop=faces',
   },
   {
     id: 'emp-18',
-    name: 'ចាន់ ធីតា (Chan Thida)',
+    name: 'Chan Thida',
     role: 'Employee',
-    title: 'វិស្វករកម្មវិធីជាន់ខ្ពស់ (Senior Software Engineer)',
+    title: 'Senior Software Engineer',
     email: 'chan.thida@hestra.kh',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces',
   },
@@ -73,13 +73,13 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [currentPersona, setCurrentPersona] = useState<Persona>(PERSONAS[0]);
-  const [isClockedIn, setIsClockedIn] = useState<boolean>(true);
-  const [clockInTime, setClockInTime] = useState<string | null>('09:00 AM');
+  const [isClockedIn, setIsClockedIn] = useState<boolean>(false);
+  const [clockInTime, setClockInTime] = useState<string | null>(null);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState<number>(0);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
-  const [language, setLanguageState] = useState<Language>('km');
+  const [language, setLanguageState] = useState<Language>('en');
 
   const showToast = useCallback(
     (message: string, type: 'success' | 'error' | 'info' = 'success') => {
@@ -145,6 +145,42 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setRefreshKey((k) => k + 1);
   }, []);
 
+  const checkClockStatus = useCallback(async (personaId: string) => {
+    if (!personaId) {
+      setIsClockedIn(false);
+      setClockInTime(null);
+      return;
+    }
+    try {
+      const res = await fetch(`/api/attendance/clock?employee_id=${encodeURIComponent(personaId)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.isClockedIn && data.record && data.record.clock_in) {
+          setIsClockedIn(true);
+          const timeParts = data.record.clock_in.split(':');
+          let displayTime = data.record.clock_in;
+          if (timeParts.length >= 2) {
+            const h = parseInt(timeParts[0], 10);
+            const m = timeParts[1];
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            const h12 = h % 12 || 12;
+            displayTime = `${String(h12).padStart(2, '0')}:${m} ${ampm}`;
+          }
+          setClockInTime(displayTime);
+        } else {
+          setIsClockedIn(false);
+          setClockInTime(null);
+        }
+      } else {
+        setIsClockedIn(false);
+        setClockInTime(null);
+      }
+    } catch {
+      setIsClockedIn(false);
+      setClockInTime(null);
+    }
+  }, []);
+
   useEffect(() => {
     try {
       const savedUser = localStorage.getItem('hestra_current_user');
@@ -154,20 +190,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           setCurrentPersona(parsed);
           document.cookie = `hestra_auth=${encodeURIComponent(parsed.id)}; path=/; max-age=604800; SameSite=Lax`;
           document.cookie = `hestra_role=${encodeURIComponent(parsed.role)}; path=/; max-age=604800; SameSite=Lax`;
+          checkClockStatus(parsed.id);
+          return;
         }
       }
     } catch {}
-  }, []);
+    // If no saved user, check default persona
+    checkClockStatus(PERSONAS[0].id);
+  }, [checkClockStatus]);
 
   const switchPersona = (personaId: string) => {
     const found = PERSONAS.find((p) => p.id === personaId);
     if (found) {
+      setIsClockedIn(false);
+      setClockInTime(null);
       setCurrentPersona(found);
       try {
         localStorage.setItem('hestra_current_user', JSON.stringify(found));
         document.cookie = `hestra_auth=${encodeURIComponent(found.id)}; path=/; max-age=604800; SameSite=Lax`;
         document.cookie = `hestra_role=${encodeURIComponent(found.role)}; path=/; max-age=604800; SameSite=Lax`;
       } catch {}
+      checkClockStatus(found.id);
       showToast(`Switched view to ${found.name} (${found.role})`, 'info');
     }
   };
@@ -178,15 +221,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       name: userData.name,
       email: userData.email,
       role: userData.role,
-      title: userData.title || (userData.role === 'Admin' ? 'ប្រធាននាយកដ្ឋានធនធានមនុស្ស (Head of HR)' : userData.role === 'Manager' ? 'ប្រធានផ្នែក (Department Manager)' : 'បុគ្គលិក (Staff Member)'),
+      title: userData.title || (userData.role === 'Admin' ? 'Head of Human Resources' : userData.role === 'Manager' ? 'Department Manager' : 'Staff Member'),
       avatar: userData.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces',
     };
+    // Ensure state starts strictly manual upon login
+    setIsClockedIn(false);
+    setClockInTime(null);
     setCurrentPersona(newPersona);
     try {
       localStorage.setItem('hestra_current_user', JSON.stringify(newPersona));
       document.cookie = `hestra_auth=${encodeURIComponent(userData.id)}; path=/; max-age=604800; SameSite=Lax`;
       document.cookie = `hestra_role=${encodeURIComponent(userData.role)}; path=/; max-age=604800; SameSite=Lax`;
     } catch {}
+    checkClockStatus(newPersona.id);
   };
 
   const logout = () => {
@@ -195,8 +242,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       document.cookie = 'hestra_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
       document.cookie = 'hestra_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
     } catch {}
+    setIsClockedIn(false);
+    setClockInTime(null);
     setCurrentPersona(PERSONAS[0]);
-    showToast('បានចាកចេញពីប្រព័ន្ធដោយជោគជ័យ (Logged out)', 'info');
+    showToast(language === 'km' ? 'បានចាកចេញពីប្រព័ន្ធដោយជោគជ័យ' : 'Logged out successfully', 'info');
   };
 
   const toggleClock = async () => {
@@ -210,11 +259,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (res.ok) {
         setIsClockedIn(data.isClockedIn);
         if (data.isClockedIn) {
-          setClockInTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-          showToast(`Clocked in successfully at ${new Date().toLocaleTimeString()}`, 'success');
+          const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          setClockInTime(nowStr);
+          showToast(
+            language === 'km'
+              ? `បានកត់ត្រាវត្តមានចូលដោយជោគជ័យនៅម៉ោង ${nowStr} ✓`
+              : `Clocked in successfully at ${nowStr} ✓`,
+            'success'
+          );
         } else {
           setClockInTime(null);
-          showToast(data.message || 'Clocked out successfully', 'info');
+          showToast(
+            data.message || (language === 'km' ? 'បានកត់ត្រាចេញដោយជោគជ័យ ✓' : 'Clocked out successfully ✓'),
+            'info'
+          );
         }
         triggerRefresh();
       } else {

@@ -41,7 +41,7 @@ export async function GET() {
     const attendancePercentage = totalTracked > 0 ? Math.round(((present + remote + late) / totalTracked) * 100) : 95;
 
     // 3. Pending leaves
-    const pendingLeaves = db.prepare("SELECT count(*) as count FROM leave_requests WHERE status = 'Pending'").get() as { count: number };
+    const pendingLeaves = db.prepare("SELECT count(*) as count FROM leave_requests WHERE status IN ('Pending', 'Pending Manager', 'Pending Admin')").get() as { count: number };
 
     // 4. Open positions
     const openJobs = db.prepare("SELECT count(*) as count FROM job_postings WHERE status = 'Active'").get() as { count: number };
@@ -60,9 +60,12 @@ export async function GET() {
 
     // 7. Recent activities
     const recentLeaves = db.prepare(`
-      SELECT lr.id, lr.leave_type, lr.status, lr.created_at, e.first_name, e.last_name
+      SELECT lr.id, lr.leave_type, lr.status, lr.created_at, 
+        COALESCE(e.first_name, u.name, 'Employee') as first_name, 
+        COALESCE(e.last_name, '') as last_name
       FROM leave_requests lr
-      JOIN employees e ON e.id = lr.employee_id
+      LEFT JOIN employees e ON e.id = lr.employee_id
+      LEFT JOIN users u ON (u.id = lr.employee_id OR u.employee_id = lr.employee_id)
       ORDER BY lr.created_at DESC
       LIMIT 3
     `).all() as any[];

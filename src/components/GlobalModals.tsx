@@ -1,32 +1,246 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '@/context/AppContext';
-import { X, UserPlus, Calendar, Briefcase, Megaphone, DollarSign, Check } from 'lucide-react';
+import {
+  X,
+  UserPlus,
+  Calendar,
+  Briefcase,
+  Megaphone,
+  DollarSign,
+  Check,
+  User,
+  Phone,
+  MapPin,
+  Building2,
+  CreditCard,
+  ShieldCheck,
+  AlertCircle,
+  FileText,
+  Upload,
+  Camera,
+  ChevronRight,
+  ChevronLeft,
+  IdCard,
+  FileCheck,
+  FolderOpen,
+  Sparkles,
+  Layers,
+  HeartHandshake,
+  Mail,
+  Lock,
+  Trash2,
+} from 'lucide-react';
 import { Department } from '@/lib/types';
+
+export const CAMBODIA_PROVINCES = [
+  'រាជធានីភ្នំពេញ (Phnom Penh)',
+  'ខេត្តកណ្តាល (Kandal)',
+  'ខេត្តសៀមរាប (Siem Reap)',
+  'ខេត្តបាត់ដំបង (Battambang)',
+  'ខេត្តព្រះសីហនុ (Preah Sihanouk)',
+  'ខេត្តកំពង់ចាម (Kampong Cham)',
+  'ខេត្តកំពង់ស្ពឺ (Kampong Speu)',
+  'ខេត្តកំពង់ឆ្នាំង (Kampong Chhnang)',
+  'ខេត្តកំពង់ធំ (Kampong Thom)',
+  'ខេត្តកំពត (Kampot)',
+  'ខេត្តកែប (Kep)',
+  'ខេត្តកោះកុង (Koh Kong)',
+  'ខេត្តក្រចេះ (Kratie)',
+  'ខេត្តមណ្ឌលគិរី (Mondulkiri)',
+  'ខេត្តឧត្តរមានជ័យ (Oddar Meanchey)',
+  'ខេត្តប៉ៃលិន (Pailin)',
+  'ខេត្តព្រះវិហារ (Preah Vihear)',
+  'ខេត្តព្រៃវែង (Prey Veng)',
+  'ខេត្តពោធិ៍សាត់ (Pursat)',
+  'ខេត្តរតនគិរី (Ratanakiri)',
+  'ខេត្តស្ទឹងត្រែង (Stung Treng)',
+  'ខេត្តស្វាយរៀង (Svay Rieng)',
+  'ខេត្តតាកែវ (Takeo)',
+  'ខេត្តត្បូងឃ្មុំ (Tboung Khmum)',
+  'ខេត្តបន្ទាយមានជ័យ (Banteay Meanchey)',
+];
+
+export const CAMBODIA_BANKS = [
+  'ABA Bank (ធនាគារ អេ ប៊ី អេ)',
+  'ACLEDA Bank Plc. (ធនាគារ អេស៊ីលីដា)',
+  'Canadia Bank (ធនាគារ កាណាឌីយ៉ា)',
+  'Wing Bank (ធនាគារ វីង)',
+  'Sathapana Bank (ធនាគារ សហគ្រាសធុនតូច & មធ្យម)',
+  'Vattanac Bank (ធនាគារ វឌ្ឍនៈ)',
+  'Prince Bank (ធនាគារ ព្រីនស៍)',
+  'J Trust Royal Bank',
+  'BRED Bank Cambodia',
+  'Chip Mong Commercial Bank',
+  'Cash / សាច់ប្រាក់សុទ្ធ (Hand-to-Hand)',
+];
+
+type AddStaffTab = 'personal' | 'contact' | 'employment' | 'payroll' | 'nssf' | 'emergency' | 'documents';
 
 export default function GlobalModals() {
   const { activeModal, closeModal, showToast, triggerRefresh, currentPersona, language, t } = useApp();
 
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [managers, setManagers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [activeStaffTab, setActiveStaffTab] = useState<AddStaffTab>('personal');
 
   // Form states
   const [empForm, setEmpForm] = useState({
-    first_name: '',
+    // 1. Personal Information
     last_name: '',
-    email: '',
-    phone: '',
-    role: '',
-    department_id: '',
-    employment_type: 'ពេញម៉ោង (Full-Time)',
+    first_name: '',
+    gender: 'ប្រុស (Male)',
+    dob: '1998-05-15',
+    nationality: 'កម្ពុជា (Cambodian)',
+    marital_status: 'នៅលីវ (Single)',
+    national_id: '',
     status: 'Active',
+    employment_type: 'ពេញម៉ោង (Full-Time)',
     salary: '1200',
     location: 'រាជធានីភ្នំពេញ (Phnom Penh)',
-    bio: '',
+
+    // 2. Contact Information
+    phone: '',
+    email: '',
+    current_address: '',
+    province_city: 'រាជធានីភ្នំពេញ (Phnom Penh)',
+    district: '',
+    commune_sangkat: '',
+    village: '',
+
+    // 3. Employee Information
+    employee_id: `EMP-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
+    department_id: '',
+    role: '',
+    employee_type: 'បុគ្គលិកពេញសិទ្ធិ (Regular / Permanent)',
+    join_date: new Date().toISOString().split('T')[0],
+    contract_type: 'UDC (មិនកំណត់ថិរវេលា)',
+    contract_start: new Date().toISOString().split('T')[0],
+    contract_end: '',
+    manager_id: '',
+    work_location: 'ការិយាល័យកណ្តាល (Head Office)',
+
+    // 4. Salary & Payroll
+    salary_currency: 'USD ($)',
+    salary_frequency: 'ប្រចាំខែ (Monthly)',
+    bank_name: 'ABA Bank (ធនាគារ អេ ប៊ី អេ)',
+    bank_account_name: '',
+    bank_account_number: '',
+
+    // 5. NSSF Information
+    nssf_member: 'មាន (Yes)',
+    nssf_number: '',
+    nssf_reg_date: new Date().toISOString().split('T')[0],
+
+    // 6. Emergency Contact
     emergency_contact_name: '',
+    emergency_contact_relationship: 'ប្តី/ប្រពន្ធ (Spouse)',
     emergency_contact_phone: '',
+    emergency_contact_address: '',
+
+    // 7. Documents
+    avatar: '',
+    doc_national_id: '',
+    doc_passport: '',
+    doc_contract: '',
+    doc_others: '',
   });
+
+  const [isDraggingAvatar, setIsDraggingAvatar] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const docIdInputRef = useRef<HTMLInputElement>(null);
+  const docPassportInputRef = useRef<HTMLInputElement>(null);
+  const docContractInputRef = useRef<HTMLInputElement>(null);
+  const docOthersInputRef = useRef<HTMLInputElement>(null);
+
+  const processImageFile = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      showToast(
+        language === 'km'
+          ? 'សូមជ្រើសរើសឯកសារជារូបភាព (JPG, PNG, WEBP)'
+          : 'Please select an image file (JPG, PNG, WEBP)',
+        'error'
+      );
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      showToast(
+        language === 'km'
+          ? 'ទំហំរូបភាពត្រូវតែតូចជាង 10MB'
+          : 'Image file must be smaller than 10MB',
+        'error'
+      );
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        // Optimize and resize image to max 400x400
+        const canvas = document.createElement('canvas');
+        const MAX_DIM = 400;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_DIM) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          }
+        } else {
+          if (height > MAX_DIM) {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
+          setEmpForm((prev) => ({ ...prev, avatar: compressedDataUrl }));
+          showToast(
+            language === 'km' ? 'បានផ្ទុករូបថតបុគ្គលិកជោគជ័យ!' : 'Staff photo uploaded successfully!',
+            'success'
+          );
+        }
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) processImageFile(file);
+  };
+
+  const handleAvatarDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingAvatar(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) processImageFile(file);
+  };
+
+  const handleDocUpload = (
+    field: 'doc_national_id' | 'doc_passport' | 'doc_contract' | 'doc_others',
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setEmpForm((prev) => ({ ...prev, [field]: file.name }));
+      showToast(
+        language === 'km' ? `បានភ្ជាប់ឯកសារ ${file.name}` : `Document attached: ${file.name}`,
+        'success'
+      );
+    }
+  };
 
   const [leaveForm, setLeaveForm] = useState({
     employee_id: currentPersona.id,
@@ -66,8 +280,20 @@ export default function GlobalModals() {
         if (Array.isArray(data)) {
           setDepartments(data);
           if (data.length > 0) {
-            setEmpForm((f) => ({ ...f, department_id: data[0].id }));
+            setEmpForm((f) => ({ ...f, department_id: f.department_id || data[0].id }));
             setJobForm((f) => ({ ...f, department_id: data[0].id }));
+          }
+        }
+      })
+      .catch((err) => console.error(err));
+
+    fetch('/api/employees')
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setManagers(data);
+          if (data.length > 0) {
+            setEmpForm((f) => ({ ...f, manager_id: f.manager_id || data[0].id }));
           }
         }
       })
@@ -81,22 +307,80 @@ export default function GlobalModals() {
   if (!activeModal) return null;
 
   // Handlers
-  const handleAddEmployee = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAddEmployee = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+
+    // Validate Required Personal Info
+    if (!empForm.first_name.trim() || !empForm.last_name.trim()) {
+      showToast(
+        language === 'km'
+          ? 'សូមបំពេញនាមត្រកូល និងនាមខ្លួនជាមុនសិន'
+          : 'Please enter Last name and First name',
+        'error'
+      );
+      setActiveStaffTab('personal');
+      return;
+    }
+
+    // Validate Required Contact Info
+    if (!empForm.email.trim()) {
+      showToast(
+        language === 'km'
+          ? 'សូមបំពេញអ៊ីមែលការងាររបស់បុគ្គលិក'
+          : 'Please enter employee work email',
+        'error'
+      );
+      setActiveStaffTab('contact');
+      return;
+    }
+
+    // Validate Required Employment Info
+    if (!empForm.role.trim()) {
+      showToast(
+        language === 'km'
+          ? 'សូមបំពេញមុខតំណែង (Position / Role)'
+          : 'Please enter position/role title',
+        'error'
+      );
+      setActiveStaffTab('employment');
+      return;
+    }
+
+    if (!empForm.department_id) {
+      showToast(
+        language === 'km'
+          ? 'សូមជ្រើសរើសនាយកដ្ឋាន / ផ្នែក'
+          : 'Please select a department',
+        'error'
+      );
+      setActiveStaffTab('employment');
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await fetch('/api/employees', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(empForm),
+        body: JSON.stringify({
+          ...empForm,
+          id: empForm.employee_id?.trim() || undefined,
+          salary: Number(empForm.salary) || 0,
+        }),
       });
+
       if (res.ok) {
-        showToast(`Employee ${empForm.first_name} ${empForm.last_name} onboarded!`, 'success');
+        showToast(
+          language === 'km'
+            ? `បានបញ្ចូលបុគ្គលិក ${empForm.first_name} ${empForm.last_name} ជោគជ័យ! ✓`
+            : `Employee ${empForm.first_name} ${empForm.last_name} onboarded! ✓`,
+          'success'
+        );
         triggerRefresh();
         closeModal();
       } else {
         const err = await res.json();
-        showToast(err.error || 'Failed to add employee', 'error');
+        showToast(err.error || 'បរាជ័យក្នុងការបញ្ចូលបុគ្គលិក', 'error');
       }
     } catch {
       showToast('Network error adding employee', 'error');
@@ -211,7 +495,9 @@ export default function GlobalModals() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+      <div className={`bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-h-[92vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-200 ${
+        activeModal === 'add-employee' ? 'max-w-4xl' : 'max-w-xl'
+      }`}>
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50/50">
           <div className="flex items-center gap-2.5">
@@ -244,7 +530,7 @@ export default function GlobalModals() {
               <h2 className="text-base font-bold text-slate-900">
                 {language === 'km' ? (
                   <>
-                    {activeModal === 'add-employee' && 'បញ្ចូលបុគ្គលិកថ្មី'}
+                    {activeModal === 'add-employee' && 'បញ្ចូលបុគ្គលិកថ្មី (Add Staff)'}
                     {activeModal === 'request-leave' && 'ពាក្យស្នើសុំច្បាប់ឈប់សម្រាក'}
                     {activeModal === 'post-job' && 'ប្រកាសជ្រើសរើសបុគ្គលិក'}
                     {activeModal === 'post-announcement' && 'ផ្សាយដំណឹងក្នុងក្រុមហ៊ុន'}
@@ -252,7 +538,7 @@ export default function GlobalModals() {
                   </>
                 ) : (
                   <>
-                    {activeModal === 'add-employee' && 'Onboard New Employee'}
+                    {activeModal === 'add-employee' && 'Onboard New Staff Member'}
                     {activeModal === 'request-leave' && 'Request Time Off'}
                     {activeModal === 'post-job' && 'Post Job Opening'}
                     {activeModal === 'post-announcement' && 'Broadcast Announcement'}
@@ -263,7 +549,7 @@ export default function GlobalModals() {
               <p className="text-xs text-slate-500">
                 {language === 'km' ? (
                   <>
-                    {activeModal === 'add-employee' && 'បំពេញប្រវត្តិរូប ប្រាក់បៀវត្សរ៍ និងផ្នែកការងារ'}
+                    {activeModal === 'add-employee' && 'បំពេញព័ត៌មានលម្អិតទាំង ៧ ផ្នែក៖ ផ្ទាល់ខ្លួន ទំនាក់ទំនង ការងារ បៀវត្សរ៍ ប.ស.ស អាសន្ន និងឯកសារ'}
                     {activeModal === 'request-leave' && 'ជ្រើសរើសប្រភេទច្បាប់ និងកាលបរិច្ឆេទសុំឈប់សម្រាក'}
                     {activeModal === 'post-job' && 'បន្ថែមតម្រូវការការងារថ្មីក្នុងប្រព័ន្ធ ATS ក្រុមហ៊ុន'}
                     {activeModal === 'post-announcement' && 'ផ្សព្វផ្សាយដំណឹងទូទៅដល់បុគ្គលិកទាំងអស់'}
@@ -271,7 +557,7 @@ export default function GlobalModals() {
                   </>
                 ) : (
                   <>
-                    {activeModal === 'add-employee' && 'Complete employee profile, department and salary'}
+                    {activeModal === 'add-employee' && 'Comprehensive 7-step employee onboarding and contract registration'}
                     {activeModal === 'request-leave' && 'Select leave type, duration and justification'}
                     {activeModal === 'post-job' && 'Publish a new opening to the recruitment ATS pipeline'}
                     {activeModal === 'post-announcement' && 'Broadcast message to the company notice board'}
@@ -283,159 +569,1083 @@ export default function GlobalModals() {
           </div>
           <button
             onClick={closeModal}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
           >
             <X size={18} />
           </button>
         </div>
 
+        {/* 7 Section Stepper Tabs for Add Staff */}
+        {activeModal === 'add-employee' && (
+          <div className="flex items-center px-6 border-b border-slate-200 bg-slate-100/70 text-xs font-semibold overflow-x-auto gap-1 py-1.5 scrollbar-thin">
+            {[
+              { id: 'personal', labelKm: '១. ផ្ទាល់ខ្លួន', labelEn: '1. Personal', icon: User },
+              { id: 'contact', labelKm: '២. ទំនាក់ទំនង', labelEn: '2. Contact', icon: Phone },
+              { id: 'employment', labelKm: '៣. ព័ត៌មានការងារ', labelEn: '3. Employment', icon: Briefcase },
+              { id: 'payroll', labelKm: '៤. បៀវត្សរ៍ & ធនាគារ', labelEn: '4. Payroll & Bank', icon: DollarSign },
+              { id: 'nssf', labelKm: '៥. ប.ស.ស (NSSF)', labelEn: '5. NSSF', icon: ShieldCheck },
+              { id: 'emergency', labelKm: '៦. អាសន្ន', labelEn: '6. Emergency', icon: AlertCircle },
+              { id: 'documents', labelKm: '៧. ឯកសារ', labelEn: '7. Documents', icon: FolderOpen },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeStaffTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveStaffTab(tab.id as AddStaffTab)}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
+                    isActive
+                      ? 'bg-white text-indigo-700 shadow-xs border border-slate-200'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  }`}
+                >
+                  <Icon size={14} className={isActive ? 'text-indigo-600' : 'text-slate-400'} />
+                  <span>{language === 'km' ? tab.labelKm : tab.labelEn}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {/* Content Body */}
         <div className="flex-1 overflow-y-auto p-6 text-sm">
           {/* 1. ADD EMPLOYEE FORM */}
           {activeModal === 'add-employee' && (
-            <form onSubmit={handleAddEmployee} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">នាមត្រកូល (Last Name) *</label>
-                  <input
-                    type="text"
-                    required
-                    value={empForm.last_name}
-                    onChange={(e) => setEmpForm({ ...empForm, last_name: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="ចៅ"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">នាមខ្លួន (First Name) *</label>
-                  <input
-                    type="text"
-                    required
-                    value={empForm.first_name}
-                    onChange={(e) => setEmpForm({ ...empForm, first_name: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="សារ៉ាត់"
-                  />
-                </div>
-              </div>
+            <div className="space-y-4">
+              {/* TAB 1: PERSONAL INFORMATION */}
+              {activeStaffTab === 'personal' && (
+                <div className="space-y-4 animate-in fade-in duration-150">
+                  <div className="p-3 bg-indigo-50/60 rounded-xl border border-indigo-100 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-indigo-900 text-xs font-bold">
+                      <User size={16} className="text-indigo-600" />
+                      <span>{language === 'km' ? 'ផ្នែកទី ១៖ ព័ត៌មានផ្ទាល់ខ្លួន (Personal Information)' : 'Section 1: Personal Information'}</span>
+                    </div>
+                    <span className="text-[10px] text-indigo-600 font-semibold bg-white px-2 py-0.5 rounded-md border border-indigo-200">
+                      {language === 'km' ? 'ជំហាន ១ នៃ ៧' : 'Step 1 of 7'}
+                    </span>
+                  </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">អ៊ីមែលការងារ (Work Email) *</label>
-                  <input
-                    type="email"
-                    required
-                    value={empForm.email}
-                    onChange={(e) => setEmpForm({ ...empForm, email: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="sarath@hestra.kh"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">លេខទូរស័ព្ទ (Phone Number)</label>
-                  <input
-                    type="text"
-                    value={empForm.phone}
-                    onChange={(e) => setEmpForm({ ...empForm, phone: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="+855 12 345 678"
-                  />
-                </div>
-              </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'នាមត្រកូល (Last name) *' : 'Last name *'}
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={empForm.last_name}
+                        onChange={(e) => setEmpForm({ ...empForm, last_name: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                        placeholder="ចាន់ / Chan"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'នាមខ្លួន (First name) *' : 'First name *'}
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={empForm.first_name}
+                        onChange={(e) => setEmpForm({ ...empForm, first_name: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                        placeholder="ធីតា / Thida"
+                      />
+                    </div>
+                  </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">មុខតំណែង (Role / Title) *</label>
-                  <input
-                    type="text"
-                    required
-                    value={empForm.role}
-                    onChange={(e) => setEmpForm({ ...empForm, role: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="Senior Software Engineer / អ្នកគ្រប់គ្រង"
-                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'ភេទ (Gender)' : 'Gender'}
+                      </label>
+                      <select
+                        value={empForm.gender}
+                        onChange={(e) => setEmpForm({ ...empForm, gender: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                      >
+                        <option value="ប្រុស (Male)">ប្រុស (Male)</option>
+                        <option value="ស្រី (Female)">ស្រី (Female)</option>
+                        <option value="ផ្សេងៗ (Other)">ផ្សេងៗ (Other)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'ថ្ងៃខែឆ្នាំកំណើត (Date of Birth)' : 'Date of Birth'}
+                      </label>
+                      <input
+                        type="date"
+                        value={empForm.dob}
+                        onChange={(e) => setEmpForm({ ...empForm, dob: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'សញ្ជាតិ (Nationality)' : 'Nationality'}
+                      </label>
+                      <input
+                        type="text"
+                        value={empForm.nationality}
+                        onChange={(e) => setEmpForm({ ...empForm, nationality: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                        placeholder="កម្ពុជា (Cambodian)"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'ស្ថានភាពអាពាហ៍ពិពាហ៍ (Marital Status)' : 'Marital Status'}
+                      </label>
+                      <select
+                        value={empForm.marital_status}
+                        onChange={(e) => setEmpForm({ ...empForm, marital_status: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                      >
+                        <option value="នៅលីវ (Single)">នៅលីវ (Single)</option>
+                        <option value="រៀបការរួច (Married)">រៀបការរួច (Married)</option>
+                        <option value="លែងលះ (Divorced)">លែងលះ (Divorced)</option>
+                        <option value="ពោះម៉ាយ/មេម៉ាយ (Widowed)">ពោះម៉ាយ/មេម៉ាយ (Widowed)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'អត្តសញ្ញាណប័ណ្ណ (National ID)' : 'National ID'}
+                      </label>
+                      <input
+                        type="text"
+                        value={empForm.national_id}
+                        onChange={(e) => setEmpForm({ ...empForm, national_id: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden font-mono"
+                        placeholder="010928374"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'ស្ថានភាព (Status)' : 'Status'}
+                      </label>
+                      <select
+                        value={empForm.status}
+                        onChange={(e) => setEmpForm({ ...empForm, status: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                      >
+                        <option value="Active">សកម្ម (Active)</option>
+                        <option value="Probation">សាកល្បង (Probation)</option>
+                        <option value="Remote">ធ្វើការពីផ្ទះ (Remote)</option>
+                        <option value="On Leave">ឈប់សម្រាក (On Leave)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'ប្រភេទការងារ (Full time)' : 'Employment Type'}
+                      </label>
+                      <select
+                        value={empForm.employment_type}
+                        onChange={(e) => setEmpForm({ ...empForm, employment_type: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                      >
+                        <option value="ពេញម៉ោង (Full-Time)">ពេញម៉ោង (Full-Time)</option>
+                        <option value="ក្រៅម៉ោង (Part-Time)">ក្រៅម៉ោង (Part-Time)</option>
+                        <option value="កិច្ចសន្យា (Contract)">កិច្ចសន្យា (Contract)</option>
+                        <option value="កម្មសិក្សា (Intern)">កម្មសិក្សា (Intern)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'ប្រាក់បៀវត្សរ៍ (Salary $/ខែ)' : 'Salary ($/month)'}
+                      </label>
+                      <input
+                        type="number"
+                        value={empForm.salary}
+                        onChange={(e) => setEmpForm({ ...empForm, salary: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden font-mono"
+                        placeholder="1200"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      {language === 'km' ? 'ទីតាំង (Location)' : 'Location'}
+                    </label>
+                    <input
+                      type="text"
+                      value={empForm.location}
+                      onChange={(e) => setEmpForm({ ...empForm, location: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                      placeholder="រាជធានីភ្នំពេញ (Phnom Penh) / សៀមរាប"
+                    />
+                  </div>
                 </div>
+              )}
+
+              {/* TAB 2: CONTACT INFORMATION */}
+              {activeStaffTab === 'contact' && (
+                <div className="space-y-4 animate-in fade-in duration-150">
+                  <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-100 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-emerald-900 text-xs font-bold">
+                      <Phone size={16} className="text-emerald-600" />
+                      <span>{language === 'km' ? 'ផ្នែកទី ២៖ ព័ត៌មានទំនាក់ទំនង (Contact Information)' : 'Section 2: Contact Information'}</span>
+                    </div>
+                    <span className="text-[10px] text-emerald-600 font-semibold bg-white px-2 py-0.5 rounded-md border border-emerald-200">
+                      {language === 'km' ? 'ជំហាន ២ នៃ ៧' : 'Step 2 of 7'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'លេខទូរស័ព្ទ (Phone number) *' : 'Phone number *'}
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={empForm.phone}
+                        onChange={(e) => setEmpForm({ ...empForm, phone: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden font-mono"
+                        placeholder="+855 12 345 678"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'អ៊ីមែលការងារ (Work Email) *' : 'Work Email *'}
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        value={empForm.email}
+                        onChange={(e) => setEmpForm({ ...empForm, email: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                        placeholder="thida@hestra.kh"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      {language === 'km' ? 'អាសយដ្ឋានបច្ចុប្បន្ន (Current address)' : 'Current address'}
+                    </label>
+                    <input
+                      type="text"
+                      value={empForm.current_address}
+                      onChange={(e) => setEmpForm({ ...empForm, current_address: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                      placeholder="ផ្ទះលេខ 128E, ផ្លូវ 2004, សង្កាត់ទឹកថ្លា"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'ខេត្ត/រាជធានី (Province/City)' : 'Province/City'}
+                      </label>
+                      <select
+                        value={empForm.province_city}
+                        onChange={(e) => setEmpForm({ ...empForm, province_city: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                      >
+                        {CAMBODIA_PROVINCES.map((prov) => (
+                          <option key={prov} value={prov}>
+                            {prov}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'ស្រុក/ខណ្ឌ (District)' : 'District'}
+                      </label>
+                      <input
+                        type="text"
+                        value={empForm.district}
+                        onChange={(e) => setEmpForm({ ...empForm, district: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                        placeholder="ខណ្ឌសែនសុខ / Khan Sen Sok"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'ឃុំ/សង្កាត់ (Commune/Sangkat)' : 'Commune/Sangkat'}
+                      </label>
+                      <input
+                        type="text"
+                        value={empForm.commune_sangkat}
+                        onChange={(e) => setEmpForm({ ...empForm, commune_sangkat: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                        placeholder="សង្កាត់ទឹកថ្លា / Sangkat Teuk Thla"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'ភូមិ (Village)' : 'Village'}
+                      </label>
+                      <input
+                        type="text"
+                        value={empForm.village}
+                        onChange={(e) => setEmpForm({ ...empForm, village: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                        placeholder="ភូមិស្លែងរលើង / Phum Slaeng Roleung"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: EMPLOYEE INFORMATION */}
+              {activeStaffTab === 'employment' && (
+                <div className="space-y-4 animate-in fade-in duration-150">
+                  <div className="p-3 bg-blue-50/60 rounded-xl border border-blue-100 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-blue-900 text-xs font-bold">
+                      <Briefcase size={16} className="text-blue-600" />
+                      <span>{language === 'km' ? 'ផ្នែកទី ៣៖ ព័ត៌មានការងារ (Employee Information)' : 'Section 3: Employee Information'}</span>
+                    </div>
+                    <span className="text-[10px] text-blue-600 font-semibold bg-white px-2 py-0.5 rounded-md border border-blue-200">
+                      {language === 'km' ? 'ជំហាន ៣ នៃ ៧' : 'Step 3 of 7'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'អត្តលេខបុគ្គលិក (Employee id)' : 'Employee ID'}
+                      </label>
+                      <input
+                        type="text"
+                        value={empForm.employee_id}
+                        onChange={(e) => setEmpForm({ ...empForm, employee_id: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden font-mono"
+                        placeholder="EMP-2026-001"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'ផ្នែក/នាយកដ្ឋាន (Department) *' : 'Department *'}
+                      </label>
+                      <select
+                        value={empForm.department_id}
+                        onChange={(e) => setEmpForm({ ...empForm, department_id: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                      >
+                        {departments.map((d) => (
+                          <option key={d.id} value={d.id}>
+                            {d.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'មុខតំណែង (Position) *' : 'Position *'}
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={empForm.role}
+                        onChange={(e) => setEmpForm({ ...empForm, role: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                        placeholder="Senior Software Engineer"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'ប្រភេទបុគ្គលិក (Employee type)' : 'Employee type'}
+                      </label>
+                      <select
+                        value={empForm.employee_type}
+                        onChange={(e) => setEmpForm({ ...empForm, employee_type: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                      >
+                        <option value="បុគ្គលិកពេញសិទ្ធិ (Regular / Permanent)">បុគ្គលិកពេញសិទ្ធិ (Regular / Permanent)</option>
+                        <option value="បុគ្គលិកកិច្ចសន្យា (Contractual)">បុគ្គលិកកិច្ចសន្យា (Contractual)</option>
+                        <option value="បុគ្គលិកសាកល្បង (Probationary)">បុគ្គលិកសាកល្បង (Probationary)</option>
+                        <option value="កម្មសិក្សាការី (Internship)">កម្មសិក្សាការី (Internship)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'ចូលបម្រើការ (Join Date)' : 'Join Date'}
+                      </label>
+                      <input
+                        type="date"
+                        value={empForm.join_date}
+                        onChange={(e) => setEmpForm({ ...empForm, join_date: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'ប្រភេទកិច្ចសន្យា (Contract Type)' : 'Contract Type'}
+                      </label>
+                      <select
+                        value={empForm.contract_type}
+                        onChange={(e) => setEmpForm({ ...empForm, contract_type: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                      >
+                        <option value="UDC (មិនកំណត់ថិរវេលា)">UDC (មិនកំណត់ថិរវេលា)</option>
+                        <option value="FDC (កំណត់ថិរវេលា)">FDC (កំណត់ថិរវេលា)</option>
+                        <option value="Probation (សាកល្បង)">Probation (សាកល្បង)</option>
+                        <option value="Internship (កម្មសិក្សា)">Internship (កម្មសិក្សា)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'កាលបរិច្ឆេទចាប់ផ្តើមកិច្ចសន្យា (Contract start)' : 'Contract start'}
+                      </label>
+                      <input
+                        type="date"
+                        value={empForm.contract_start}
+                        onChange={(e) => setEmpForm({ ...empForm, contract_start: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'កាលបរិច្ឆេទបញ្ចប់កិច្ចសន្យា (Contract end)' : 'Contract end'}
+                      </label>
+                      <input
+                        type="date"
+                        value={empForm.contract_end}
+                        onChange={(e) => setEmpForm({ ...empForm, contract_end: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'អ្នកគ្រប់គ្រងផ្ទាល់ (Manager)' : 'Direct Manager'}
+                      </label>
+                      <select
+                        value={empForm.manager_id}
+                        onChange={(e) => setEmpForm({ ...empForm, manager_id: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                      >
+                        <option value="">-- {language === 'km' ? 'គ្មានអ្នកគ្រប់គ្រងផ្ទាល់ / ថ្នាក់ដឹកនាំ' : 'None / Executive'} --</option>
+                        {managers.map((m) => (
+                          <option key={m.id} value={m.id}>
+                            {m.first_name} {m.last_name} ({m.role || 'Colleague'})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'ការិយាល័យធ្វើការ (Work location)' : 'Work location'}
+                      </label>
+                      <input
+                        type="text"
+                        value={empForm.work_location}
+                        onChange={(e) => setEmpForm({ ...empForm, work_location: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                        placeholder="ការិយាល័យកណ្តាល (Head Office) / Canadia Tower"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 4: SALARY & PAYROLL */}
+              {activeStaffTab === 'payroll' && (
+                <div className="space-y-4 animate-in fade-in duration-150">
+                  <div className="p-3 bg-amber-50/60 rounded-xl border border-amber-100 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-amber-900 text-xs font-bold">
+                      <DollarSign size={16} className="text-amber-600" />
+                      <span>{language === 'km' ? 'ផ្នែកទី ៤៖ ប្រាក់បៀវត្សរ៍ & ធនាគារ (Salary & Payroll)' : 'Section 4: Salary & Payroll'}</span>
+                    </div>
+                    <span className="text-[10px] text-amber-600 font-semibold bg-white px-2 py-0.5 rounded-md border border-amber-200">
+                      {language === 'km' ? 'ជំហាន ៤ នៃ ៧' : 'Step 4 of 7'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'ប្រាក់បៀវត្សរ៍គោល (Basic salary) *' : 'Basic salary *'}
+                      </label>
+                      <input
+                        type="number"
+                        required
+                        value={empForm.salary}
+                        onChange={(e) => setEmpForm({ ...empForm, salary: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden font-mono"
+                        placeholder="1200"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'រូបិយប័ណ្ណ (Salary Currency)' : 'Salary Currency'}
+                      </label>
+                      <select
+                        value={empForm.salary_currency}
+                        onChange={(e) => setEmpForm({ ...empForm, salary_currency: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden font-mono"
+                      >
+                        <option value="USD ($)">USD ($)</option>
+                        <option value="KHR (៛)">KHR (៛)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'ភាពញឹកញាប់បើកប្រាក់ (Salary Frequency)' : 'Salary Frequency'}
+                      </label>
+                      <select
+                        value={empForm.salary_frequency}
+                        onChange={(e) => setEmpForm({ ...empForm, salary_frequency: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                      >
+                        <option value="ប្រចាំខែ (Monthly)">ប្រចាំខែ (Monthly)</option>
+                        <option value="កន្លះខែ (Semi-monthly)">កន្លះខែ (Semi-monthly)</option>
+                        <option value="ប្រចាំសប្តាហ៍ (Weekly)">ប្រចាំសប្តាហ៍ (Weekly)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      {language === 'km' ? 'ឈ្មោះធនាគារ (Bank Name)' : 'Bank Name'}
+                    </label>
+                    <select
+                      value={empForm.bank_name}
+                      onChange={(e) => setEmpForm({ ...empForm, bank_name: e.target.value })}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                    >
+                      {CAMBODIA_BANKS.map((b) => (
+                        <option key={b} value={b}>
+                          {b}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'ឈ្មោះម្ចាស់គណនី (Account Name)' : 'Account Name'}
+                      </label>
+                      <input
+                        type="text"
+                        value={empForm.bank_account_name}
+                        onChange={(e) => setEmpForm({ ...empForm, bank_account_name: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden uppercase font-mono"
+                        placeholder="CHAN THIDA"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'លេខគណនីធនាគារ (Account Number)' : 'Account Number'}
+                      </label>
+                      <input
+                        type="text"
+                        value={empForm.bank_account_number}
+                        onChange={(e) => setEmpForm({ ...empForm, bank_account_number: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden font-mono"
+                        placeholder="001 234 567"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 5: NSSF INFORMATION */}
+              {activeStaffTab === 'nssf' && (
+                <div className="space-y-4 animate-in fade-in duration-150">
+                  <div className="p-3 bg-purple-50/60 rounded-xl border border-purple-100 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-purple-900 text-xs font-bold">
+                      <ShieldCheck size={16} className="text-purple-600" />
+                      <span>{language === 'km' ? 'ផ្នែកទី ៥៖ ព័ត៌មាន ប.ស.ស (NSSF Information)' : 'Section 5: NSSF Information'}</span>
+                    </div>
+                    <span className="text-[10px] text-purple-600 font-semibold bg-white px-2 py-0.5 rounded-md border border-purple-200">
+                      {language === 'km' ? 'ជំហាន ៥ នៃ ៧' : 'Step 5 of 7'}
+                    </span>
+                  </div>
+
+                  <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="font-bold text-slate-900 text-xs">
+                          {language === 'km' ? 'សមាជិក ប.ស.ស (NSSF member)' : 'NSSF Member Status'}
+                        </span>
+                        <p className="text-[11px] text-slate-500">
+                          {language === 'km'
+                            ? 'កំណត់ការចូលរួមរបបសន្តិសុខសង្គម ហានិភ័យការងារ & ថែទាំសុខភាព'
+                            : 'Enrollment in Cambodian Social Security scheme (Occupational risk & Healthcare)'}
+                        </p>
+                      </div>
+                      <select
+                        value={empForm.nssf_member}
+                        onChange={(e) => setEmpForm({ ...empForm, nssf_member: e.target.value })}
+                        className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-indigo-700"
+                      >
+                        <option value="មាន (Yes)">មាន (Yes)</option>
+                        <option value="គ្មាន (No)">គ្មាន (No)</option>
+                      </select>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-slate-200">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          {language === 'km' ? 'លេខកាត ប.ស.ស (NSSF number)' : 'NSSF Number'}
+                        </label>
+                        <input
+                          type="text"
+                          value={empForm.nssf_number}
+                          onChange={(e) => setEmpForm({ ...empForm, nssf_number: e.target.value })}
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-hidden font-mono"
+                          placeholder="102938475"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-700 mb-1">
+                          {language === 'km' ? 'កាលបរិច្ឆេទចុះបញ្ជី (Registration Date)' : 'Registration Date'}
+                        </label>
+                        <input
+                          type="date"
+                          value={empForm.nssf_reg_date}
+                          onChange={(e) => setEmpForm({ ...empForm, nssf_reg_date: e.target.value })}
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 6: EMERGENCY CONTACT */}
+              {activeStaffTab === 'emergency' && (
+                <div className="space-y-4 animate-in fade-in duration-150">
+                  <div className="p-3 bg-rose-50/60 rounded-xl border border-rose-100 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-rose-900 text-xs font-bold">
+                      <HeartHandshake size={16} className="text-rose-600" />
+                      <span>{language === 'km' ? 'ផ្នែកទី ៦៖ ទំនាក់ទំនងពេលមានអាសន្ន (Emergency Contact)' : 'Section 6: Emergency Contact'}</span>
+                    </div>
+                    <span className="text-[10px] text-rose-600 font-semibold bg-white px-2 py-0.5 rounded-md border border-rose-200">
+                      {language === 'km' ? 'ជំហាន ៦ នៃ ៧' : 'Step 6 of 7'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'ឈ្មោះអ្នកទំនាក់ទំនង (Contact name)' : 'Contact name'}
+                      </label>
+                      <input
+                        type="text"
+                        value={empForm.emergency_contact_name}
+                        onChange={(e) => setEmpForm({ ...empForm, emergency_contact_name: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                        placeholder="សុខ វណ្ណា / Sok Vanna"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'ត្រូវជា (Relationship)' : 'Relationship'}
+                      </label>
+                      <select
+                        value={empForm.emergency_contact_relationship}
+                        onChange={(e) => setEmpForm({ ...empForm, emergency_contact_relationship: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                      >
+                        <option value="ប្តី/ប្រពន្ធ (Spouse)">ប្តី/ប្រពន្ធ (Spouse)</option>
+                        <option value="ឪពុក/ម្តាយ (Parent)">ឪពុក/ម្តាយ (Parent)</option>
+                        <option value="បងប្អូន (Sibling)">បងប្អូន (Sibling)</option>
+                        <option value="សាច់ញាតិ (Relative)">សាច់ញាតិ (Relative)</option>
+                        <option value="មិត្តភក្តិ (Friend)">មិត្តភក្តិ (Friend)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'លេខទូរស័ព្ទអាសន្ន (Phone)' : 'Emergency Phone'}
+                      </label>
+                      <input
+                        type="text"
+                        value={empForm.emergency_contact_phone}
+                        onChange={(e) => setEmpForm({ ...empForm, emergency_contact_phone: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden font-mono"
+                        placeholder="+855 92 888 777"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-700 mb-1">
+                        {language === 'km' ? 'អាសយដ្ឋាន (address)' : 'Address'}
+                      </label>
+                      <input
+                        type="text"
+                        value={empForm.emergency_contact_address}
+                        onChange={(e) => setEmpForm({ ...empForm, emergency_contact_address: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                        placeholder="រាជធានីភ្នំពេញ / Phnom Penh"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 7: DOCUMENTS */}
+              {activeStaffTab === 'documents' && (
+                <div className="space-y-5 animate-in fade-in duration-150">
+                  <div className="p-3 bg-indigo-50/60 rounded-xl border border-indigo-100 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-indigo-900 text-xs font-bold">
+                      <FolderOpen size={16} className="text-indigo-600" />
+                      <span>{language === 'km' ? 'ផ្នែកទី ៧៖ ឯកសារ & រូបថតបុគ្គលិក (Documents & Staff Photo)' : 'Section 7: Documents & Staff Photo'}</span>
+                    </div>
+                    <span className="text-[10px] text-indigo-600 font-semibold bg-white px-2 py-0.5 rounded-md border border-indigo-200">
+                      {language === 'km' ? 'ជំហាន ៧ នៃ ៧' : 'Step 7 of 7'}
+                    </span>
+                  </div>
+
+                  {/* Profile Photo Upload Section - NO URL/LINKS */}
+                  <div className="p-5 bg-slate-50/90 rounded-2xl border border-slate-200 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-900 flex items-center gap-1.5">
+                          <Camera size={15} className="text-indigo-600" />
+                          <span>{language === 'km' ? 'រូបថតផ្ទាល់ខ្លួន (Profile photo)' : 'Profile Photo'}</span>
+                        </label>
+                        <p className="text-[11px] text-slate-500">
+                          {language === 'km'
+                            ? 'ផ្ទុករូបថតផ្ទាល់ខ្លួនពីឧបករណ៍/កុំព្យូទ័ររបស់អ្នក (JPG, PNG, WEBP)'
+                            : 'Upload photo directly from your computer (JPG, PNG, WEBP)'}
+                        </p>
+                      </div>
+                      {empForm.avatar ? (
+                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/90 px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-300/60">
+                          <Check size={12} /> {language === 'km' ? 'បានផ្ទុករួចរាល់' : 'Uploaded'}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <input
+                      ref={avatarInputRef}
+                      type="file"
+                      accept="image/png, image/jpeg, image/webp, image/gif"
+                      className="hidden"
+                      onChange={handleAvatarFileChange}
+                    />
+
+                    {empForm.avatar ? (
+                      /* Uploaded Photo Preview Card */
+                      <div className="p-4 bg-white rounded-xl border border-slate-200 flex flex-col sm:flex-row items-center gap-4 shadow-2xs">
+                        <div className="relative group shrink-0">
+                          <img
+                            src={empForm.avatar}
+                            alt="Profile Avatar Preview"
+                            className="w-24 h-24 rounded-2xl object-cover ring-4 ring-indigo-500/20 shadow-md"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => avatarInputRef.current?.click()}
+                            className="absolute inset-0 bg-slate-900/50 rounded-2xl opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity cursor-pointer"
+                            title={language === 'km' ? 'ផ្លាស់ប្តូររូបថត' : 'Change Photo'}
+                          >
+                            <Camera size={22} />
+                          </button>
+                        </div>
+                        <div className="flex-1 text-center sm:text-left space-y-1">
+                          <div className="font-bold text-slate-800 text-xs">
+                            {empForm.first_name || empForm.last_name
+                              ? `${empForm.first_name} ${empForm.last_name}`
+                              : (language === 'km' ? 'រូបថតបុគ្គលិកដែលបានជ្រើសរើស' : 'Selected Staff Photo')}
+                          </div>
+                          <p className="text-[11px] text-slate-500">
+                            {language === 'km' ? 'រូបថតត្រូវបានផ្ទុកឡើង និងរួចរាល់សម្រាប់ការរក្សាទុក ✓' : 'Photo uploaded and ready to save ✓'}
+                          </p>
+                          <div className="flex items-center gap-2 pt-2 justify-center sm:justify-start">
+                            <button
+                              type="button"
+                              onClick={() => avatarInputRef.current?.click()}
+                              className="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer border border-indigo-200"
+                            >
+                              <Upload size={13} />
+                              <span>{language === 'km' ? 'ប្តូររូបថត' : 'Change Photo'}</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEmpForm((prev) => ({ ...prev, avatar: '' }));
+                                if (avatarInputRef.current) avatarInputRef.current.value = '';
+                              }}
+                              className="px-3 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer border border-rose-200"
+                            >
+                              <Trash2 size={13} />
+                              <span>{language === 'km' ? 'លុបរូបថត' : 'Remove'}</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      /* Drag & Drop Photo Upload Box */
+                      <div
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          setIsDraggingAvatar(true);
+                        }}
+                        onDragLeave={() => setIsDraggingAvatar(false)}
+                        onDrop={handleAvatarDrop}
+                        onClick={() => avatarInputRef.current?.click()}
+                        className={`p-6 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center text-center cursor-pointer transition-all bg-white hover:bg-slate-50/80 ${
+                          isDraggingAvatar
+                            ? 'border-indigo-500 bg-indigo-50/40 ring-4 ring-indigo-500/10'
+                            : 'border-slate-300 hover:border-indigo-400'
+                        }`}
+                      >
+                        <div className="w-14 h-14 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center mb-3 shadow-2xs">
+                          <Camera size={26} />
+                        </div>
+                        <div className="text-xs font-bold text-slate-800 mb-1">
+                          {language === 'km'
+                            ? 'ចុចទីនេះ ឬទម្លាក់រូបថតមកដើម្បីផ្ទុកឡើង'
+                            : 'Click here or drag & drop photo to upload'}
+                        </div>
+                        <p className="text-[11px] text-slate-400 mb-3">
+                          JPG, PNG, WEBP (អតិបរមា 10MB) &bull; No URL required
+                        </p>
+                        <span className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5">
+                          <Upload size={14} />
+                          <span>{language === 'km' ? 'ជ្រើសរើសរូបថតពីកុំព្យូទ័រ' : 'Choose Photo from Computer'}</span>
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Document Attachments */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-bold text-slate-900">
+                      {language === 'km' ? 'ឯកសារផ្លូវការភ្ជាប់មកជាមួយ (Attached Documents)' : 'Attached Official Documents'}
+                    </label>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {/* Doc 1: National ID */}
+                      <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+                            <IdCard size={14} className="text-indigo-600" />
+                            {language === 'km' ? 'ច្បាប់ចម្លងអត្តសញ្ញាណប័ណ្ណ' : 'National ID'}
+                          </span>
+                          {empForm.doc_national_id && (
+                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                              Attached
+                            </span>
+                          )}
+                        </div>
+                        <input
+                          ref={docIdInputRef}
+                          type="file"
+                          accept=".pdf,image/*,.doc,.docx"
+                          className="hidden"
+                          onChange={(e) => handleDocUpload('doc_national_id', e)}
+                        />
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={empForm.doc_national_id}
+                            onChange={(e) => setEmpForm({ ...empForm, doc_national_id: e.target.value })}
+                            placeholder="National_ID_Card.pdf"
+                            className="flex-1 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => docIdInputRef.current?.click()}
+                            className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer shrink-0"
+                            title="Upload document"
+                          >
+                            <Upload size={13} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Doc 2: Passport */}
+                      <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+                            <FileText size={14} className="text-blue-600" />
+                            {language === 'km' ? 'លិខិតឆ្លងដែន' : 'Passport'}
+                          </span>
+                          {empForm.doc_passport && (
+                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                              Attached
+                            </span>
+                          )}
+                        </div>
+                        <input
+                          ref={docPassportInputRef}
+                          type="file"
+                          accept=".pdf,image/*,.doc,.docx"
+                          className="hidden"
+                          onChange={(e) => handleDocUpload('doc_passport', e)}
+                        />
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={empForm.doc_passport}
+                            onChange={(e) => setEmpForm({ ...empForm, doc_passport: e.target.value })}
+                            placeholder="Passport_Scan.pdf"
+                            className="flex-1 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => docPassportInputRef.current?.click()}
+                            className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer shrink-0"
+                            title="Upload passport"
+                          >
+                            <Upload size={13} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Doc 3: Employee Contract */}
+                      <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+                            <FileCheck size={14} className="text-emerald-600" />
+                            {language === 'km' ? 'កិច្ចសន្យាការងារ' : 'Employee Contract'}
+                          </span>
+                          {empForm.doc_contract && (
+                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                              Attached
+                            </span>
+                          )}
+                        </div>
+                        <input
+                          ref={docContractInputRef}
+                          type="file"
+                          accept=".pdf,image/*,.doc,.docx"
+                          className="hidden"
+                          onChange={(e) => handleDocUpload('doc_contract', e)}
+                        />
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={empForm.doc_contract}
+                            onChange={(e) => setEmpForm({ ...empForm, doc_contract: e.target.value })}
+                            placeholder="Employment_Contract_Signed.pdf"
+                            className="flex-1 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => docContractInputRef.current?.click()}
+                            className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer shrink-0"
+                            title="Upload contract"
+                          >
+                            <Upload size={13} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Doc 4: Other Documents */}
+                      <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-slate-800 flex items-center gap-1.5">
+                            <FolderOpen size={14} className="text-amber-600" />
+                            {language === 'km' ? 'ឯកសារផ្សេងៗ' : 'Other Documents'}
+                          </span>
+                          {empForm.doc_others && (
+                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                              Attached
+                            </span>
+                          )}
+                        </div>
+                        <input
+                          ref={docOthersInputRef}
+                          type="file"
+                          accept=".pdf,image/*,.doc,.docx,.zip"
+                          className="hidden"
+                          onChange={(e) => handleDocUpload('doc_others', e)}
+                        />
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={empForm.doc_others}
+                            onChange={(e) => setEmpForm({ ...empForm, doc_others: e.target.value })}
+                            placeholder="Degrees_Certificates.zip"
+                            className="flex-1 px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => docOthersInputRef.current?.click()}
+                            className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer shrink-0"
+                            title="Upload other documents"
+                          >
+                            <Upload size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Stepper Footer Controls */}
+              <div className="pt-4 mt-6 border-t border-slate-200 flex items-center justify-between gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">នាយកដ្ឋាន / ផ្នែក (Department) *</label>
-                  <select
-                    value={empForm.department_id}
-                    onChange={(e) => setEmpForm({ ...empForm, department_id: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                  {activeStaffTab !== 'personal' && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const tabs: AddStaffTab[] = ['personal', 'contact', 'employment', 'payroll', 'nssf', 'emergency', 'documents'];
+                        const idx = tabs.indexOf(activeStaffTab);
+                        if (idx > 0) setActiveStaffTab(tabs[idx - 1]);
+                      }}
+                      className="px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <ChevronLeft size={14} /> <span>{language === 'km' ? 'ថយក្រោយ' : 'Previous'}</span>
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
                   >
-                    {departments.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
+                    {language === 'km' ? 'បោះបង់ (Cancel)' : 'Cancel'}
+                  </button>
 
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">ប្រភេទការងារ</label>
-                  <select
-                    value={empForm.employment_type}
-                    onChange={(e) => setEmpForm({ ...empForm, employment_type: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                  {activeStaffTab !== 'documents' ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const tabs: AddStaffTab[] = ['personal', 'contact', 'employment', 'payroll', 'nssf', 'emergency', 'documents'];
+                        const idx = tabs.indexOf(activeStaffTab);
+                        if (idx < tabs.length - 1) setActiveStaffTab(tabs[idx + 1]);
+                      }}
+                      className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <span>{language === 'km' ? 'បន្ទាប់' : 'Next Step'}</span> <ChevronRight size={14} />
+                    </button>
+                  ) : null}
+
+                  <button
+                    type="button"
+                    onClick={() => handleAddEmployee()}
+                    disabled={loading}
+                    className="px-5 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm shadow-indigo-600/30 flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
                   >
-                    <option value="ពេញម៉ោង (Full-Time)">ពេញម៉ោង (Full-Time)</option>
-                    <option value="ក្រៅម៉ោង (Part-Time)">ក្រៅម៉ោង (Part-Time)</option>
-                    <option value="កិច្ចសន្យា (Contract)">កិច្ចសន្យា (Contract)</option>
-                    <option value="កម្មសិក្សា (Intern)">កម្មសិក្សា (Intern)</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">ស្ថានភាព (Status)</label>
-                  <select
-                    value={empForm.status}
-                    onChange={(e) => setEmpForm({ ...empForm, status: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                  >
-                    <option value="Active">សកម្ម (Active)</option>
-                    <option value="Remote">ធ្វើការពីផ្ទះ (Remote)</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">បៀវត្សរ៍មូលដ្ឋាន ($/ខែ)</label>
-                  <input
-                    type="number"
-                    value={empForm.salary}
-                    onChange={(e) => setEmpForm({ ...empForm, salary: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="1200"
-                  />
+                    <Check size={15} />
+                    <span>{loading ? (language === 'km' ? 'កំពុងបញ្ចូល...' : 'Saving...') : (language === 'km' ? 'រក្សាទុក & បញ្ចូលបុគ្គលិក' : 'Complete Registration')}</span>
+                  </button>
                 </div>
               </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">ទីតាំងការងារ (Location)</label>
-                <input
-                  type="text"
-                  value={empForm.location}
-                  onChange={(e) => setEmpForm({ ...empForm, location: e.target.value })}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                  placeholder="រាជធានីភ្នំពេញ (Phnom Penh) / សៀមរាប"
-                />
-              </div>
-
-              <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg"
-                >
-                  បោះបង់ (Cancel)
-                </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm shadow-indigo-600/30"
-                >
-                  {loading ? 'កំពុងបញ្ចូល...' : 'យល់ព្រមបញ្ចូលបុគ្គលិក'}
-                </button>
-              </div>
-            </form>
+            </div>
           )}
 
           {/* 2. REQUEST LEAVE FORM */}

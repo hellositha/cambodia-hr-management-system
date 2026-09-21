@@ -14,7 +14,6 @@ import {
   Eye,
   EyeOff,
   ArrowRight,
-  KeyRound,
   CheckCircle2,
   Building2,
   Sparkles,
@@ -38,117 +37,25 @@ export default function LoginPage() {
   // Selected portal mode: 'staff' (ESS) or 'management' (MSS/Admin)
   const [portalMode, setPortalMode] = useState<'staff' | 'management'>('staff');
 
-  // Form fields (defaults to staff demo username: chan)
-  const [email, setEmail] = useState('chan');
-  const [password, setPassword] = useState('hestra123');
+  // Form fields
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  // 2FA state
-  const [is2FAModalOpen, setIs2FAModalOpen] = useState(false);
-  const [otpCode, setOtpCode] = useState(['', '', '', '', '', '']);
-  const [pendingUser, setPendingUser] = useState<any>(null);
-  const [verifying2FA, setVerifying2FA] = useState(false);
-
   // Help & Forgot Password Modal
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
-
-  // Quick Demo Accounts with Last Name as Username
-  const staffDemoAccounts = [
-    {
-      name: 'ចាន់ ធីតា (Chan Thida)',
-      role: 'Employee',
-      username: 'chan',
-      lastName: 'ចាន់ (Chan)',
-      title: 'វិស្វករកម្មវិធីជាន់ខ្ពស់ (Senior Software Engineer)',
-      email: 'chan.thida@hestra.kh',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces',
-      descKm: 'ចូលមើលប័ណ្ណប្រាក់ខែ, កាតឌីជីថល QR, និងកត់ត្រាវត្តមាន',
-      descEn: 'Access payslips, QR digital badge, and punch attendance',
-    },
-    {
-      name: 'ស៊ឹម កក្កដា (Sim Kakkada)',
-      role: 'Employee',
-      username: 'sim',
-      lastName: 'ស៊ឹម (Sim)',
-      title: 'ប្រធានក្រុមទីផ្សារ (Marketing Team Lead)',
-      email: 'sim.kakkada@hestra.kh',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=256&h=256&fit=crop&crop=faces',
-      descKm: 'ស្នើសុំច្បាប់ឈប់សម្រាកប្រចាំឆ្នាំ និងពិនិត្យម៉ោងការងារ',
-      descEn: 'Submit annual leave requests & check work hours',
-    },
-    {
-      name: 'ឌី ដារ៉ា (Dy Dara)',
-      role: 'Employee',
-      username: 'dy',
-      lastName: 'ឌី (Dy)',
-      title: 'វិស្វករ UI/UX (Frontend & Design)',
-      email: 'dy.dara@hestra.kh',
-      avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=256&h=256&fit=crop&crop=faces',
-      descKm: 'កត់ត្រាវត្តមាន ពិនិត្យកាលវិភាគការងារ និងស្នើសុំច្បាប់',
-      descEn: 'Punch attendance, check work shifts & request time off',
-    },
-    {
-      name: 'សេង វណ្ណា (Seng Vanna)',
-      role: 'Employee',
-      username: 'seng',
-      lastName: 'សេង (Seng)',
-      title: 'អ្នកស្រាវជ្រាវផលិតផល (UX Researcher)',
-      email: 'seng.vanna@hestra.kh',
-      avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=256&h=256&fit=crop&crop=faces',
-      descKm: 'មើលសមតុល្យច្បាប់ប្រចាំឆ្នាំ និងទាញយកប័ណ្ណប្រាក់ខែ',
-      descEn: 'Check leave balances and download monthly payslips',
-    },
-  ];
-
-  const managementDemoAccounts = [
-    {
-      name: 'សារ៉ាត់ (Sarath)',
-      role: 'Admin',
-      username: 'sarath',
-      lastName: 'Sarath',
-      title: 'ប្រធាននាយកដ្ឋានធនធានមនុស្ស (Head of HR)',
-      email: 'sarath@hestra.kh',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=256&h=256&fit=crop&crop=faces',
-      descKm: 'សិទ្ធិពេញលេញលើប្រព័ន្ធ: បៀវត្សរ៍, ប.ស.ស, RBAC & របាយការណ៍',
-      descEn: 'Full system admin: Payroll, NSSF, RBAC & Executive BI',
-    },
-    {
-      name: 'វ៉ាន់ សុភ័ក្ត្រ (Van Sopheak)',
-      role: 'Manager',
-      username: 'van',
-      lastName: 'វ៉ាន់ (Van)',
-      title: 'នាយកផ្នែកបច្ចេកវិទ្យា (VP of Engineering)',
-      email: 'van.sopheak@hestra.kh',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=256&h=256&fit=crop&crop=faces',
-      descKm: 'អនុម័តច្បាប់ឈប់កូនក្រុម, វាយតម្លៃ KPI & តាមដានវត្តមាន',
-      descEn: 'Approve team leaves, KPI reviews & team roster',
-    },
-    {
-      name: 'ហេង សុផល (Heng Sophal)',
-      role: 'Manager',
-      username: 'heng',
-      lastName: 'ហេង (Heng)',
-      title: 'ប្រធានផ្នែកប្រតិបត្តិការ (Operations Manager)',
-      email: 'heng.sophal@hestra.kh',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=256&h=256&fit=crop&crop=faces',
-      descKm: 'គ្រប់គ្រងវត្តមានក្រុមការងារប្រតិបត្តិការទូទាំងក្រុមហ៊ុន',
-      descEn: 'Operations workforce attendance & schedule approvals',
-    },
-  ];
-
-  // Quick fill demo user
-  const handleSelectDemoUser = (userIdentifier: string) => {
-    setEmail(userIdentifier);
-    setPassword('hestra123');
-  };
 
   // Submit Login
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) {
-      showToast(language === 'km' ? 'សូមបញ្ចូលអ៊ីមែល ឬលេខសម្គាល់បុគ្គលិក' : 'Please enter your email or employee ID', 'error');
+    if (!email.trim()) {
+      showToast(language === 'km' ? 'សូមបញ្ចូលឈ្មោះសម្គាល់ ឬអ៊ីមែល' : 'Please enter your username or email', 'error');
+      return;
+    }
+    if (!password) {
+      showToast(language === 'km' ? 'សូមបញ្ចូលពាក្យសម្ងាត់' : 'Please enter your password', 'error');
       return;
     }
 
@@ -158,8 +65,8 @@ export default function LoginPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email,
-          password: password || 'hestra123',
+          email: email.trim(),
+          password,
           portalType: portalMode,
         }),
       });
@@ -172,57 +79,12 @@ export default function LoginPage() {
         return;
       }
 
-      // Check if 2FA is required
-      if (data.requires2FA) {
-        setPendingUser(data);
-        setIs2FAModalOpen(true);
-        setLoading(false);
-        return;
-      }
-
       // Successful login
       finalizeLogin(data.user, data.redirectUrl, data.portalWarning);
     } catch (err) {
       console.error('Login error:', err);
       showToast('កំហុសម៉ាស៊ីនមេក្នុងការចូលប្រើប្រព័ន្ធ', 'error');
       setLoading(false);
-    }
-  };
-
-  // Verify 2FA OTP
-  const handleVerify2FA = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const code = otpCode.join('');
-    if (code.length < 6) {
-      showToast(language === 'km' ? 'សូមបញ្ចូលលេខកូដ OTP ៦ ខ្ទង់' : 'Please enter the 6-digit OTP code', 'error');
-      return;
-    }
-
-    setVerifying2FA(true);
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: pendingUser.email,
-          password: password || 'hestra123',
-          portalType: portalMode,
-          otpCode: code,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        showToast(data.error || 'លេខកូដ OTP មិនត្រឹមត្រូវទេ', 'error');
-        setVerifying2FA(false);
-        return;
-      }
-
-      setIs2FAModalOpen(false);
-      finalizeLogin(data.user, data.redirectUrl, data.portalWarning);
-    } catch (err) {
-      showToast('កំហុសក្នុងការផ្ទៀងផ្ទាត់ OTP', 'error');
-      setVerifying2FA(false);
     }
   };
 
@@ -248,24 +110,12 @@ export default function LoginPage() {
       );
     }
 
-    // Redirect to respective destination
+    // Redirect to respective destination (Dashboard for Management, Staff Portal for Employee)
+    const destination = redirectUrl || (user.role === 'Employee' ? '/portal/staff' : '/');
+
     setTimeout(() => {
-      router.push(redirectUrl || (user.role === 'Employee' ? '/portal/staff' : '/portal/manager'));
-    }, 400);
-  };
-
-  // Handle OTP digit changes
-  const handleOtpChange = (index: number, value: string) => {
-    if (value.length > 1) value = value.slice(-1);
-    const newOtp = [...otpCode];
-    newOtp[index] = value;
-    setOtpCode(newOtp);
-
-    // Auto focus next input
-    if (value && index < 5) {
-      const nextInput = document.getElementById(`otp-input-${index + 1}`);
-      nextInput?.focus();
-    }
+      window.location.href = destination;
+    }, 250);
   };
 
   return (
@@ -369,7 +219,7 @@ export default function LoginPage() {
                   </div>
                   <div>
                     <span className="font-semibold text-white">
-                      {language === 'km' ? 'សុវត្ថិភាព 2FA & ការការពារទិន្នន័យ' : 'Bank-Grade 2FA & RBAC Security'}
+                      {language === 'km' ? 'សុវត្ថិភាពសិទ្ធិប្រើប្រាស់ RBAC & ការពារទិន្នន័យ' : 'Enterprise RBAC & Data Security'}
                     </span>
                     <p className="text-[11px] text-indigo-300 mt-0.5">
                       {language === 'km' ? 'ការពារទិន្នន័យសម្ងាត់ប្រាក់ខែ និងព័ត៌មានបុគ្គលិក' : 'Strict data privacy & 256-bit SSL encrypted sessions'}
@@ -409,11 +259,7 @@ export default function LoginPage() {
                   {/* Staff Portal Tab */}
                   <button
                     type="button"
-                    onClick={() => {
-                      setPortalMode('staff');
-                      setEmail('chan');
-                      setPassword('hestra123');
-                    }}
+                    onClick={() => setPortalMode('staff')}
                     className={`flex items-center justify-center gap-2.5 py-3 px-3 rounded-xl font-bold text-xs transition-all cursor-pointer ${
                       portalMode === 'staff'
                         ? 'bg-white text-emerald-800 shadow-xs border border-emerald-200'
@@ -432,11 +278,7 @@ export default function LoginPage() {
                   {/* Management Portal Tab */}
                   <button
                     type="button"
-                    onClick={() => {
-                      setPortalMode('management');
-                      setEmail('sarath@hestra.kh');
-                      setPassword('hestra123');
-                    }}
+                    onClick={() => setPortalMode('management')}
                     className={`flex items-center justify-center gap-2.5 py-3 px-3 rounded-xl font-bold text-xs transition-all cursor-pointer ${
                       portalMode === 'management'
                         ? 'bg-white text-indigo-900 shadow-xs border border-indigo-200'
@@ -464,8 +306,8 @@ export default function LoginPage() {
                 <p className="text-xs text-gray-500 mt-1">
                   {portalMode === 'staff'
                     ? (language === 'km'
-                        ? 'ប្រើប្រាស់នាមត្រកូល (Last Name) ជាឈ្មោះសម្គាល់ ឬអ៊ីមែលការងារដើម្បីចូលដំណើរការ'
-                        : 'Use your employee Last Name as your username or work email to access personal workspace')
+                        ? 'ប្រើប្រាស់នាមខ្លួន (First Name) ជាឈ្មោះសម្គាល់ ឬអ៊ីមែលការងារដើម្បីចូលដំណើរការ'
+                        : 'Use your employee First Name as your username or work email to access personal workspace')
                     : (language === 'km'
                         ? 'គណនីមានសិទ្ធិជាប្រធានផ្នែក (Manager) ឬអ្នកគ្រប់គ្រងជាន់ខ្ពស់ (Admin)'
                         : 'Authorized credentials for Team Leads, Department Heads, and HR Admins')}
@@ -479,12 +321,12 @@ export default function LoginPage() {
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="block text-xs font-bold text-gray-700">
                       {portalMode === 'staff'
-                        ? (language === 'km' ? 'ឈ្មោះសម្គាល់ / នាមត្រកូល (Username / Last Name) *' : 'Staff Username (Last Name) *')
+                        ? (language === 'km' ? 'ឈ្មោះសម្គាល់ / នាមខ្លួន (Username / First Name) *' : 'Staff Username (First Name) *')
                         : (language === 'km' ? 'អ៊ីមែលការងារ ឬឈ្មោះសម្គាល់ *' : 'Work Email or Username *')}
                     </label>
                     {portalMode === 'staff' && (
                       <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                        {language === 'km' ? 'នាមត្រកូល = Username' : 'Last Name = Username'}
+                        {language === 'km' ? 'នាមខ្លួន = Username' : 'First Name = Username'}
                       </span>
                     )}
                   </div>
@@ -497,8 +339,8 @@ export default function LoginPage() {
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder={
                         portalMode === 'staff'
-                          ? (language === 'km' ? 'ឧទាហរណ៍៖ chan, sim, dy, van ឬ chan.thida@hestra.kh' : 'e.g. chan, sim, dy, van or chan.thida@hestra.kh')
-                          : (language === 'km' ? 'sarath@hestra.kh ឬ van.sopheak@hestra.kh' : 'sarath@hestra.kh or van.sopheak@hestra.kh')
+                          ? (language === 'km' ? 'ឈ្មោះសម្គាល់ ឬអ៊ីមែលការងារ' : 'Username or work email')
+                          : (language === 'km' ? 'អ៊ីមែលការងារ ឬឈ្មោះសម្គាល់' : 'Work email or username')
                       }
                       className="w-full pl-10 pr-4 py-2.5 bg-gray-50/50 hover:bg-white focus:bg-white border border-gray-200 focus:border-indigo-500 rounded-xl text-xs text-gray-900 transition-all focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 font-mono"
                     />
@@ -508,8 +350,8 @@ export default function LoginPage() {
                       <Sparkles className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                       <span>
                         {language === 'km'
-                          ? 'ប្រើប្រាស់នាមត្រកូល (Last Name) របស់បុគ្គលិកជា Username សម្រាប់ចូលប្រព័ន្ធ (ឧ. chan, sim, dy, van...)'
-                          : 'Use your employee Last Name as your login username (e.g. chan, sim, dy, van...)'}
+                          ? 'ប្រើប្រាស់នាមខ្លួន (First Name) របស់បុគ្គលិកជា Username សម្រាប់ចូលប្រព័ន្ធ'
+                          : 'Use your employee First Name as your login username'}
                       </span>
                     </p>
                   )}
@@ -518,8 +360,8 @@ export default function LoginPage() {
                 {/* Password Input */}
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="block text-xs font-bold text-gray-700">
-                      {language === 'km' ? 'ពាក្យសម្ងាត់ (Password) *' : 'Password *'}
+                    <label className="flex items-center gap-2 text-xs font-bold text-gray-700">
+                      <span>{language === 'km' ? 'ពាក្យសម្ងាត់ (Password) *' : 'Password *'}</span>
                     </label>
                     <button
                       type="button"
@@ -536,8 +378,8 @@ export default function LoginPage() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="w-full pl-10 pr-10 py-2.5 bg-gray-50/50 hover:bg-white focus:bg-white border border-gray-200 focus:border-indigo-500 rounded-xl text-xs text-gray-900 transition-all focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20"
+                      placeholder={language === 'km' ? 'បញ្ចូលពាក្យសម្ងាត់របស់អ្នក' : 'Enter your password'}
+                      className="w-full pl-10 pr-10 py-2.5 bg-gray-50/50 hover:bg-white focus:bg-white border border-gray-200 focus:border-indigo-500 rounded-xl text-xs text-gray-900 transition-all focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 font-mono"
                     />
                     <button
                       type="button"
@@ -561,12 +403,10 @@ export default function LoginPage() {
                     <span>{language === 'km' ? 'ចងចាំការចូលប្រើលើឧបករណ៍នេះ' : 'Remember me on this device'}</span>
                   </label>
 
-                  {portalMode === 'management' && (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
-                      <ShieldCheck className="w-3 h-3" />
-                      <span>2FA Protected</span>
-                    </span>
-                  )}
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">
+                    <ShieldCheck className="w-3 h-3" />
+                    <span>SSL Protected</span>
+                  </span>
                 </div>
 
                 {/* Submit CTA Button */}
@@ -594,58 +434,6 @@ export default function LoginPage() {
                 </button>
               </form>
 
-              {/* 1-Click Demo Accounts Section */}
-              <div className="mt-6 pt-5 border-t border-gray-100">
-                <div className="flex items-center justify-between mb-2.5">
-                  <span className="text-xs font-bold text-gray-700">
-                    {language === 'km' ? '⚡ ចុចចូលសាកល្បងរហ័ស (1-Click Demo Accounts)' : '⚡ Quick 1-Click Demo Accounts'}
-                  </span>
-                  <span className="text-[10px] text-gray-400 font-mono">Password: hestra123</span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {(portalMode === 'staff' ? staffDemoAccounts : managementDemoAccounts).map((acc) => (
-                    <button
-                      key={acc.email}
-                      type="button"
-                      onClick={() => handleSelectDemoUser(portalMode === 'staff' ? acc.username : acc.email)}
-                      className={`p-2.5 rounded-xl border text-left transition-all flex items-center gap-2.5 cursor-pointer hover:scale-[1.01] ${
-                        email === acc.username || email === acc.email
-                          ? 'bg-emerald-50/90 border-emerald-300 ring-2 ring-emerald-500/20'
-                          : 'bg-gray-50/70 border-gray-200/80 hover:bg-white hover:border-gray-300'
-                      }`}
-                    >
-                      <img
-                        src={acc.avatar}
-                        alt={acc.name}
-                        className="w-8 h-8 rounded-full object-cover border border-gray-200 shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs font-bold text-gray-900 truncate">{acc.name.split('(')[0]}</p>
-                          <span
-                            className={`text-[9px] font-bold px-1.5 py-0.2 rounded ${
-                              acc.role === 'Admin'
-                                ? 'bg-purple-100 text-purple-700'
-                                : acc.role === 'Manager'
-                                ? 'bg-blue-100 text-blue-700'
-                                : 'bg-emerald-100 text-emerald-700'
-                            }`}
-                          >
-                            {acc.role}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between text-[10px] text-gray-500 truncate mt-0.5">
-                          <span className="font-bold text-emerald-700 font-mono">
-                            Username: {acc.username}
-                          </span>
-                          <span className="text-gray-400 text-[9px] font-sans truncate">{acc.lastName}</span>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
 
             {/* Bottom Footer Note */}
@@ -659,91 +447,6 @@ export default function LoginPage() {
           </div>
         </div>
       </main>
-
-      {/* 2FA OTP VERIFICATION MODAL */}
-      {is2FAModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-gray-200 overflow-hidden p-6 text-center font-khmer">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center mx-auto mb-3 shadow-xs">
-              <KeyRound className="w-6 h-6" />
-            </div>
-
-            <h3 className="text-lg font-bold text-gray-900">
-              {language === 'km' ? 'ផ្ទៀងផ្ទាត់សុវត្ថិភាព 2FA (Two-Factor OTP)' : '2FA Security Verification'}
-            </h3>
-
-            <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-              {language === 'km'
-                ? `លេខកូដសុវត្ថិភាព ៦ ខ្ទង់ ត្រូវបានផ្ញើទៅកាន់អ៊ីមែល ${pendingUser?.email || ''}`
-                : `A 6-digit one-time passcode has been generated for ${pendingUser?.email || ''}`}
-            </p>
-
-            {/* Profile Pill */}
-            {pendingUser && (
-              <div className="mt-4 p-2 bg-gray-50 rounded-xl border border-gray-200 flex items-center justify-center gap-2">
-                <img
-                  src={pendingUser.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=256&h=256&fit=crop&crop=faces'}
-                  alt={pendingUser.name}
-                  className="w-6 h-6 rounded-full object-cover"
-                />
-                <span className="text-xs font-semibold text-gray-800">{pendingUser.name}</span>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700">
-                  {pendingUser.role}
-                </span>
-              </div>
-            )}
-
-            {/* 6 Digit Input Box */}
-            <form onSubmit={handleVerify2FA} className="mt-6">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                {otpCode.map((digit, idx) => (
-                  <input
-                    key={idx}
-                    id={`otp-input-${idx}`}
-                    type="text"
-                    maxLength={1}
-                    value={digit}
-                    onChange={(e) => handleOtpChange(idx, e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Backspace' && !digit && idx > 0) {
-                        document.getElementById(`otp-input-${idx - 1}`)?.focus();
-                      }
-                    }}
-                    className="w-11 h-12 text-center text-lg font-bold bg-gray-50 border border-gray-200 focus:border-indigo-500 rounded-xl focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 text-gray-900 transition-all font-mono"
-                  />
-                ))}
-              </div>
-
-              {/* Demo Fill Helper */}
-              <button
-                type="button"
-                onClick={() => setOtpCode(['1', '2', '3', '4', '5', '6'])}
-                className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 mb-4 inline-block cursor-pointer"
-              >
-                {language === 'km' ? '⚡ បំពេញលេខកូដគំរូស្វ័យប្រវត្តិ (Auto-fill 123456)' : '⚡ Auto-fill Demo Code (123456)'}
-              </button>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIs2FAModalOpen(false)}
-                  className="w-1/3 py-2.5 border border-gray-200 rounded-xl text-xs font-semibold text-gray-700 hover:bg-gray-50 cursor-pointer"
-                >
-                  {language === 'km' ? 'បោះបង់' : 'Cancel'}
-                </button>
-                <button
-                  type="submit"
-                  disabled={verifying2FA}
-                  className="w-2/3 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
-                >
-                  {verifying2FA && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
-                  <span>{language === 'km' ? 'ផ្ទៀងផ្ទាត់ & ចូលប្រព័ន្ធ' : 'Verify & Sign In'}</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* HELP / FORGOT PASSWORD MODAL */}
       {isHelpModalOpen && (

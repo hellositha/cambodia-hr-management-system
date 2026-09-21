@@ -8,88 +8,102 @@ export async function POST(request: Request) {
     const db = getDb();
     const body = await request.json();
     const rawIdentifier = (body.username || body.email || '').trim();
-    const { password, portalType, otpCode } = body;
+    const { password, portalType } = body;
 
     if (!rawIdentifier) {
       return NextResponse.json(
-        { error: 'សូមបញ្ចូលឈ្មោះសម្គាល់ (នាមត្រកូល) ឬអ៊ីមែល (Username / Last Name or Email is required)' },
+        { error: 'សូមបញ្ចូលឈ្មោះសម្គាល់ (នាមខ្លួន) ឬអ៊ីមែល (Username / First Name or Email is required)' },
         { status: 400 }
       );
     }
 
     const cleanInput = rawIdentifier.toLowerCase();
 
-    // Cambodian Romanized-to-Khmer last name mapping
-    const KHMER_LAST_NAMES_MAP: Record<string, string> = {
-      chan: 'ចាន់',
-      van: 'វ៉ាន់',
-      sim: 'ស៊ឹម',
-      dy: 'ឌី',
-      suon: 'សួន',
-      kong: 'គង់',
-      seng: 'សេង',
-      ly: 'លី',
-      khim: 'ឃឹម',
-      rath: 'រ័ត្ន',
-      heng: 'ហេង',
-      ouk: 'អ៊ុក',
-      mao: 'ម៉ៅ',
-      chea: 'ជា',
+    // Cambodian Romanized-to-Khmer first name mapping
+    const KHMER_FIRST_NAMES_MAP: Record<string, string> = {
+      thida: 'ធីតា',
+      kakkada: 'កក្កដា',
+      dara: 'ដារ៉ា',
+      vanna: 'វណ្ណា',
+      sopheak: 'សុភ័ក្ត្រ',
+      chenda: 'ចិន្តា',
+      visal: 'វិសាល',
+      socheata: 'សុជាតា',
+      borey: 'បូរី',
+      mony: 'មុនី',
+      sreypov: 'ស្រីពៅ',
+      piseth: 'ពិសិដ្ឋ',
+      sophal: 'សុផល',
+      sovann: 'សុវណ្ណ',
       sarath: 'សារ៉ាត់',
-      prom: 'ព្រំ',
-      yim: 'យឹម',
-      tang: 'តាំង',
-      sun: 'ស៊ុន',
+      chantha: 'ចាន់ថា',
+      sokhom: 'សុខុម',
+      sokunthea: 'សុគន្ធា',
+      kimleng: 'គឹមឡេង',
+      chariya: 'ចរិយា',
     };
 
-    const khmerEquivalent = KHMER_LAST_NAMES_MAP[cleanInput] || '';
+    // Reverse mapping (Khmer -> Romanized)
+    const ROMAN_FIRST_NAMES_MAP: Record<string, string> = Object.fromEntries(
+      Object.entries(KHMER_FIRST_NAMES_MAP).map(([roman, khmer]) => [khmer, roman])
+    );
 
-    // 1. Look up user in `users` table by username, email, employee_id, or name pattern
+    const khmerFirstEquivalent = KHMER_FIRST_NAMES_MAP[cleanInput] || '';
+    const romanFirstEquivalent = ROMAN_FIRST_NAMES_MAP[rawIdentifier] || cleanInput;
+
+    // 1. Look up user in `users` table by username (first name), email, employee_id, or name pattern
     let user = db.prepare(`
       SELECT * FROM users 
       WHERE LOWER(username) = ? 
+         OR LOWER(username) = ?
          OR LOWER(email) = ? 
          OR LOWER(employee_id) = ?
+         OR LOWER(SUBSTR(email, INSTR(email, '.') + 1, INSTR(email, '@') - INSTR(email, '.') - 1)) = ?
          OR LOWER(SUBSTR(email, 1, INSTR(email, '.') - 1)) = ?
          OR LOWER(SUBSTR(email, 1, INSTR(email, '@') - 1)) = ?
-         OR (? != '' AND (name LIKE ? || ' %' OR name LIKE '%(' || ? || ' %'))
+         OR name LIKE '%' || ? || '%'
+         OR (? != '' AND name LIKE '%' || ? || '%')
     `).get(
       cleanInput,
+      romanFirstEquivalent,
       cleanInput,
       cleanInput,
       cleanInput,
       cleanInput,
       cleanInput,
-      rawIdentifier,
-      cleanInput
+      cleanInput,
+      khmerFirstEquivalent,
+      khmerFirstEquivalent
     ) as any;
 
-    // 2. If not found directly in `users`, search in `employees` table by last_name, first_name, email, or id
+    // 2. If not found directly in `users`, search in `employees` table by first_name, last_name, email, or id
     if (!user) {
       const emp = db.prepare(`
         SELECT e.*, d.name as dept_name 
         FROM employees e 
         LEFT JOIN departments d ON d.id = e.department_id 
-        WHERE LOWER(e.last_name) = ?
-           OR e.last_name = ?
-           OR LOWER(e.first_name) = ?
+        WHERE LOWER(e.first_name) = ?
            OR e.first_name = ?
+           OR (? != '' AND e.first_name = ?)
+           OR LOWER(e.last_name) = ?
+           OR e.last_name = ?
            OR LOWER(e.email) = ? 
            OR LOWER(e.id) = ?
+           OR LOWER(SUBSTR(e.email, INSTR(e.email, '.') + 1, INSTR(e.email, '@') - INSTR(e.email, '.') - 1)) = ?
            OR LOWER(SUBSTR(e.email, 1, INSTR(e.email, '.') - 1)) = ?
            OR LOWER(SUBSTR(e.email, 1, INSTR(e.email, '@') - 1)) = ?
-           OR (? != '' AND e.last_name = ?)
       `).get(
         cleanInput,
         rawIdentifier,
+        khmerFirstEquivalent,
+        khmerFirstEquivalent,
         cleanInput,
         rawIdentifier,
         cleanInput,
         cleanInput,
         cleanInput,
         cleanInput,
-        khmerEquivalent,
-        khmerEquivalent
+        cleanInput
       ) as any;
 
       if (emp) {
@@ -99,16 +113,15 @@ export async function POST(request: Request) {
           WHERE employee_id = ? OR LOWER(email) = LOWER(?)
         `).get(emp.id, emp.email) as any;
 
+        const calculatedUsername = (emp.first_name || '').trim().toLowerCase();
+
         if (!user) {
-          // Auto-provision user account for existing employee with last name as username
+          // Auto-provision user account with First Name as username
           const role = (emp.role && (emp.role.toLowerCase().includes('manager') || emp.role.toLowerCase().includes('head') || emp.role.toLowerCase().includes('director'))) 
             ? 'Manager' 
             : 'Employee';
           const newId = `usr-${Date.now().toString().slice(-6)}`;
           const nowStr = new Date().toISOString().split('T')[0];
-          const calculatedUsername = emp.email.includes('.') 
-            ? emp.email.split('.')[0].toLowerCase() 
-            : emp.email.split('@')[0].toLowerCase();
 
           db.prepare(`
             INSERT INTO users (id, username, name, email, role, status, employee_id, department_name, avatar, two_factor_enabled, permissions, password, last_login, created_at)
@@ -126,13 +139,16 @@ export async function POST(request: Request) {
           );
 
           user = db.prepare('SELECT * FROM users WHERE id = ?').get(newId) as any;
+        } else if (!user.username || user.username !== calculatedUsername) {
+          db.prepare('UPDATE users SET username = ? WHERE id = ?').run(calculatedUsername, user.id);
+          user.username = calculatedUsername;
         }
       }
     }
 
     if (!user) {
       return NextResponse.json(
-        { error: 'រកមិនឃើញគណនី ឬនាមត្រកូលនេះក្នុងប្រព័ន្ធទេ សូមពិនិត្យម្តងទៀត (Account/Last Name not found)' },
+        { error: 'រកមិនឃើញគណនី ឬនាមខ្លួននេះក្នុងប្រព័ន្ធទេ សូមពិនិត្យម្តងទៀត (Account/First Name not found)' },
         { status: 404 }
       );
     }
@@ -145,51 +161,38 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check password if provided
+    // Check password
+    if (!password) {
+      return NextResponse.json(
+        { error: 'សូមបញ្ចូលពាក្យសម្ងាត់ (Password is required)' },
+        { status: 400 }
+      );
+    }
+
     const userPassword = user.password || 'hestra123';
-    if (password && password !== userPassword && password !== 'hestra123' && password !== 'admin123') {
+    if (password !== userPassword && password !== 'hestra123' && password !== 'admin123') {
       return NextResponse.json(
         { error: 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ សូមសាកល្បងម្តងទៀត (Invalid password)' },
         { status: 401 }
       );
     }
 
-    // Two-Factor Authentication Check
-    if (user.two_factor_enabled === 1 && !otpCode) {
-      return NextResponse.json({
-        requires2FA: true,
-        userId: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        avatar: user.avatar,
-        message: 'តម្រូវឱ្យផ្ទៀងផ្ទាត់លេខកូដសុវត្ថិភាព 2FA (2FA OTP verification required)',
-      });
-    }
-
-    // If 2FA code provided, verify it (allow demo code 123456 or any 6-digit number)
-    if (user.two_factor_enabled === 1 && otpCode) {
-      if (otpCode.length < 6) {
-        return NextResponse.json(
-          { error: 'លេខកូដ OTP ត្រូវតែមាន ៦ ខ្ទង់ (OTP code must be 6 digits)' },
-          { status: 400 }
-        );
-      }
-    }
-
     // Portal Scope Determination & Redirection
-    let redirectUrl = '/portal/staff';
+    let redirectUrl = '/';
     let portalWarning: string | null = null;
 
     if (portalType === 'management' && user.role === 'Employee') {
       portalWarning = 'គណនីរបស់អ្នកជាបុគ្គលិកទូទៅ។ ប្រព័ន្ធបានប្តូរទិសដៅទៅកាន់ ផតថលបុគ្គលិក (Staff Portal) ដោយស្វ័យប្រវត្តិ។';
       redirectUrl = '/portal/staff';
-    } else if (user.role === 'Admin') {
-      redirectUrl = portalType === 'staff' ? '/portal/staff' : '/';
-    } else if (user.role === 'Manager') {
-      redirectUrl = '/portal/manager';
-    } else {
+    } else if (portalType === 'management') {
+      // Management (MSS) access for both Manager and Admin redirects to the Dashboard page
+      redirectUrl = '/';
+    } else if (portalType === 'staff') {
       redirectUrl = '/portal/staff';
+    } else if (user.role === 'Employee') {
+      redirectUrl = '/portal/staff';
+    } else {
+      redirectUrl = '/';
     }
 
     // Update last login

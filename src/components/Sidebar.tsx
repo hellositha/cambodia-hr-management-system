@@ -31,22 +31,26 @@ export default function Sidebar() {
   const pathname = usePathname();
   const { currentPersona, sidebarCollapsed, toggleSidebar, language, toggleLanguage, logout, t } = useApp();
 
-  const navItems = [
-    { label: t('nav_dashboard'), href: '/', icon: LayoutDashboard },
-    { label: t('nav_employees'), href: '/employees', icon: Users, badge: language === 'km' ? 'បុគ្គលិក' : 'Staff' },
-    { label: t('nav_attendance'), href: '/attendance', icon: Clock },
-    { label: t('nav_leaves'), href: '/leaves', icon: CalendarCheck, badge: language === 'km' ? 'ច្បាប់' : 'Leaves' },
-    { label: t('nav_payroll'), href: '/payroll', icon: CreditCard },
-    { label: t('nav_recruitment'), href: '/recruitment', icon: Briefcase, badge: language === 'km' ? 'ការងារ' : 'Jobs' },
-    { label: t('nav_performance'), href: '/performance', icon: Award },
-    { label: t('nav_announcements'), href: '/announcements', icon: Megaphone },
-    { label: t('nav_tools'), href: '/tools', icon: Scale, badge: language === 'km' ? 'ថ្មី' : 'Tools' },
-    { label: t('nav_staff_portal'), href: '/portal/staff', icon: UserCheck, badge: language === 'km' ? 'ផ្ទាល់ខ្លួន' : 'ESS' },
-    { label: t('nav_manager_portal'), href: '/portal/manager', icon: Shield, badge: language === 'km' ? 'ក្រុម' : 'MSS' },
-    { label: t('nav_reports'), href: '/reports', icon: BarChart3, badge: language === 'km' ? 'របាយការណ៍' : 'BI' },
-    { label: t('nav_users'), href: '/users', icon: UserCog },
-    { label: t('nav_settings'), href: '/settings', icon: Settings },
+  const allNavItems = [
+    { label: t('nav_dashboard'), href: '/', icon: LayoutDashboard, roles: ['Manager', 'Admin'] },
+    { label: t('nav_staff_portal'), href: '/portal/staff', icon: UserCheck, badge: language === 'km' ? 'ផ្ទាល់ខ្លួន' : 'ESS', roles: ['Employee', 'Manager', 'Admin'] },
+    { label: t('nav_manager_portal'), href: '/portal/manager', icon: Shield, badge: language === 'km' ? 'ក្រុម' : 'MSS', roles: ['Manager', 'Admin'] },
+    { label: t('nav_employees'), href: '/employees', icon: Users, badge: language === 'km' ? 'បុគ្គលិក' : 'Staff', roles: ['Manager', 'Admin'] },
+    { label: t('nav_attendance'), href: '/attendance', icon: Clock, badge: language === 'km' ? 'វត្តមាន' : 'Time', roles: ['Employee', 'Manager', 'Admin'] },
+    { label: t('nav_leaves'), href: '/leaves', icon: CalendarCheck, badge: language === 'km' ? 'ច្បាប់' : 'Leaves', roles: ['Employee', 'Manager', 'Admin'] },
+    { label: t('nav_payroll'), href: '/payroll', icon: CreditCard, roles: ['Admin'] },
+    { label: t('nav_recruitment'), href: '/recruitment', icon: Briefcase, badge: language === 'km' ? 'ការងារ' : 'Jobs', roles: ['Admin'] },
+    { label: t('nav_performance'), href: '/performance', icon: Award, roles: ['Manager', 'Admin'] },
+    { label: t('nav_announcements'), href: '/announcements', icon: Megaphone, roles: ['Employee', 'Manager', 'Admin'] },
+    { label: t('nav_tools'), href: '/tools', icon: Scale, badge: language === 'km' ? 'ថ្មី' : 'Tools', roles: ['Admin'] },
+    { label: t('nav_reports'), href: '/reports', icon: BarChart3, badge: language === 'km' ? 'របាយការណ៍' : 'BI', roles: ['Admin'] },
+    { label: t('nav_users'), href: '/users', icon: UserCog, roles: ['Admin'] },
+    { label: t('nav_settings'), href: '/settings', icon: Settings, roles: ['Admin'] },
   ];
+
+  const userRole = currentPersona?.role || 'Employee';
+  const navItems = allNavItems.filter((item) => item.roles.includes(userRole));
+  const homeHref = userRole === 'Employee' ? '/portal/staff' : '/';
 
   return (
     <aside
@@ -56,7 +60,7 @@ export default function Sidebar() {
     >
       {/* Brand Header */}
       <div className="flex items-center justify-between px-4 h-16 border-b border-slate-100 bg-white">
-        <Link href="/" className="flex items-center gap-3 overflow-hidden">
+        <Link href={homeHref} className="flex items-center gap-3 overflow-hidden">
           <HestraLogo
             size="md"
             showText={!sidebarCollapsed}
@@ -182,6 +186,15 @@ export default function Sidebar() {
                   {currentPersona.role}
                 </span>
               </div>
+              {userRole === 'Employee' && (
+                <div className="mt-2 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[10px] text-amber-700 font-bold">
+                  <div className="flex items-center gap-1">
+                    <ShieldAlert size={12} className="text-amber-500 shrink-0" />
+                    <span>{language === 'km' ? 'សិទ្ធិកម្រិតកំណត់' : 'Limited Role'}</span>
+                  </div>
+                  <span className="text-[9px] text-slate-400 font-mono">ESS Only</span>
+                </div>
+              )}
             </div>
           </div>
         ) : (

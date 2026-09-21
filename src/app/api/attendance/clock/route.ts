@@ -7,24 +7,35 @@ export async function GET(request: Request) {
   try {
     const db = getDb();
     const { searchParams } = new URL(request.url);
-    const employeeId = searchParams.get('employee_id');
+    const rawEmployeeId = searchParams.get('employee_id');
 
-    if (!employeeId) {
+    if (!rawEmployeeId) {
       return NextResponse.json({ error: 'employee_id is required' }, { status: 400 });
     }
 
-    const today = new Date().toISOString().split('T')[0];
-    const record = db.prepare('SELECT * FROM attendance WHERE employee_id = ? AND date = ?').get(employeeId, today) as any;
+    let employeeId = rawEmployeeId;
+    if (employeeId.startsWith('usr-')) {
+      const u = db.prepare('SELECT employee_id FROM users WHERE id = ?').get(employeeId) as any;
+      if (u?.employee_id) employeeId = u.employee_id;
+    }
 
-    const isClockedIn = !!record && !record.clock_out;
-    const isClockedOut = !!record && !!record.clock_out;
+    const today = new Date().toISOString().split('T')[0];
+    const records = db.prepare(
+      'SELECT * FROM attendance WHERE (employee_id = ? OR employee_id = ?) AND date = ? ORDER BY id DESC'
+    ).all(employeeId, rawEmployeeId, today) as any[];
+
+    const activeShift = records.find((r) => !r.clock_out);
+    const latestRecord = activeShift || records[0] || null;
+    const isClockedIn = !!activeShift;
+    const isClockedOut = !isClockedIn && records.length > 0;
 
     return NextResponse.json({
       today,
-      record: record || null,
+      record: latestRecord,
       isClockedIn,
       isClockedOut,
-      hasRecord: !!record,
+      hasRecord: records.length > 0,
+      shiftsToday: records.length,
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -35,64 +46,67 @@ export async function POST(request: Request) {
   try {
     const db = getDb();
     const body = await request.json();
-    const { employee_id } = body;
+    const rawEmployeeId = body.employee_id;
 
-    if (!employee_id) {
+    if (!rawEmployeeId) {
       return NextResponse.json({ error: 'employee_id is required' }, { status: 400 });
+    }
+
+    let employeeId = rawEmployeeId;
+    if (employeeId.startsWith('usr-')) {
+      const u = db.prepare('SELECT employee_id FROM users WHERE id = ?').get(employeeId) as any;
+      if (u?.employee_id) employeeId = u.employee_id;
     }
 
     const today = new Date().toISOString().split('T')[0];
     const now = new Date();
     const timeString = now.toTimeString().split(' ')[0]; // HH:MM:SS
 
-    const existing = db.prepare('SELECT * FROM attendance WHERE employee_id = ? AND date = ?').get(employee_id, today) as any;
+    const records = db.prepare(
+      'SELECT * FROM attendance WHERE (employee_id = ? OR employee_id = ?) AND date = ? ORDER BY id DESC'
+    ).all(employeeId, rawEmployeeId, today) as any[];
 
-    if (!existing) {
-      // CLOCK IN
-      const id = `att-${employee_id}-${today}`;
+    const activeShift = records.find((r) => !r.clock_out);
+
+    if (!activeShift) {
+      // MANUAL CLOCK IN
+      const id = `att-${employeeId}-${today}-${Date.now().toString().slice(-4)}`;
       const hour = now.getHours();
       const status = hour >= 10 ? 'Late' : 'Present';
 
       db.prepare(`
         INSERT INTO attendance (id, employee_id, date, clock_in, clock_out, status, work_hours, notes)
-        VALUES (?, ?, ?, ?, NULL, ?, 0, 'Clocked in via HESTRA HRM Web')
-      `).run(id, employee_id, today, timeString, status);
+        VALUES (?, ?, ?, ?, NULL, ?, 0, 'Clocked in manually via HESTRA HRM Web')
+      `).run(id, employeeId, today, timeString, status);
 
       const created = db.prepare('SELECT * FROM attendance WHERE id = ?').get(id);
       return NextResponse.json({
         action: 'clock_in',
-        message: `Clocked in successfully at ${timeString}`,
+        message: `បានកត់ត្រាចូលដោយជោគជ័យនៅម៉ោង ${timeString} (Clocked in successfully)`,
         record: created,
         isClockedIn: true,
       });
-    } else if (!existing.clock_out) {
-      // CLOCK OUT
+    } else {
+      // MANUAL CLOCK OUT
       let workHours = 8.0;
-      if (existing.clock_in) {
-        const [inH, inM] = existing.clock_in.split(':').map(Number);
+      if (activeShift.clock_in) {
+        const [inH, inM] = activeShift.clock_in.split(':').map(Number);
         const [outH, outM] = timeString.split(':').map(Number);
         const diffHours = (outH * 60 + outM - (inH * 60 + inM)) / 60;
-        workHours = Math.max(0.5, Math.round(diffHours * 10) / 10);
+        workHours = Math.max(0.1, Math.round(diffHours * 10) / 10);
       }
 
       db.prepare(`
         UPDATE attendance 
-        SET clock_out = ?, work_hours = ?, notes = notes || ' | Shift ended'
+        SET clock_out = ?, work_hours = ?, notes = notes || ' | Shift ended manually'
         WHERE id = ?
-      `).run(timeString, workHours, existing.id);
+      `).run(timeString, workHours, activeShift.id);
 
-      const updated = db.prepare('SELECT * FROM attendance WHERE id = ?').get(existing.id);
+      const updated = db.prepare('SELECT * FROM attendance WHERE id = ?').get(activeShift.id);
       return NextResponse.json({
         action: 'clock_out',
-        message: `Clocked out at ${timeString}. Total duration: ${workHours} hrs`,
+        message: `បានកត់ត្រាចេញដោយជោគជ័យនៅម៉ោង ${timeString} (Clocked out: ${workHours} hrs)`,
         record: updated,
-        isClockedIn: false,
-      });
-    } else {
-      return NextResponse.json({
-        action: 'already_completed',
-        message: 'Shift already completed today.',
-        record: existing,
         isClockedIn: false,
       });
     }

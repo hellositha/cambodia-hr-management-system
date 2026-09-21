@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { getDb } from '@/lib/db';
 import { AttendanceRecord } from '@/lib/types';
 
@@ -9,17 +10,35 @@ export async function GET(request: Request) {
     const db = getDb();
     const { searchParams } = new URL(request.url);
     const date = searchParams.get('date');
-    const employeeId = searchParams.get('employee_id');
+    const month = searchParams.get('month');
+    const startDate = searchParams.get('start_date');
+    const endDate = searchParams.get('end_date');
+    let employeeId = searchParams.get('employee_id');
+
+    const cookieStore = await cookies();
+    const userRole = cookieStore.get('hestra_role')?.value;
+    const authId = cookieStore.get('hestra_auth')?.value;
+
+    // If requester is an Employee, enforce filtering strictly to their own attendance records
+    if (userRole === 'Employee' && authId) {
+      employeeId = authId;
+      // Resolve user id to employee id if needed
+      const u = db.prepare('SELECT employee_id FROM users WHERE id = ? OR username = ?').get(authId, authId) as any;
+      if (u && u.employee_id) {
+        employeeId = u.employee_id;
+      }
+    }
 
     let sql = `
       SELECT 
         a.*,
-        e.first_name || ' ' || e.last_name as employee_name,
-        e.role as employee_role,
-        e.avatar as employee_avatar,
-        d.name as department_name
+        COALESCE(e.first_name || ' ' || e.last_name, u.name, 'Staff Member') as employee_name,
+        COALESCE(e.role, u.role, 'Employee') as employee_role,
+        COALESCE(e.avatar, u.avatar, 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces') as employee_avatar,
+        COALESCE(d.name, 'General') as department_name
       FROM attendance a
-      JOIN employees e ON e.id = a.employee_id
+      LEFT JOIN employees e ON e.id = a.employee_id
+      LEFT JOIN users u ON (u.id = a.employee_id OR u.employee_id = a.employee_id)
       LEFT JOIN departments d ON d.id = e.department_id
       WHERE 1=1
     `;
@@ -30,9 +49,24 @@ export async function GET(request: Request) {
       params.push(date);
     }
 
+    if (month) {
+      sql += ` AND a.date LIKE ?`;
+      params.push(`${month}%`);
+    }
+
+    if (startDate && endDate) {
+      sql += ` AND a.date >= ? AND a.date <= ?`;
+      params.push(startDate, endDate);
+    }
+
     if (employeeId) {
-      sql += ` AND a.employee_id = ?`;
-      params.push(employeeId);
+      let linkedEmpId = employeeId;
+      try {
+        const u = db.prepare('SELECT employee_id FROM users WHERE id = ?').get(employeeId) as any;
+        if (u && u.employee_id) linkedEmpId = u.employee_id;
+      } catch {}
+      sql += ` AND (a.employee_id = ? OR a.employee_id = ?)`;
+      params.push(employeeId, linkedEmpId);
     }
 
     sql += ` ORDER BY a.date DESC, a.clock_in ASC`;
@@ -63,7 +97,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'employee_id is required' }, { status: 400 });
     }
 
-    const id = `att-${employee_id}-${date}`;
+    let finalEmpId = employee_id;
+    const empExists = db.prepare('SELECT id FROM employees WHERE id = ?').get(employee_id);
+    if (!empExists) {
+      const u = db.prepare('SELECT employee_id FROM users WHERE id = ? OR username = ?').get(employee_id, employee_id) as any;
+      if (u && u.employee_id) finalEmpId = u.employee_id;
+    }
+
+    const id = `att-${finalEmpId}-${date}`;
 
     db.prepare(`
       INSERT INTO attendance (id, employee_id, date, clock_in, clock_out, status, work_hours, notes)
@@ -74,9 +115,20 @@ export async function POST(request: Request) {
         status = excluded.status,
         work_hours = excluded.work_hours,
         notes = excluded.notes
-    `).run(id, employee_id, date, clock_in, clock_out, status, Number(work_hours), notes);
+    `).run(id, finalEmpId, date, clock_in, clock_out, status, Number(work_hours), notes);
 
-    const record = db.prepare('SELECT * FROM attendance WHERE id = ?').get(id);
+    const record = db.prepare(`
+      SELECT 
+        a.*,
+        COALESCE(e.first_name || ' ' || e.last_name, u.name, 'Staff Member') as employee_name,
+        COALESCE(e.role, u.role, 'Employee') as employee_role,
+        COALESCE(e.avatar, u.avatar, 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces') as employee_avatar
+      FROM attendance a
+      LEFT JOIN employees e ON e.id = a.employee_id
+      LEFT JOIN users u ON (u.id = a.employee_id OR u.employee_id = a.employee_id)
+      WHERE a.id = ?
+    `).get(id);
+
     return NextResponse.json(record, { status: 201 });
   } catch (error: any) {
     console.error('Error saving attendance:', error);

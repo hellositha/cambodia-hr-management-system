@@ -41,9 +41,18 @@ export async function GET(
 
     // 4. Leave requests
     const leaves = db.prepare(`
-      SELECT lr.*, m.first_name || ' ' || m.last_name as reviewer_name
+      SELECT 
+        lr.*,
+        COALESCE(lm.first_name || ' ' || lm.last_name, lmu.name) as line_manager_name,
+        COALESCE(adm.first_name || ' ' || adm.last_name, admu.name) as admin_reviewer_name,
+        COALESCE(m.first_name || ' ' || m.last_name, mu.name) as reviewer_name
       FROM leave_requests lr
+      LEFT JOIN employees lm ON lm.id = lr.line_manager_id
+      LEFT JOIN users lmu ON (lmu.id = lr.line_manager_id OR lmu.employee_id = lr.line_manager_id)
+      LEFT JOIN employees adm ON adm.id = lr.admin_reviewer_id
+      LEFT JOIN users admu ON (admu.id = lr.admin_reviewer_id OR admu.employee_id = lr.admin_reviewer_id)
       LEFT JOIN employees m ON m.id = lr.reviewer_id
+      LEFT JOIN users mu ON (mu.id = lr.reviewer_id OR mu.employee_id = lr.reviewer_id)
       WHERE lr.employee_id = ?
       ORDER BY lr.created_at DESC
     `).all(id);
@@ -101,6 +110,38 @@ export async function PUT(
       bio,
       emergency_contact_name,
       emergency_contact_phone,
+      gender,
+      dob,
+      nationality,
+      marital_status,
+      national_id,
+      current_address,
+      province_city,
+      district,
+      commune_sangkat,
+      village,
+      employee_type,
+      join_date,
+      contract_type,
+      contract_start,
+      contract_end,
+      manager_id,
+      work_location,
+      salary_currency,
+      salary_frequency,
+      bank_name,
+      bank_account_name,
+      bank_account_number,
+      nssf_member,
+      nssf_number,
+      nssf_reg_date,
+      emergency_contact_relationship,
+      emergency_contact_address,
+      avatar,
+      doc_national_id,
+      doc_passport,
+      doc_contract,
+      doc_others,
     } = body;
 
     db.prepare(`
@@ -117,24 +158,92 @@ export async function PUT(
         location = COALESCE(?, location),
         bio = COALESCE(?, bio),
         emergency_contact_name = COALESCE(?, emergency_contact_name),
-        emergency_contact_phone = COALESCE(?, emergency_contact_phone)
+        emergency_contact_phone = COALESCE(?, emergency_contact_phone),
+        gender = COALESCE(?, gender),
+        dob = COALESCE(?, dob),
+        nationality = COALESCE(?, nationality),
+        marital_status = COALESCE(?, marital_status),
+        national_id = COALESCE(?, national_id),
+        current_address = COALESCE(?, current_address),
+        province_city = COALESCE(?, province_city),
+        district = COALESCE(?, district),
+        commune_sangkat = COALESCE(?, commune_sangkat),
+        village = COALESCE(?, village),
+        employee_type = COALESCE(?, employee_type),
+        join_date = COALESCE(?, join_date),
+        contract_type = COALESCE(?, contract_type),
+        contract_start = COALESCE(?, contract_start),
+        contract_end = COALESCE(?, contract_end),
+        manager_id = COALESCE(?, manager_id),
+        work_location = COALESCE(?, work_location),
+        salary_currency = COALESCE(?, salary_currency),
+        salary_frequency = COALESCE(?, salary_frequency),
+        bank_name = COALESCE(?, bank_name),
+        bank_account_name = COALESCE(?, bank_account_name),
+        bank_account_number = COALESCE(?, bank_account_number),
+        nssf_member = COALESCE(?, nssf_member),
+        nssf_number = COALESCE(?, nssf_number),
+        nssf_reg_date = COALESCE(?, nssf_reg_date),
+        emergency_contact_relationship = COALESCE(?, emergency_contact_relationship),
+        emergency_contact_address = COALESCE(?, emergency_contact_address),
+        avatar = COALESCE(?, avatar),
+        doc_national_id = COALESCE(?, doc_national_id),
+        doc_passport = COALESCE(?, doc_passport),
+        doc_contract = COALESCE(?, doc_contract),
+        doc_others = COALESCE(?, doc_others)
       WHERE id = ?
     `).run(
-      first_name,
-      last_name,
-      email,
-      phone,
-      role,
-      department_id,
-      employment_type,
-      status,
-      salary ? Number(salary) : null,
-      location,
-      bio,
-      emergency_contact_name,
-      emergency_contact_phone,
+      first_name !== undefined ? first_name : null,
+      last_name !== undefined ? last_name : null,
+      email !== undefined ? email : null,
+      phone !== undefined ? phone : null,
+      role !== undefined ? role : null,
+      department_id !== undefined ? department_id : null,
+      employment_type !== undefined ? employment_type : null,
+      status !== undefined ? status : null,
+      salary !== undefined ? Number(salary) : null,
+      location !== undefined ? location : null,
+      bio !== undefined ? bio : null,
+      emergency_contact_name !== undefined ? emergency_contact_name : null,
+      emergency_contact_phone !== undefined ? emergency_contact_phone : null,
+      gender !== undefined ? gender : null,
+      dob !== undefined ? dob : null,
+      nationality !== undefined ? nationality : null,
+      marital_status !== undefined ? marital_status : null,
+      national_id !== undefined ? national_id : null,
+      current_address !== undefined ? current_address : null,
+      province_city !== undefined ? province_city : null,
+      district !== undefined ? district : null,
+      commune_sangkat !== undefined ? commune_sangkat : null,
+      village !== undefined ? village : null,
+      employee_type !== undefined ? employee_type : null,
+      join_date !== undefined ? join_date : null,
+      contract_type !== undefined ? contract_type : null,
+      contract_start !== undefined ? contract_start : null,
+      contract_end !== undefined ? contract_end : null,
+      manager_id !== undefined ? manager_id : null,
+      work_location !== undefined ? work_location : null,
+      salary_currency !== undefined ? salary_currency : null,
+      salary_frequency !== undefined ? salary_frequency : null,
+      bank_name !== undefined ? bank_name : null,
+      bank_account_name !== undefined ? bank_account_name : null,
+      bank_account_number !== undefined ? bank_account_number : null,
+      nssf_member !== undefined ? nssf_member : null,
+      nssf_number !== undefined ? nssf_number : null,
+      nssf_reg_date !== undefined ? nssf_reg_date : null,
+      emergency_contact_relationship !== undefined ? emergency_contact_relationship : null,
+      emergency_contact_address !== undefined ? emergency_contact_address : null,
+      avatar !== undefined ? avatar : null,
+      doc_national_id !== undefined ? doc_national_id : null,
+      doc_passport !== undefined ? doc_passport : null,
+      doc_contract !== undefined ? doc_contract : null,
+      doc_others !== undefined ? doc_others : null,
       id
     );
+
+    if (first_name) {
+      db.prepare('UPDATE users SET username = ? WHERE employee_id = ?').run(first_name.trim().toLowerCase(), id);
+    }
 
     const updated = db.prepare(`
       SELECT 

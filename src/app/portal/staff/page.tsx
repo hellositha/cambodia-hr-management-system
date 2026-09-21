@@ -23,6 +23,7 @@ import {
   ExternalLink,
   ChevronRight,
   TrendingUp,
+  ShieldAlert,
 } from 'lucide-react';
 
 interface StaffPayslip {
@@ -40,6 +41,16 @@ export default function StaffPortalPage() {
   const { currentPersona, language, t, isClockedIn, clockInTime, toggleClock, openModal, showToast } = useApp();
 
   const [activePayslipModal, setActivePayslipModal] = useState<StaffPayslip | null>(null);
+  const [isRestrictedAccess, setIsRestrictedAccess] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('restricted') === '1') {
+        setIsRestrictedAccess(true);
+      }
+    }
+  }, []);
 
   const [staffData, setStaffData] = useState({
     name: currentPersona.name,
@@ -203,6 +214,31 @@ export default function StaffPortalPage() {
 
   return (
     <div className="space-y-6">
+      {/* RESTRICTED ACCESS NOTICE BANNER */}
+      {isRestrictedAccess && (
+        <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-3 animate-in fade-in duration-200 shadow-xs">
+          <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-black uppercase tracking-wide text-amber-900 flex items-center gap-1.5">
+                <span>{language === 'km' ? 'សិទ្ធិប្រើប្រាស់មានកម្រិត (Limited Employee Access)' : 'Limited Employee Access Notice'}</span>
+              </h4>
+              <button
+                onClick={() => setIsRestrictedAccess(false)}
+                className="text-amber-500 hover:text-amber-800 text-xs font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="text-xs mt-1 leading-relaxed text-amber-800 font-khmer">
+              {language === 'km'
+                ? 'គណនីរបស់អ្នកជាបុគ្គលិកទូទៅ (Employee Role) ដែលត្រូវបានកំណត់ឱ្យប្រើប្រាស់ត្រឹមតែ មុខងារស្វ័យសេវាបុគ្គលិក (Employee Self-Service) ប៉ុណ្ណោះ។ ផ្នែករដ្ឋបាល បៀវត្សរ៍ក្រុមហ៊ុន និងការគ្រប់គ្រងត្រូវបានការពារ។'
+                : 'Your account is assigned the standard Employee role with limited self-service permissions. Company-wide administrative and management modules are restricted.'}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* 1. HEADER & BANNER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
         <div>
@@ -231,12 +267,20 @@ export default function StaffPortalPage() {
           </button>
 
           <Link
-            href="/tools?tab=letters"
-            className="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold flex items-center gap-2 transition-colors shadow-2xs"
+            href="/attendance"
+            className="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold flex items-center gap-2 transition-colors shadow-2xs cursor-pointer"
+          >
+            <Clock size={15} className="text-emerald-600" />
+            <span>{language === 'km' ? 'របាយការណ៍វត្តមាន' : 'Attendance Report'}</span>
+          </Link>
+
+          <button
+            onClick={() => showToast(language === 'km' ? 'សំណើសុំលិខិតបញ្ជាក់ការងារត្រូវបានផ្ញើទៅកាន់ផ្នែកធនធានមនុស្សរួចរាល់' : 'Employment verification request sent to HR Department', 'info')}
+            className="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold flex items-center gap-2 transition-colors shadow-2xs cursor-pointer"
           >
             <FileText size={15} className="text-indigo-600" />
             <span>{language === 'km' ? 'ស្នើសុំលិខិតបញ្ជាក់' : 'Request HR Letter'}</span>
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -294,7 +338,7 @@ export default function StaffPortalPage() {
                 isClockedIn ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-slate-700 text-slate-300'
               }`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${isClockedIn ? 'bg-emerald-400 animate-ping' : 'bg-slate-400'}`}></span>
-                {isClockedIn ? (language === 'km' ? 'កំពុងធ្វើការ' : 'Active On Duty') : (language === 'km' ? 'បានកត់ត្រាចេញ' : 'Off Duty')}
+                {isClockedIn ? (language === 'km' ? 'កំពុងធ្វើការ (Clocked In)' : 'Active On Duty') : (language === 'km' ? 'មិនទាន់កត់ត្រាចូល (Not Clocked In)' : 'Not Clocked In')}
               </span>
             </div>
 
@@ -305,23 +349,31 @@ export default function StaffPortalPage() {
               <p className="text-[11px] text-slate-400 mt-1">
                 {isClockedIn
                   ? (language === 'km' ? 'ម៉ោងកត់ត្រាចូលថ្ងៃនេះ (Timesheet Logged)' : 'Clocked in today at office')
-                  : (language === 'km' ? 'មិនទាន់កត់ត្រាវត្តមានចូលនៅឡើយ' : 'Not clocked in yet today')}
+                  : (language === 'km' ? 'មិនទាន់កត់ត្រាវត្តមានចូលនៅឡើយ (សូមចុចកត់ត្រាចូលដោយដៃ)' : 'Not clocked in yet today (Click button to clock in manually)')}
               </p>
             </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+          <div className="mt-6 pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
             <button
               onClick={toggleClock}
-              className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer ${
+              className={`flex-1 w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer ${
                 isClockedIn
                   ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/30'
                   : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30'
               }`}
             >
               <Clock size={16} />
-              <span>{isClockedIn ? (language === 'km' ? 'កត់ត្រាចេញពីការងារ (Clock Out)' : 'Clock Out Now') : (language === 'km' ? 'កត់ត្រាចូលធ្វើការ (Clock In)' : 'Clock In Now')}</span>
+              <span>{isClockedIn ? (language === 'km' ? 'កត់ត្រាចេញ (Clock Out)' : 'Clock Out Now') : (language === 'km' ? 'កត់ត្រាចូល (Clock In)' : 'Clock In Now')}</span>
             </button>
+
+            <Link
+              href="/attendance"
+              className="text-[11px] font-semibold text-indigo-300 hover:text-white underline-offset-4 hover:underline flex items-center gap-1 transition-colors whitespace-nowrap"
+            >
+              <span>{language === 'km' ? 'របាយការណ៍វត្តមាន' : 'Attendance Report'}</span>
+              <span>&rarr;</span>
+            </Link>
           </div>
         </div>
       </div>
@@ -430,12 +482,20 @@ export default function StaffPortalPage() {
                 {language === 'km' ? 'តាមដានស្ថានភាពការអនុម័តពីប្រធានផ្នែក' : 'Review status and manager comments'}
               </p>
             </div>
-            <button
-              onClick={() => openModal('request-leave')}
-              className="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition-colors cursor-pointer"
-            >
-              + ស្នើសុំថ្មី
-            </button>
+            <div className="flex items-center gap-2">
+              <Link
+                href="/leaves"
+                className="px-2.5 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 text-xs font-medium transition-colors"
+              >
+                {language === 'km' ? 'ទំព័រច្បាប់' : 'Leaves Page'} &rarr;
+              </Link>
+              <button
+                onClick={() => openModal('request-leave')}
+                className="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition-colors cursor-pointer"
+              >
+                + ស្នើសុំថ្មី
+              </button>
+            </div>
           </div>
 
           <div className="overflow-x-auto">
@@ -465,9 +525,19 @@ export default function StaffPortalPage() {
                       <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
                         req.status === 'Approved'
                           ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : req.status === 'Pending Admin'
+                          ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                          : req.status === 'Rejected'
+                          ? 'bg-rose-50 text-rose-700 border border-rose-200'
                           : 'bg-amber-50 text-amber-700 border border-amber-200'
                       }`}>
-                        {req.status === 'Approved' ? '✓ បានអនុម័ត' : '⏳ រង់ចាំពិនិត្យ'}
+                        {req.status === 'Approved'
+                          ? '✓ បានអនុម័តពេញលេញ'
+                          : req.status === 'Pending Admin'
+                          ? '⏳ ជំហាន ២/២: រង់ចាំរដ្ឋបាល (Admin)'
+                          : req.status === 'Rejected'
+                          ? '✕ បានបដិសេធ'
+                          : '⏳ ជំហាន ១/២: រង់ចាំប្រធានផ្នែក'}
                       </span>
                     </td>
                   </tr>

@@ -1,0 +1,292 @@
+module.exports=[85148,(e,a,t)=>{a.exports=e.x("better-sqlite3-90e2652d1716b047",()=>require("better-sqlite3-90e2652d1716b047"))},22734,(e,a,t)=>{a.exports=e.x("fs",()=>require("fs"))},43793,e=>{"use strict";var a=e.i(85148),t=e.i(14747),n=e.i(22734);let r=[{id:"dept-1",name:"ផ្នែកបច្ចេកវិទ្យា & វិស្វកម្ម (Engineering & Tech)",description:"ការអភិវឌ្ឍប្រព័ន្ធកម្មវិធី ហេដ្ឋារចនាសម្ព័ន្ធ Cloud និងប្រព័ន្ធឆ្លាតវៃ AI។",manager_id:"emp-1",budget:45e4,color:"#3b82f6"},{id:"dept-2",name:"ផ្នែករចនា & ផលិតផល (Product & Design)",description:"យុទ្ធសាស្ត្រផលិតផលឌីជីថល និងការរចនាបទពិសោធន៍អ្នកប្រើប្រាស់ UI/UX។",manager_id:"emp-4",budget:28e4,color:"#8b5cf6"},{id:"dept-3",name:"ផ្នែកទីផ្សារ & ប្រព័ន្ធផ្សព្វផ្សាយ (Marketing & PR)",description:"ការកសាងម៉ាកយីហោ ទីផ្សារឌីជីថល និងការផ្សព្វផ្សាយជាសាធារណៈ។",manager_id:"emp-7",budget:21e4,color:"#ec4899"},{id:"dept-4",name:"ផ្នែកលក់ & អភិវឌ្ឍន៍អាជីវកម្ម (Sales & Enterprise)",description:"ការគ្រប់គ្រងអតិថិជនសហគ្រាស និងការពង្រីកទីផ្សារក្នុងតំបន់។",manager_id:"emp-10",budget:38e4,color:"#10b981"},{id:"dept-5",name:"ផ្នែកធនធានមនុស្ស & វប្បធម៌ (People & Culture)",description:"ការគ្រប់គ្រងបុគ្គលិក អត្ថប្រយោជន៍ ប.ស.ស និងការអភិវឌ្ឍទេពកោសល្យ។",manager_id:"emp-13",budget:19e4,color:"#f59e0b"},{id:"dept-6",name:"ផ្នែកគណនេយ្យ & ហិរញ្ញវត្ថុ (Finance & Legal)",description:"ផែនការហិរញ្ញវត្ថុ ការទូទាត់ពន្ធ និងអនុលោមភាពច្បាប់នៅកម្ពុជា។",manager_id:"emp-16",budget:25e4,color:"#6366f1"}],o=[{id:"emp-1",first_name:"សុភ័ក្ត្រ",last_name:"វ៉ាន់",email:"van.sopheak@hestra.kh",phone:"+855 12 888 123",role:"នាយកផ្នែកបច្ចេកវិទ្យា (VP of Engineering)",department_id:"dept-1",employment_type:"Full-Time",status:"Active",salary:68e3,join_date:"2022-03-15",manager_id:null,avatar:"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=256&h=256&fit=crop&crop=faces",location:"រាជធានីភ្នំពេញ (Phnom Penh)",bio:"អ្នកជំនាញផ្នែកស្ថាបត្យកម្មប្រព័ន្ធកុំព្យូទ័រ និង Cloud Infrastructure មានបទពិសោធន៍ជាង ១២ ឆ្នាំ។",emergency_contact_name:"វ៉ាន់ សុភាព (បងប្រុស)",emergency_contact_phone:"+855 12 999 001",created_at:"2022-03-15T09:00:00Z"},{id:"emp-2",first_name:"ធីតា",last_name:"ចាន់",email:"chan.thida@hestra.kh",phone:"+855 16 777 234",role:"វិស្វករកម្មវិធីជាន់ខ្ពស់ (Lead Full-Stack)",department_id:"dept-1",employment_type:"Full-Time",status:"Active",salary:48e3,join_date:"2023-01-10",manager_id:"emp-1",avatar:"https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces",location:"រាជធានីភ្នំពេញ (Phnom Penh)",bio:"មានជំនាញខ្ពស់លើ Next.js, React, Node.js និង TypeScript ក្នុងការកសាងប្រព័ន្ធ HRMS។",emergency_contact_name:"ចាន់ សុខុម (ឪពុក)",emergency_contact_phone:"+855 92 111 222",created_at:"2023-01-10T09:00:00Z"},{id:"emp-3",first_name:"វិសាល",last_name:"សួន",email:"suon.visal@hestra.kh",phone:"+855 70 666 345",role:"វិស្វករ DevOps & Cloud Security",department_id:"dept-1",employment_type:"Full-Time",status:"Remote",salary:42e3,join_date:"2023-06-01",manager_id:"emp-1",avatar:"https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=256&h=256&fit=crop&crop=faces",location:"ខេត្តសៀមរាប (Siem Reap - WFH)",bio:"អ្នកជំនាញ Kubernetes, Docker, និងស្វ័យប្រវត្តិកម្ម CI/CD សម្រាប់ប្រព័ន្ធសហគ្រាស។",emergency_contact_name:"សួន ចន្ថា (ប្អូនស្រី)",emergency_contact_phone:"+855 88 333 444",created_at:"2023-06-01T09:00:00Z"},{id:"emp-4",first_name:"ចិន្តា",last_name:"គង់",email:"kong.chenda@hestra.kh",phone:"+855 12 555 456",role:"ប្រធានផ្នែករចនា (Head of Product Design)",department_id:"dept-2",employment_type:"Full-Time",status:"Active",salary:52e3,join_date:"2022-07-20",manager_id:null,avatar:"https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=256&h=256&fit=crop&crop=faces",location:"រាជធានីភ្នំពេញ (Phnom Penh)",bio:"ដឹកនាំការរចនា UI/UX បែបទំនើប ស្របតាមវប្បធម៌ និងតម្រូវការទីផ្សារនៅកម្ពុជា។",emergency_contact_name:"គង់ វីរៈ (ស្វាមី)",emergency_contact_phone:"+855 12 444 555",created_at:"2022-07-20T09:00:00Z"},{id:"emp-5",first_name:"វណ្ណា",last_name:"សេង",email:"seng.vanna@hestra.kh",phone:"+855 98 444 567",role:"អ្នកស្រាវជ្រាវផលិតផល (Principal UX Researcher)",department_id:"dept-2",employment_type:"Full-Time",status:"Active",salary:36e3,join_date:"2023-04-12",manager_id:"emp-4",avatar:"https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=256&h=256&fit=crop&crop=faces",location:"រាជធានីភ្នំពេញ (Phnom Penh)",bio:"ផ្តោតលើការសម្ភាសន៍អ្នកប្រើប្រាស់ និងការធ្វើតេស្តលទ្ធភាពប្រើប្រាស់នៃប្រព័ន្ធ HR។",emergency_contact_name:"សេង សោភា (ម្តាយ)",emergency_contact_phone:"+855 11 555 666",created_at:"2023-04-12T09:00:00Z"},{id:"emp-6",first_name:"សុជាតា",last_name:"លី",email:"ly.socheata@hestra.kh",phone:"+855 15 333 678",role:"អ្នករចនាផលិតផល (Senior Product Designer)",department_id:"dept-2",employment_type:"Full-Time",status:"On Leave",salary:34e3,join_date:"2024-02-01",manager_id:"emp-4",avatar:"https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=256&h=256&fit=crop&crop=faces",location:"ខេត្តបាត់ដំបង (Battambang)",bio:"អ្នករចនា Design System និងរូបភាពចលនាសម្រាប់គេហទំព័រ និងទូរស័ព្ទ។",emergency_contact_name:"លី រតនា (បងប្រុស)",emergency_contact_phone:"+855 77 666 777",created_at:"2024-02-01T09:00:00Z"},{id:"emp-7",first_name:"បូរី",last_name:"ឃឹម",email:"khim.borey@hestra.kh",phone:"+855 12 222 789",role:"នាយកផ្នែកទីផ្សារ (Director of Marketing)",department_id:"dept-3",employment_type:"Full-Time",status:"Active",salary:48e3,join_date:"2022-11-15",manager_id:null,avatar:"https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=256&h=256&fit=crop&crop=faces",location:"រាជធានីភ្នំពេញ (Phnom Penh)",bio:"យុទ្ធសាស្ត្រទីផ្សារឌីជីថល B2B SaaS និងការពង្រឹងវត្តមានយីហោទូទាំងប្រទេសកម្ពុជា។",emergency_contact_name:"ឃឹម សុខា (ភរិយា)",emergency_contact_phone:"+855 12 777 888",created_at:"2022-11-15T09:00:00Z"},{id:"emp-8",first_name:"មុន្នី",last_name:"រ័ត្ន",email:"rath.mony@hestra.kh",phone:"+855 93 111 890",role:"អ្នកគ្រប់គ្រងមាតិកា (Content Strategist)",department_id:"dept-3",employment_type:"Full-Time",status:"Active",salary:26e3,join_date:"2024-05-20",manager_id:"emp-7",avatar:"https://images.unsplash.com/photo-1534751516642-a171edd2521e?w=256&h=256&fit=crop&crop=faces",location:"រាជធានីភ្នំពេញ (Phnom Penh)",bio:"សរសេរអត្ថបទបច្ចេកវិទ្យា ផលិតវីដេអូ និងគ្រប់គ្រងយុទ្ធនាការលើបណ្តាញសង្គម។",emergency_contact_name:"រ័ត្ន សម្បត្តិ (ឪពុក)",emergency_contact_phone:"+855 10 888 999",created_at:"2024-05-20T09:00:00Z"},{id:"emp-9",first_name:"ស្រីពៅ",last_name:"ហេង",email:"heng.sreypov@hestra.kh",phone:"+855 81 999 012",role:"អ្នករចនាម៉ាកយីហោ (Brand Visual Designer)",department_id:"dept-3",employment_type:"Contract",status:"Remote",salary:24e3,join_date:"2025-01-15",manager_id:"emp-7",avatar:"https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=256&h=256&fit=crop&crop=faces",location:"ខេត្តកំពត (Kampot - WFH)",bio:"រចនារូបភាព ក្រាហ្វិក និងក្បូរក្បាច់បែបទំនើបសម្រាប់ឯកសារសហគ្រាស។",emergency_contact_name:"ហេង ចំរើន (បងប្រុស)",emergency_contact_phone:"+855 97 777 666",created_at:"2025-01-15T09:00:00Z"},{id:"emp-10",first_name:"ពិសិដ្ឋ",last_name:"អ៊ុក",email:"ouk.piseth@hestra.kh",phone:"+855 12 333 901",role:"នាយកផ្នែកលក់ (VP of Enterprise Sales)",department_id:"dept-4",employment_type:"Full-Time",status:"Active",salary:65e3,join_date:"2022-05-01",manager_id:null,avatar:"https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=256&h=256&fit=crop&crop=faces",location:"រាជធានីភ្នំពេញ (Phnom Penh)",bio:"មានបទពិសោធន៍ជាង ១០ ឆ្នាំ ក្នុងការចរចាកិច្ចសន្យាដំណោះស្រាយ HR ជាមួយធនាគារ និងក្រុមហ៊ុនធំៗ។",emergency_contact_name:"អ៊ុក វណ្ណឌី (ភរិយា)",emergency_contact_phone:"+855 12 666 555",created_at:"2022-05-01T09:00:00Z"},{id:"emp-11",first_name:"សុផល",last_name:"ម៉ៅ",email:"mao.sophal@hestra.kh",phone:"+855 17 222 012",role:"មន្ត្រីទំនាក់ទំនងអតិថិជន (Account Executive)",department_id:"dept-4",employment_type:"Full-Time",status:"Active",salary:32e3,join_date:"2023-08-14",manager_id:"emp-10",avatar:"https://images.unsplash.com/photo-1517841905240-472988babdf9?w=256&h=256&fit=crop&crop=faces",location:"រាជធានីភ្នំពេញ (Phnom Penh)",bio:"ផ្តល់ការប្រឹក្សាអំពីដំណោះស្រាយគ្រប់គ្រងប្រាក់ខែ និងវត្តមានដល់អាជីវកម្ម SMEs។",emergency_contact_name:"ម៉ៅ សុគន្ធ (បងស្រី)",emergency_contact_phone:"+855 12 555 111",created_at:"2023-08-14T09:00:00Z"},{id:"emp-12",first_name:"សុវណ្ណ",last_name:"ជា",email:"chea.sovann@hestra.kh",phone:"+855 92 111 345",role:"វិស្វករដំណោះស្រាយលក់ (Solutions Engineer)",department_id:"dept-4",employment_type:"Full-Time",status:"Active",salary:38e3,join_date:"2024-01-08",manager_id:"emp-10",avatar:"https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=256&h=256&fit=crop&crop=faces",location:"ក្រុងព្រះសីហនុ (Sihanoukville)",bio:"ជួយសម្របសម្រួលបច្ចេកទេស ការភ្ជាប់ API និងប្រព័ន្ធស្កេនមេដៃ/មុខសម្រាប់អតិថិជន។",emergency_contact_name:"ជា ផល្លី (ម្តាយ)",emergency_contact_phone:"+855 92 444 333",created_at:"2024-01-08T09:00:00Z"},{id:"emp-13",first_name:"សារ៉ាត់",last_name:"Sarath",email:"sarath@hestra.kh",phone:"+855 12 456 789",role:"ប្រធាននាយកដ្ឋានធនធានមនុស្ស (Head of HR)",department_id:"dept-5",employment_type:"Full-Time",status:"Active",salary:72e3,join_date:"2021-10-01",manager_id:null,avatar:"https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?w=256&h=256&fit=crop&crop=faces",location:"រាជធានីភ្នំពេញ (Phnom Penh)",bio:"ដឹកនាំគោលនយោបាយធនធានមនុស្ស អនុលោមភាពច្បាប់ការងារកម្ពុជា ការធានារ៉ាប់រង ប.ស.ស និងសុខុមាលភាពបុគ្គលិក។",emergency_contact_name:"សារ៉ាត់ ពិសី",emergency_contact_phone:"+855 12 888 777",created_at:"2021-10-01T09:00:00Z"},{id:"emp-14",first_name:"សុខុម",last_name:"ព្រំ",email:"prom.sokhom@hestra.kh",phone:"+855 16 888 234",role:"មន្ត្រីជ្រើសរើសបុគ្គលិកជាន់ខ្ពស់ (Senior Recruiter)",department_id:"dept-5",employment_type:"Full-Time",status:"Active",salary:28e3,join_date:"2023-03-20",manager_id:"emp-13",avatar:"https://images.unsplash.com/photo-1580489944761-15a19d654956?w=256&h=256&fit=crop&crop=faces",location:"រាជធានីភ្នំពេញ (Phnom Penh)",bio:"ស្វែងរកនិងជ្រើសរើសបុគ្គលិកជំនាញ IT វិស្វករកម្មវិធី និងអ្នកដឹកនាំអាជីវកម្មឆ្នើម។",emergency_contact_name:"ព្រំ វណ្ណារ៉ា (បងស្រី)",emergency_contact_phone:"+855 15 222 333",created_at:"2023-03-20T09:00:00Z"},{id:"emp-15",first_name:"សុគន្ធា",last_name:"យឹម",email:"yim.sokunthea@hestra.kh",phone:"+855 77 555 890",role:"មន្ត្រីប្រតិបត្តិការធនធានមនុស្ស (People Operations Lead)",department_id:"dept-5",employment_type:"Full-Time",status:"Active",salary:26e3,join_date:"2024-03-10",manager_id:"emp-13",avatar:"https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=256&h=256&fit=crop&crop=faces",location:"រាជធានីភ្នំពេញ (Phnom Penh)",bio:"គ្រប់គ្រងការចុះឈ្មោះ ប.ស.ស ការឈប់សម្រាកបុណ្យជាតិ និងសកម្មភាពកម្សាន្តបុគ្គលិក។",emergency_contact_name:"យឹម មុន្នី (បងប្រុស)",emergency_contact_phone:"+855 11 999 888",created_at:"2024-03-10T09:00:00Z"},{id:"emp-16",first_name:"គឹមឡេង",last_name:"តាំង",email:"tang.kimleng@hestra.kh",phone:"+855 12 777 901",role:"នាយកហិរញ្ញវត្ថុ & ច្បាប់ (Head of Finance & Legal)",department_id:"dept-6",employment_type:"Full-Time",status:"Active",salary:62e3,join_date:"2022-01-15",manager_id:null,avatar:"https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=256&h=256&fit=crop&crop=faces",location:"រាជធានីភ្នំពេញ (Phnom Penh)",bio:"គណនេយ្យករជំនាញ (CPA) គ្រប់គ្រងថវិកា ប្រាក់បៀវត្សរ៍ និងរបាយការណ៍ពន្ធនៅកម្ពុជា។",emergency_contact_name:"តាំង ស្រីលីន (ភរិយា)",emergency_contact_phone:"+855 12 999 111",created_at:"2022-01-15T09:00:00Z"},{id:"emp-17",first_name:"ចរិយា",last_name:"ស៊ុន",email:"sun.chariya@hestra.kh",phone:"+855 95 333 456",role:"អ្នកវិភាគហិរញ្ញវត្ថុជាន់ខ្ពស់ (Senior Financial Analyst)",department_id:"dept-6",employment_type:"Full-Time",status:"Active",salary:33e3,join_date:"2023-09-01",manager_id:"emp-16",avatar:"https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=256&h=256&fit=crop&crop=faces",location:"រាជធានីភ្នំពេញ (Phnom Penh)",bio:"ត្រួតពិនិត្យការទូទាត់ប្រាក់បៀវត្សរ៍ គណនាកាត់កងពន្ធលើប្រាក់បៀវត្ស និងការចំណាយក្រុមហ៊ុន។",emergency_contact_name:"ស៊ុន បូរិន (ឪពុក)",emergency_contact_phone:"+855 12 333 222",created_at:"2023-09-01T09:00:00Z"},{id:"emp-18",first_name:"ដារ៉ា",last_name:"ឌី",email:"dy.dara@hestra.kh",phone:"+855 16 444 555",role:"អ្នកអភិវឌ្ឍន៍គេហទំព័រ (Frontend Web Engineer)",department_id:"dept-1",employment_type:"Full-Time",status:"Active",salary:28e3,join_date:"2025-06-15",manager_id:"emp-2",avatar:"https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=256&h=256&fit=crop&crop=faces",location:"រាជធានីភ្នំពេញ (Phnom Penh)",bio:"បង្កើតផ្ទាំងកម្មវិធី UI ដ៏ទំនើប ងាយស្រួលប្រើប្រាស់ និងដំណើរការបានលឿន។",emergency_contact_name:"ឌី សុខេង (បងប្រុស)",emergency_contact_phone:"+855 98 111 444",created_at:"2025-06-15T09:00:00Z"}],i=[{id:"job-1",title:"វិស្វករកម្មវិធីជាន់ខ្ពស់ Full-Stack (Next.js & TypeScript)",department_id:"dept-1",location:"រាជធានីភ្នំពេញ (Hybrid)",type:"Full-Time",experience_level:"ជាន់ខ្ពស់ / ៤+ ឆ្នាំ",salary_range:"$1,800 - $2,800 / ខែ",description:"ដឹកនាំការកសាង និងពង្រីកប្រព័ន្ធ HESTRA HRM Web App ជាមួយ React 19, TypeScript និង Next.js។",requirements:"មានបទពិសោធន៍យ៉ាងហោច ៤ ឆ្នាំជាមួយ Fullstack, Next.js, Node.js, SQL database និង Git។",status:"Active",posted_date:"2026-08-25",applicants_count:24},{id:"job-2",title:"អ្នករចនាផលិតផល UI/UX (Design Systems)",department_id:"dept-2",location:"រាជធានីភ្នំពេញ / Remote",type:"Full-Time",experience_level:"មធ្យម-ជាន់ខ្ពស់ / ៣+ ឆ្នាំ",salary_range:"$1,200 - $2,000 / ខែ",description:"ទទួលខុសត្រូវលើប្រព័ន្ធ Design System, Figma Components, និងការរចនាបទពិសោធន៍អ្នកប្រើប្រាស់។",requirements:"មានស្នាដៃការងារ (Portfolio) បង្ហាញពីការរចនា Web/Mobile Apps ទំនើប និងច្បាស់លាស់។",status:"Active",posted_date:"2026-09-01",applicants_count:38},{id:"job-3",title:"មន្ត្រីទំនាក់ទំនងអតិថិជនសហគ្រាស (Enterprise Sales)",department_id:"dept-4",location:"រាជធានីភ្នំពេញ (Phnom Penh)",type:"Full-Time",experience_level:"ជាន់ខ្ពស់ / ៣+ ឆ្នាំ",salary_range:"$1,000 Base + Commission ខ្ពស់",description:"ពង្រីកការលក់ប្រព័ន្ធគ្រប់គ្រងធនធានមនុស្សទៅកាន់ក្រុមហ៊ុនធំៗ និងធនាគារនៅកម្ពុជា។",requirements:"មានបទពិសោធន៍លក់សេវាកម្ម B2B ឬ Software មានជំនាញចរចា និងទំនាក់ទំនងល្អឥតខ្ចោះ។",status:"Active",posted_date:"2026-09-05",applicants_count:19},{id:"job-4",title:"មន្ត្រីទីផ្សារឌីជីថល & មាតិកា (Digital Marketing Specialist)",department_id:"dept-3",location:"រាជធានីភ្នំពេញ (Phnom Penh)",type:"Full-Time",experience_level:"មធ្យម / ២+ ឆ្នាំ",salary_range:"$700 - $1,200 / ខែ",description:"គ្រប់គ្រងផេក Facebook, Telegram, LinkedIn, TikTok និងបង្កើតមាតិកាទាក់ទាញពី HESTRA HRM។",requirements:"មានភាពច្នៃប្រឌិតខ្ពស់ ចេះរចនារូបភាព និងកាត់តវីដេអូខ្លីៗ មានជំនាញសរសេរភាសាខ្មែរបានស្ទាត់ជំនាញ។",status:"Active",posted_date:"2026-09-10",applicants_count:31}],s=[{id:"cand-1",job_id:"job-1",name:"ហេង រតនា (Heng Rathana)",email:"heng.rathana@example.com",phone:"+855 12 771 889",stage:"Offer",rating:5,applied_date:"2026-08-28",notes:"បានឆ្លងកាត់ការប្រឡងបច្ចេកទេសយ៉ាងឆ្នើម។ មានចំណេះដឹងជ្រៅជ្រៅលើ System Architecture និង Next.js។"},{id:"cand-2",job_id:"job-1",name:"ស៊ិន វឌ្ឍនា (Sin Vathana)",email:"sin.vathana@example.com",phone:"+855 16 662 778",stage:"Interview",rating:4,applied_date:"2026-09-02",notes:"មានបទពិសោធន៍ ៥ ឆ្នាំនៅធនាគារក្នុងស្រុក។ កំពុងរៀបចំសម្ភាសន៍ជុំចុងក្រោយជាមួយនាយកបច្ចេកវិទ្យា។"},{id:"cand-3",job_id:"job-2",name:"លឹម គឹមសួរ (Lim Kimsour)",email:"lim.kimsour@example.com",phone:"+855 70 553 667",stage:"Interview",rating:5,applied_date:"2026-09-04",notes:"ស្នាដៃ Figma Design ស្អាតខ្លាំង មានក្បូរក្បាច់ និង Micro-interactions បែបអន្តរជាតិ។"},{id:"cand-4",job_id:"job-2",name:"អ៊ុំ ស្រីនិច (Oum Sreynich)",email:"oum.sreynich@example.com",phone:"+855 15 444 556",stage:"Screening",rating:4,applied_date:"2026-09-12",notes:"បានឆ្លងផុតការពិនិត្យ CV របស់មន្ត្រីជ្រើសរើសបុគ្គលិក។"},{id:"cand-5",job_id:"job-3",name:"ឈៀង វិបុល (Chheang Vibol)",email:"chheang.vibol@example.com",phone:"+855 12 333 445",stage:"Applied",rating:3,applied_date:"2026-09-18",notes:"ប្រវត្តិរូបសង្ខេបកំពុងស្ថិតក្នុងការពិនិត្យ។ ធ្លាប់ធ្វើការនៅក្រុមហ៊ុនទូរគមនាគមន៍ធំ។"}],p=[{id:"ann-1",title:"🇰🇭 សេចក្តីជូនដំណឹងស្តីពីការឈប់សម្រាកក្នុងព្រះរាជពិធីបុណ្យអុំទូក បណ្តែតប្រទីប និងសំពះព្រះខែ អកអំបុក",content:"សូមជម្រាបជូនដល់បុគ្គលិកទាំងអស់ឱ្យបានជ្រាបថា ក្រុមហ៊ុននឹងឈប់សម្រាកចំនួន ៣ ថ្ងៃ ក្នុងឱកាសព្រះរាជពិធីបុណ្យអុំទូក។ សូមជូនពរឱ្យបុគ្គលិកទាំងអស់មានដំណើរកម្សាន្តប្រកបដោយសុវត្ថិភាព និងសេចក្តីសប្បាយរីករាយ!",author_id:"emp-13",category:"Celebration",pinned:1,created_at:"2026-09-18T10:00:00Z"},{id:"ann-2",title:"🌸 កម្មវិធីជួបជុំសាមគ្គីភាពបុគ្គលិក អបអរសាទរពិធីបុណ្យភ្ជុំបិណ្ឌ",content:"ក្រុមហ៊ុននឹងរៀបចំអាហារសាមគ្គីភាព និងពិធីសូត្រមន្តលើករាសីនៅការិយាល័យកណ្តាល ដើម្បីអបអរសាទរពិធីបុណ្យភ្ជុំបិណ្ឌប្រពៃណីជាតិខ្មែរ។ សូមអញ្ជើញបុគ្គលិកទាំងអស់ចូលរួមដោយសេចក្តីសោមនស្សរីករាយ។",author_id:"emp-13",category:"General",pinned:1,created_at:"2026-09-15T14:30:00Z"},{id:"ann-3",title:"💼 គោលការណ៍ស្តីពីអត្ថប្រយោជន៍របបសន្តិសុខសង្គម (ប.ស.ស) និងការធានារ៉ាប់រងសុខភាព",content:"សូមបុគ្គលិកទាំងអស់ពិនិត្យមើលប័ណ្ណ ប.ស.ស (NSSF) របស់ខ្លួន សម្រាប់ការថែទាំសុខភាព គ្រោះថ្នាក់ការងារ និងប្រាក់សោធននិវត្តន៍ ស្របតាមច្បាប់ការងារនៃព្រះរាជាណាចក្រកម្ពុជា។",author_id:"emp-15",category:"Policy",pinned:0,created_at:"2026-09-10T11:00:00Z"}],d=[{id:"rev-1",employee_id:"emp-2",reviewer_id:"emp-1",review_period:"ឆមាសទី១ ឆ្នាំ២០២៦ (Mid-Year 2026)",rating:4.9,goals_achievement:98,strengths:"មានភាពប៉ិនប្រសប់ខ្ពស់ក្នុងការសរសេរកូដស្អាត ដឹកនាំក្រុមការងារវិស្វកម្មបានល្អ និងដោះស្រាយបញ្ហាប្រព័ន្ធបានទាន់ពេលវេលា។",areas_for_growth:"បន្តពង្រឹងការបណ្តុះបណ្តាលសមាជិកក្រុមថ្មី និងការចូលរួមចែករំលែកបទពិសោធន៍ក្នុងសហគមន៍បច្ចេកវិទ្យាកម្ពុជា។",status:"Completed",created_at:"2026-07-15T12:00:00Z"},{id:"rev-2",employee_id:"emp-18",reviewer_id:"emp-2",review_period:"ត្រីមាសទី២ ឆ្នាំ២០២៦ (Q2 2026)",rating:4.7,goals_achievement:95,strengths:"រៀនឆាប់ចេះ យកចិត្តទុកដាក់លើព័ត៌មានលម្អិតនៃ UI/UX និងបំពេញភារកិច្ចបានលឿន។",areas_for_growth:"រៀនបន្ថែមអំពីការបង្កើនប្រសិទ្ធភាពទិន្នន័យ (Performance Optimization) លើ Backend។",status:"Completed",created_at:"2026-07-20T14:00:00Z"}],l=t.default.join(process.cwd(),"data");n.default.existsSync(l)||n.default.mkdirSync(l,{recursive:!0});let m=t.default.join(l,"hr.db"),c=null;function _(e){e.prepare("DELETE FROM job_candidates").run(),e.prepare("DELETE FROM job_postings").run()}function T(e){for(let a of["attendance","leave_requests","leave_balances","payrolls","job_candidates","job_postings","announcements","performance_reviews","employees","departments"])e.exec(`DELETE FROM ${a}`);let a=e.prepare(`
+    INSERT INTO departments (id, name, description, manager_id, budget, color)
+    VALUES (@id, @name, @description, @manager_id, @budget, @color)
+  `);for(let e of r)a.run(e);let t=e.prepare(`
+    INSERT INTO employees (
+      id, first_name, last_name, email, phone, role, department_id,
+      employment_type, status, salary, join_date, manager_id, avatar,
+      location, bio, emergency_contact_name, emergency_contact_phone, created_at
+    ) VALUES (
+      @id, @first_name, @last_name, @email, @phone, @role, @department_id,
+      @employment_type, @status, @salary, @join_date, @manager_id, @avatar,
+      @location, @bio, @emergency_contact_name, @emergency_contact_phone, @created_at
+    )
+  `);for(let e of o)t.run(e);let n=e.prepare(`
+    INSERT INTO leave_balances (id, employee_id, annual_total, annual_used, sick_total, sick_used, casual_total, casual_used)
+    VALUES (?, ?, 20, ?, 10, ?, 5, ?)
+  `);o.forEach((e,a)=>{n.run(`bal-${e.id}`,e.id,2*a%12,a%4,a%3)});let l=e.prepare(`
+    INSERT INTO attendance (id, employee_id, date, clock_in, clock_out, status, work_hours, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `),m="2026-09-21";["2026-09-17","2026-09-18","2026-09-19","2026-09-20","2026-09-21"].forEach(e=>{o.forEach((a,t)=>{let n="Present",r="08:58:00",o="17:30:00",i=8.5,s=null;"On Leave"===a.status&&e===m?(n="Absent",r=null,o=null,i=0,s="Approved Annual Leave"):"Remote"===a.status?(n="Remote",r="09:05:00",o=e===m?null:"18:00:00",i=e===m?7.2:8.5,s="WFH approved"):t%6==0?(n="Late",r="09:42:00",o=e===m?null:"18:30:00",i=e===m?6.5:8,s="Traffic delay"):e===m&&(o=null,i=6.8),l.run(`att-${a.id}-${e}`,a.id,e,r,o,n,i,s)})});let c=e.prepare(`
+    INSERT INTO leave_requests (
+      id, employee_id, leave_type, start_date, end_date, days_count,
+      reason, status, reviewer_id, reviewed_at, reviewer_comments, created_at
+    ) VALUES (
+      @id, @employee_id, @leave_type, @start_date, @end_date, @days_count,
+      @reason, @status, @reviewer_id, @reviewed_at, @reviewer_comments, @created_at
+    )
+  `);for(let e of[{id:"leave-1",employee_id:"emp-6",leave_type:"Annual",start_date:"2026-09-19",end_date:"2026-09-25",days_count:5,reason:"Family trip to French Alps and resting up.",status:"Approved",reviewer_id:"emp-4",reviewed_at:"2026-09-12T10:00:00Z",reviewer_comments:"Have a wonderful vacation, Chloe! Enjoy.",created_at:"2026-09-10T14:30:00Z"},{id:"leave-2",employee_id:"emp-2",leave_type:"Casual",start_date:"2026-09-24",end_date:"2026-09-25",days_count:2,reason:"Home renovation and contractor inspection.",status:"Pending",reviewer_id:null,reviewed_at:null,reviewer_comments:null,created_at:"2026-09-19T09:15:00Z"},{id:"leave-3",employee_id:"emp-8",leave_type:"Sick",start_date:"2026-09-14",end_date:"2026-09-15",days_count:2,reason:"Severe migraine & doctor visit.",status:"Approved",reviewer_id:"emp-7",reviewed_at:"2026-09-14T08:30:00Z",reviewer_comments:"Get well soon!",created_at:"2026-09-14T07:45:00Z"},{id:"leave-4",employee_id:"emp-11",leave_type:"Annual",start_date:"2026-10-05",end_date:"2026-10-12",days_count:6,reason:"Attending cousin wedding in Hawaii.",status:"Pending",reviewer_id:null,reviewed_at:null,reviewer_comments:null,created_at:"2026-09-20T16:20:00Z"},{id:"leave-5",employee_id:"emp-18",leave_type:"Casual",start_date:"2026-09-28",end_date:"2026-09-29",days_count:2,reason:"Attending Next.js Conf keynote session.",status:"Pending",reviewer_id:null,reviewed_at:null,reviewer_comments:null,created_at:"2026-09-21T08:00:00Z"}])c.run(e);let _=e.prepare(`
+    INSERT INTO payrolls (
+      id, employee_id, pay_period, payment_date, base_salary,
+      allowances, bonuses, tax_deduction, insurance_deduction, other_deductions,
+      net_salary, status, payment_method, created_at
+    ) VALUES (
+      @id, @employee_id, @pay_period, @payment_date, @base_salary,
+      @allowances, @bonuses, @tax_deduction, @insurance_deduction, @other_deductions,
+      @net_salary, @status, @payment_method, @created_at
+    )
+  `);[{period:"August 2026",payDate:"2026-08-31",status:"Paid"},{period:"September 2026",payDate:"2026-09-30",status:"Pending"}].forEach(e=>{o.forEach(a=>{let t=Math.round(a.salary/12),n=a.role.includes("VP")||a.role.includes("Head")?1500:350,r=t+500+n,o=Math.round(.22*r),i=Math.round(.05*r);_.run({id:`pay-${e.period.replace(" ","-").toLowerCase()}-${a.id}`,employee_id:a.id,pay_period:e.period,payment_date:e.payDate,base_salary:t,allowances:500,bonuses:n,tax_deduction:o,insurance_deduction:320,other_deductions:i,net_salary:r-o-320-i,status:e.status,payment_method:"Direct Deposit",created_at:`${e.payDate}T00:00:00Z`})})});let T=e.prepare(`
+    INSERT INTO job_postings (
+      id, title, department_id, location, type, experience_level,
+      salary_range, description, requirements, status, posted_date, applicants_count
+    ) VALUES (
+      @id, @title, @department_id, @location, @type, @experience_level,
+      @salary_range, @description, @requirements, @status, @posted_date, @applicants_count
+    )
+  `);for(let e of i)T.run(e);let E=e.prepare(`
+    INSERT INTO job_candidates (
+      id, job_id, name, email, phone, stage, rating, applied_date, notes
+    ) VALUES (
+      @id, @job_id, @name, @email, @phone, @stage, @rating, @applied_date, @notes
+    )
+  `);for(let e of s)E.run(e);let u=e.prepare(`
+    INSERT INTO announcements (
+      id, title, content, author_id, category, pinned, created_at
+    ) VALUES (
+      @id, @title, @content, @author_id, @category, @pinned, @created_at
+    )
+  `);for(let e of p)u.run(e);let h=e.prepare(`
+    INSERT INTO performance_reviews (
+      id, employee_id, reviewer_id, review_period, rating,
+      goals_achievement, strengths, areas_for_growth, status, created_at
+    ) VALUES (
+      @id, @employee_id, @reviewer_id, @review_period, @rating,
+      @goals_achievement, @strengths, @areas_for_growth, @status, @created_at
+    )
+  `);for(let e of d)h.run(e)}e.s(["clearAllEmployees",0,function(e){e.prepare("UPDATE departments SET manager_id = NULL").run(),e.prepare("DELETE FROM attendance").run(),e.prepare("DELETE FROM leave_requests").run(),e.prepare("DELETE FROM leave_balances").run(),e.prepare("DELETE FROM payrolls").run(),e.prepare("DELETE FROM performance_reviews").run(),e.prepare("DELETE FROM employees").run()},"clearAllRecruitment",0,_,"getDb",0,function(){return c||((c=new a.default(m)).pragma("journal_mode = WAL"),c.pragma("foreign_keys = ON"),function(e){e.exec(`
+    CREATE TABLE IF NOT EXISTS departments (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT,
+      manager_id TEXT,
+      budget REAL DEFAULT 0,
+      color TEXT DEFAULT '#3b82f6'
+    );
+
+    CREATE TABLE IF NOT EXISTS employees (
+      id TEXT PRIMARY KEY,
+      first_name TEXT NOT NULL,
+      last_name TEXT NOT NULL,
+      email TEXT NOT NULL UNIQUE,
+      phone TEXT,
+      role TEXT NOT NULL,
+      department_id TEXT NOT NULL,
+      employment_type TEXT NOT NULL,
+      employee_type TEXT DEFAULT 'បុគ្គលិកពេញសិទ្ធិ (Regular / Permanent)',
+      status TEXT NOT NULL,
+      salary REAL NOT NULL,
+      join_date TEXT NOT NULL,
+      manager_id TEXT,
+      avatar TEXT,
+      location TEXT,
+      bio TEXT,
+      emergency_contact_name TEXT,
+      emergency_contact_phone TEXT,
+      gender TEXT DEFAULT 'ប្រុស (Male)',
+      dob TEXT,
+      nationality TEXT DEFAULT 'កម្ពុជា (Cambodian)',
+      marital_status TEXT DEFAULT 'នៅលីវ (Single)',
+      national_id TEXT,
+      current_address TEXT,
+      province_city TEXT,
+      district TEXT,
+      commune_sangkat TEXT,
+      village TEXT,
+      contract_type TEXT DEFAULT 'UDC (មិនកំណត់ថិរវេលា)',
+      contract_start TEXT,
+      contract_end TEXT,
+      work_location TEXT,
+      salary_currency TEXT DEFAULT 'USD ($)',
+      salary_frequency TEXT DEFAULT 'ប្រចាំខែ (Monthly)',
+      bank_name TEXT DEFAULT 'ABA Bank',
+      bank_account_name TEXT,
+      bank_account_number TEXT,
+      nssf_member TEXT DEFAULT 'មាន (Yes)',
+      nssf_number TEXT,
+      nssf_reg_date TEXT,
+      emergency_contact_relationship TEXT,
+      emergency_contact_address TEXT,
+      doc_national_id TEXT,
+      doc_passport TEXT,
+      doc_contract TEXT,
+      doc_others TEXT,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS attendance (
+      id TEXT PRIMARY KEY,
+      employee_id TEXT NOT NULL,
+      date TEXT NOT NULL,
+      clock_in TEXT,
+      clock_out TEXT,
+      status TEXT NOT NULL,
+      work_hours REAL DEFAULT 0,
+      notes TEXT,
+      UNIQUE(employee_id, date)
+    );
+
+    CREATE TABLE IF NOT EXISTS leave_requests (
+      id TEXT PRIMARY KEY,
+      employee_id TEXT NOT NULL,
+      leave_type TEXT NOT NULL,
+      start_date TEXT NOT NULL,
+      end_date TEXT NOT NULL,
+      days_count REAL NOT NULL,
+      reason TEXT,
+      status TEXT NOT NULL DEFAULT 'Pending Manager',
+      line_manager_id TEXT,
+      line_manager_reviewed_at TEXT,
+      line_manager_comments TEXT,
+      admin_reviewer_id TEXT,
+      admin_reviewed_at TEXT,
+      admin_comments TEXT,
+      reviewer_id TEXT,
+      reviewed_at TEXT,
+      reviewer_comments TEXT,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS leave_balances (
+      id TEXT PRIMARY KEY,
+      employee_id TEXT NOT NULL UNIQUE,
+      annual_total REAL DEFAULT 20,
+      annual_used REAL DEFAULT 0,
+      sick_total REAL DEFAULT 10,
+      sick_used REAL DEFAULT 0,
+      casual_total REAL DEFAULT 5,
+      casual_used REAL DEFAULT 0
+    );
+
+    CREATE TABLE IF NOT EXISTS payrolls (
+      id TEXT PRIMARY KEY,
+      employee_id TEXT NOT NULL,
+      pay_period TEXT NOT NULL,
+      payment_date TEXT NOT NULL,
+      base_salary REAL NOT NULL,
+      allowances REAL DEFAULT 0,
+      bonuses REAL DEFAULT 0,
+      tax_deduction REAL DEFAULT 0,
+      insurance_deduction REAL DEFAULT 0,
+      other_deductions REAL DEFAULT 0,
+      net_salary REAL NOT NULL,
+      status TEXT NOT NULL DEFAULT 'Paid',
+      payment_method TEXT DEFAULT 'Direct Deposit',
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS job_postings (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      department_id TEXT NOT NULL,
+      location TEXT NOT NULL,
+      type TEXT NOT NULL,
+      experience_level TEXT NOT NULL,
+      salary_range TEXT NOT NULL,
+      description TEXT,
+      requirements TEXT,
+      status TEXT NOT NULL DEFAULT 'Active',
+      posted_date TEXT NOT NULL,
+      applicants_count INTEGER DEFAULT 0
+    );
+
+    CREATE TABLE IF NOT EXISTS job_candidates (
+      id TEXT PRIMARY KEY,
+      job_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      phone TEXT,
+      stage TEXT NOT NULL DEFAULT 'Applied',
+      rating INTEGER DEFAULT 3,
+      applied_date TEXT NOT NULL,
+      notes TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS announcements (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      content TEXT NOT NULL,
+      author_id TEXT NOT NULL,
+      category TEXT NOT NULL DEFAULT 'General',
+      pinned INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS performance_reviews (
+      id TEXT PRIMARY KEY,
+      employee_id TEXT NOT NULL,
+      reviewer_id TEXT NOT NULL,
+      review_period TEXT NOT NULL,
+      rating REAL NOT NULL,
+      goals_achievement REAL NOT NULL,
+      strengths TEXT,
+      areas_for_growth TEXT,
+      status TEXT NOT NULL DEFAULT 'Completed',
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      username TEXT,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL UNIQUE,
+      role TEXT NOT NULL DEFAULT 'Employee',
+      status TEXT NOT NULL DEFAULT 'Active',
+      employee_id TEXT,
+      department_name TEXT,
+      avatar TEXT,
+      two_factor_enabled INTEGER DEFAULT 0,
+      permissions TEXT,
+      password TEXT DEFAULT 'hestra123',
+      last_login TEXT,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS system_meta (
+      key TEXT PRIMARY KEY,
+      value TEXT
+    );
+  `);try{let a=e.prepare("PRAGMA table_info(users)").all();a.some(e=>"password"===e.name)||e.prepare("ALTER TABLE users ADD COLUMN password TEXT DEFAULT 'hestra123'").run(),a.some(e=>"username"===e.name)||e.prepare("ALTER TABLE users ADD COLUMN username TEXT").run(),e.prepare(`
+      UPDATE users 
+      SET username = LOWER(
+        COALESCE(
+          (SELECT first_name FROM employees WHERE employees.id = users.employee_id AND employees.first_name IS NOT NULL AND employees.first_name != ''),
+          CASE 
+            WHEN INSTR(email, '.') > 0 AND INSTR(email, '.') < INSTR(email, '@') 
+              THEN SUBSTR(email, INSTR(email, '.') + 1, INSTR(email, '@') - INSTR(email, '.') - 1)
+            WHEN INSTR(email, '@') > 0 
+              THEN SUBSTR(email, 1, INSTR(email, '@') - 1)
+            ELSE email
+          END
+        )
+      )
+      WHERE username IS NULL OR username = ''
+    `).run()}catch(e){}try{e.prepare("ALTER TABLE leave_requests ADD COLUMN line_manager_id TEXT").run()}catch(e){}try{e.prepare("ALTER TABLE leave_requests ADD COLUMN line_manager_reviewed_at TEXT").run()}catch(e){}try{e.prepare("ALTER TABLE leave_requests ADD COLUMN line_manager_comments TEXT").run()}catch(e){}try{e.prepare("ALTER TABLE leave_requests ADD COLUMN admin_reviewer_id TEXT").run()}catch(e){}try{e.prepare("ALTER TABLE leave_requests ADD COLUMN admin_reviewed_at TEXT").run()}catch(e){}try{e.prepare("ALTER TABLE leave_requests ADD COLUMN admin_comments TEXT").run()}catch(e){}try{e.prepare("UPDATE leave_requests SET status = 'Pending Manager' WHERE status = 'Pending'").run()}catch(e){}try{let a=e.prepare("PRAGMA table_info(employees)").all(),t=new Set(a.map(e=>e.name));for(let[a,n]of[["gender",'TEXT DEFAULT "ប្រុស (Male)"'],["dob","TEXT"],["nationality",'TEXT DEFAULT "កម្ពុជា (Cambodian)"'],["marital_status",'TEXT DEFAULT "នៅលីវ (Single)"'],["national_id","TEXT"],["current_address","TEXT"],["province_city",'TEXT DEFAULT "រាជធានីភ្នំពេញ (Phnom Penh)"'],["district","TEXT"],["commune_sangkat","TEXT"],["village","TEXT"],["employee_type",'TEXT DEFAULT "បុគ្គលិកពេញសិទ្ធិ (Regular / Permanent)"'],["contract_type",'TEXT DEFAULT "UDC (មិនកំណត់ថិរវេលា)"'],["contract_start","TEXT"],["contract_end","TEXT"],["work_location",'TEXT DEFAULT "ការិយាល័យកណ្តាល (Head Office)"'],["salary_currency",'TEXT DEFAULT "USD ($)"'],["salary_frequency",'TEXT DEFAULT "ប្រចាំខែ (Monthly)"'],["bank_name",'TEXT DEFAULT "ABA Bank"'],["bank_account_name","TEXT"],["bank_account_number","TEXT"],["nssf_member",'TEXT DEFAULT "មាន (Yes)"'],["nssf_number","TEXT"],["nssf_reg_date","TEXT"],["emergency_contact_relationship","TEXT"],["emergency_contact_address","TEXT"],["doc_national_id","TEXT"],["doc_passport","TEXT"],["doc_contract","TEXT"],["doc_others","TEXT"]])if(!t.has(a))try{e.prepare(`ALTER TABLE employees ADD COLUMN ${a} ${n}`).run()}catch(e){console.error(`Error adding column ${a} to employees:`,e)}}catch(e){console.error("Error migrating employees table columns:",e)}try{let a=e.prepare("SELECT count(*) as count FROM users").get();if(!a||0===a.count){let a=e.prepare(`
+        INSERT INTO users (id, username, name, email, role, status, employee_id, department_name, avatar, two_factor_enabled, permissions, last_login, created_at)
+        VALUES (@id, @username, @name, @email, @role, @status, @employee_id, @department_name, @avatar, @two_factor_enabled, @permissions, @last_login, @created_at)
+      `);for(let e of[{id:"usr-1",username:"sarath",name:"សារ៉ាត់ ចាន់ថា (Sarath Chantha)",email:"sarath@hestra.kh",role:"Admin",status:"Active",employee_id:"emp-13",department_name:"ផ្នែកធនធានមនុស្ស (People & Culture)",avatar:"https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=256&h=256&fit=crop&crop=faces",two_factor_enabled:0,permissions:"all,manage_users,manage_payroll,approve_leaves,system_settings,export_data",last_login:"2026-10-24 08:30",created_at:"2024-01-01"},{id:"usr-2",username:"sopheak",name:"វ៉ាន់ សុភ័ក្ត្រ (Van Sopheak)",email:"van.sopheak@hestra.kh",role:"Manager",status:"Active",employee_id:"emp-1",department_name:"ផ្នែកបច្ចេកវិទ្យា (Engineering)",avatar:"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=256&h=256&fit=crop&crop=faces",two_factor_enabled:0,permissions:"view_team,approve_leaves,evaluate_performance,attendance_management",last_login:"2026-10-24 09:12",created_at:"2024-01-15"},{id:"usr-3",username:"thida",name:"ចាន់ ធីតា (Chan Thida)",email:"chan.thida@hestra.kh",role:"Employee",status:"Active",employee_id:"emp-18",department_name:"ផ្នែកបច្ចេកវិទ្យា (Engineering)",avatar:"https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces",two_factor_enabled:0,permissions:"self_service,clock_in,request_leave,view_payslips",last_login:"2026-10-24 08:45",created_at:"2024-02-01"},{id:"usr-4",username:"kakkada",name:"ស៊ឹម កក្កដា (Sim Kakkada)",email:"sim.kakkada@hestra.kh",role:"Employee",status:"Active",employee_id:"emp-5",department_name:"ផ្នែកទីផ្សារ & ប្រព័ន្ធផ្សព្វផ្សាយ (Marketing)",avatar:"https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=256&h=256&fit=crop&crop=faces",two_factor_enabled:0,permissions:"self_service,clock_in,request_leave,view_payslips",last_login:"2026-10-23 16:20",created_at:"2024-03-10"},{id:"usr-5",username:"sophal",name:"ហេង សុផល (Heng Sophal)",email:"heng.sophal@hestra.kh",role:"Manager",status:"Active",employee_id:"emp-8",department_name:"ផ្នែកគណនេយ្យ & ហិរញ្ញវត្ថុ (Finance)",avatar:"https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=256&h=256&fit=crop&crop=faces",two_factor_enabled:0,permissions:"view_team,approve_leaves,view_payroll,evaluate_performance",last_login:"2026-10-22 11:05",created_at:"2024-02-20"}])a.run(e)}}catch(e){console.error("Error initializing default users:",e)}e.prepare("SELECT value FROM system_meta WHERE key = 'initialized'").get()||(T(e),e.prepare("INSERT OR REPLACE INTO system_meta (key, value) VALUES ('initialized', 'true')").run())}(c)),c},"restoreRecruitment",0,function(e){_(e);let a=e.prepare(`
+    INSERT INTO job_postings (
+      id, title, department_id, location, type, experience_level,
+      salary_range, description, requirements, status, posted_date, applicants_count
+    ) VALUES (
+      @id, @title, @department_id, @location, @type, @experience_level,
+      @salary_range, @description, @requirements, @status, @posted_date, @applicants_count
+    )
+  `);for(let e of i)a.run(e);let t=e.prepare(`
+    INSERT INTO job_candidates (
+      id, job_id, name, email, phone, stage, rating, applied_date, notes
+    ) VALUES (
+      @id, @job_id, @name, @email, @phone, @stage, @rating, @applied_date, @notes
+    )
+  `);for(let e of s)t.run(e)},"seedDatabase",0,T],43793)}];
+
+//# sourceMappingURL=%5Broot-of-the-server%5D__0twv2xh._.js.map

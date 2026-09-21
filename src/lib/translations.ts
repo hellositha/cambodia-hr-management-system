@@ -43,8 +43,8 @@ export const TRANSLATIONS = {
 
     // Header
     search_placeholder: 'ស្វែងរកបុគ្គលិក, ផ្នែកការងារ...',
-    clock_in: 'កត់ត្រាវត្តមាន',
-    clock_out: 'កត់ត្រាចេញ',
+    clock_in: 'កត់ត្រាចូល (Clock In)',
+    clock_out: 'កត់ត្រាចេញ (Clock Out)',
     clocked_in: 'បានកត់ត្រាចូល',
     quick_action: 'សកម្មភាពរហ័ស',
     quick_actions_title: 'បង្កើត & ស្នើសុំ',
@@ -130,6 +130,23 @@ export const TRANSLATIONS = {
     location: 'ទីតាំងការងារ',
     role: 'មុខតំណែង',
     salary: 'ប្រាក់បៀវត្សរ៍',
+
+    // Employee Directory & Drawer
+    emp_directory_title: 'បញ្ជីបុគ្គលិក & ធនធានមនុស្ស',
+    emp_directory_sub: 'ស្វែងរក, ច្រោះតាមផ្នែក, គ្រប់គ្រងប្រវត្តិរូប, ប្រាក់បៀវត្សរ៍, វត្តមាន និងច្បាប់ឈប់សម្រាក',
+    emp_clear_btn: 'សម្អាតបញ្ជី',
+    emp_export_csv: 'ទាញយក CSV',
+    emp_add_staff: 'បញ្ចូលបុគ្គលិក',
+    emp_search_placeholder: 'ស្វែងរកតាមឈ្មោះ, អ៊ីមែល, មុខតំណែង...',
+    emp_all_departments: 'គ្រប់ដេប៉ាតឺម៉ង់',
+    emp_all_types: 'គ្រប់ប្រភេទការងារ',
+    emp_type_fulltime: 'ពេញម៉ោង',
+    emp_type_parttime: 'ក្រៅម៉ោង',
+    emp_type_contract: 'កិច្ចសន្យា',
+    emp_type_intern: 'កម្មសិក្សា',
+    emp_official_letter: 'ចេញលិខិតផ្លូវការ',
+    emp_hr_profile_tab: 'HR Profile (៧ ផ្នែក)',
+    emp_view_7_sections: 'មើលព័ត៌មានលម្អិតទាំង ៧ ផ្នែក →',
   },
 
   en: {
@@ -139,8 +156,8 @@ export const TRANSLATIONS = {
 
     // Language
     lang_switch: 'Switch Language',
-    lang_khmer: 'ភាសាខ្មែរ',
-    lang_english: 'English',
+    lang_khmer: 'Khmer (KM)',
+    lang_english: 'English (EN)',
 
     // Nav
     nav_dashboard: 'Dashboard',
@@ -250,7 +267,7 @@ export const TRANSLATIONS = {
     save: 'Save Changes',
     clear_all: 'Clear All',
     export_csv: 'Export CSV',
-    add_employee: 'Add Employee',
+    add_employee: 'Add Staff',
     request_leave: 'Request Time Off',
     run_payroll: 'Run Payroll',
     post_job: 'Post Job',
@@ -261,5 +278,75 @@ export const TRANSLATIONS = {
     location: 'Location',
     role: 'Job Role / Title',
     salary: 'Base Salary',
+
+    // Employee Directory & Drawer
+    emp_directory_title: 'Employee Directory & Workforce',
+    emp_directory_sub: 'Search, filter by department, manage profiles, compensation, attendance and leaves',
+    emp_clear_btn: 'Clear Directory',
+    emp_export_csv: 'Export CSV',
+    emp_add_staff: 'Add Staff',
+    emp_search_placeholder: 'Search by name, email, position...',
+    emp_all_departments: 'All Departments',
+    emp_all_types: 'All Types',
+    emp_type_fulltime: 'Full-Time',
+    emp_type_parttime: 'Part-Time',
+    emp_type_contract: 'Contract',
+    emp_type_intern: 'Intern',
+    emp_official_letter: 'Issue Official Letter',
+    emp_hr_profile_tab: 'HR Profile (7 Sections)',
+    emp_view_7_sections: 'View Full 7-Section Profile →',
   },
 };
+
+export function formatLocalizedText(text: string | null | undefined, language: 'en' | 'km'): string {
+  if (!text) return '';
+  const str = String(text).trim();
+
+  // Check if string contains parentheses, e.g. "UDC (មិនកំណត់ថិរវេលា)" or "រាជធានីភ្នំពេញ (Phnom Penh)"
+  const parenMatch = str.match(/^(.*?)\s*\((.*?)\)$/);
+  if (parenMatch) {
+    const part1 = parenMatch[1].trim();
+    const part2 = parenMatch[2].trim();
+    const isPart1Khmer = /[\u1780-\u17FF]/.test(part1);
+    const isPart2Khmer = /[\u1780-\u17FF]/.test(part2);
+
+    if (language === 'en') {
+      if (!isPart2Khmer && part2.length > 0) return part2;
+      if (!isPart1Khmer && part1.length > 0) return part1;
+      const stripped = str.replace(/[\u1780-\u17FF\(\)\/]+/g, '').replace(/\s+/g, ' ').trim();
+      return stripped || str;
+    } else {
+      if (isPart1Khmer && part1.length > 0) return part1;
+      if (isPart2Khmer && part2.length > 0) return part2;
+      return str;
+    }
+  }
+
+  // If no outer parentheses, but string has mixed Khmer & English:
+  if (language === 'en' && /[\u1780-\u17FF]/.test(str)) {
+    // Known common translations
+    if (str.includes('ពេញម៉ោង')) return 'Full-Time';
+    if (str.includes('ក្រៅម៉ោង')) return 'Part-Time';
+    if (str.includes('កិច្ចសន្យា')) return 'Contract';
+    if (str.includes('កម្មសិក្សា')) return 'Intern';
+    if (str.includes('ប្រុស')) return 'Male';
+    if (str.includes('ស្រី')) return 'Female';
+    if (str.includes('នៅលីវ')) return 'Single';
+    if (str.includes('រៀបការ')) return 'Married';
+    if (str.includes('កម្ពុជា')) return 'Cambodian';
+    if (str.includes('មាន')) return 'Yes';
+    if (str.includes('គ្មាន')) return 'No';
+    if (str.includes('សកម្ម')) return 'Active';
+    if (str.includes('សាកល្បង')) return 'Probation';
+    if (str.includes('ភ្នំពេញ')) return 'Phnom Penh';
+    if (str.includes('ការិយាល័យកណ្តាល')) return 'Head Office';
+    if (str.includes('ប្រចាំខែ')) return 'Monthly';
+    if (str.includes('ប្តី') || str.includes('ប្រពន្ធ')) return 'Spouse';
+    if (str.includes('ឪពុក') || str.includes('ម្តាយ')) return 'Parent';
+    if (str.includes('បងប្អូន')) return 'Sibling';
+    const stripped = str.replace(/[\u1780-\u17FF\(\)\/]+/g, '').replace(/\s+/g, ' ').trim();
+    return stripped || str;
+  }
+
+  return str;
+}

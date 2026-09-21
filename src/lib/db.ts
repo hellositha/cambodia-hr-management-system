@@ -50,6 +50,7 @@ function initDatabase(db: Database.Database) {
       role TEXT NOT NULL,
       department_id TEXT NOT NULL,
       employment_type TEXT NOT NULL,
+      employee_type TEXT DEFAULT 'បុគ្គលិកពេញសិទ្ធិ (Regular / Permanent)',
       status TEXT NOT NULL,
       salary REAL NOT NULL,
       join_date TEXT NOT NULL,
@@ -59,6 +60,34 @@ function initDatabase(db: Database.Database) {
       bio TEXT,
       emergency_contact_name TEXT,
       emergency_contact_phone TEXT,
+      gender TEXT DEFAULT 'ប្រុស (Male)',
+      dob TEXT,
+      nationality TEXT DEFAULT 'កម្ពុជា (Cambodian)',
+      marital_status TEXT DEFAULT 'នៅលីវ (Single)',
+      national_id TEXT,
+      current_address TEXT,
+      province_city TEXT,
+      district TEXT,
+      commune_sangkat TEXT,
+      village TEXT,
+      contract_type TEXT DEFAULT 'UDC (មិនកំណត់ថិរវេលា)',
+      contract_start TEXT,
+      contract_end TEXT,
+      work_location TEXT,
+      salary_currency TEXT DEFAULT 'USD ($)',
+      salary_frequency TEXT DEFAULT 'ប្រចាំខែ (Monthly)',
+      bank_name TEXT DEFAULT 'ABA Bank',
+      bank_account_name TEXT,
+      bank_account_number TEXT,
+      nssf_member TEXT DEFAULT 'មាន (Yes)',
+      nssf_number TEXT,
+      nssf_reg_date TEXT,
+      emergency_contact_relationship TEXT,
+      emergency_contact_address TEXT,
+      doc_national_id TEXT,
+      doc_passport TEXT,
+      doc_contract TEXT,
+      doc_others TEXT,
       created_at TEXT NOT NULL
     );
 
@@ -82,7 +111,13 @@ function initDatabase(db: Database.Database) {
       end_date TEXT NOT NULL,
       days_count REAL NOT NULL,
       reason TEXT,
-      status TEXT NOT NULL DEFAULT 'Pending',
+      status TEXT NOT NULL DEFAULT 'Pending Manager',
+      line_manager_id TEXT,
+      line_manager_reviewed_at TEXT,
+      line_manager_comments TEXT,
+      admin_reviewer_id TEXT,
+      admin_reviewed_at TEXT,
+      admin_comments TEXT,
       reviewer_id TEXT,
       reviewed_at TEXT,
       reviewer_comments TEXT,
@@ -199,19 +234,96 @@ function initDatabase(db: Database.Database) {
     if (!cols.some((c) => c.name === 'username')) {
       db.prepare("ALTER TABLE users ADD COLUMN username TEXT").run();
     }
-    // Automatically set employee last name as username if missing
+    // Automatically set employee first name as username if missing
     db.prepare(`
       UPDATE users 
       SET username = LOWER(
-        CASE 
-          WHEN INSTR(email, '.') > 0 AND INSTR(email, '.') < INSTR(email, '@') THEN SUBSTR(email, 1, INSTR(email, '.') - 1)
-          WHEN INSTR(email, '@') > 0 THEN SUBSTR(email, 1, INSTR(email, '@') - 1)
-          ELSE email
-        END
+        COALESCE(
+          (SELECT first_name FROM employees WHERE employees.id = users.employee_id AND employees.first_name IS NOT NULL AND employees.first_name != ''),
+          CASE 
+            WHEN INSTR(email, '.') > 0 AND INSTR(email, '.') < INSTR(email, '@') 
+              THEN SUBSTR(email, INSTR(email, '.') + 1, INSTR(email, '@') - INSTR(email, '.') - 1)
+            WHEN INSTR(email, '@') > 0 
+              THEN SUBSTR(email, 1, INSTR(email, '@') - 1)
+            ELSE email
+          END
+        )
       )
       WHERE username IS NULL OR username = ''
     `).run();
   } catch (e) {}
+
+  // Migrate leave_requests to support two-stage approval workflow (Line Manager -> Administrator)
+  try {
+    db.prepare("ALTER TABLE leave_requests ADD COLUMN line_manager_id TEXT").run();
+  } catch (e) {}
+  try {
+    db.prepare("ALTER TABLE leave_requests ADD COLUMN line_manager_reviewed_at TEXT").run();
+  } catch (e) {}
+  try {
+    db.prepare("ALTER TABLE leave_requests ADD COLUMN line_manager_comments TEXT").run();
+  } catch (e) {}
+  try {
+    db.prepare("ALTER TABLE leave_requests ADD COLUMN admin_reviewer_id TEXT").run();
+  } catch (e) {}
+  try {
+    db.prepare("ALTER TABLE leave_requests ADD COLUMN admin_reviewed_at TEXT").run();
+  } catch (e) {}
+  try {
+    db.prepare("ALTER TABLE leave_requests ADD COLUMN admin_comments TEXT").run();
+  } catch (e) {}
+  try {
+    db.prepare("UPDATE leave_requests SET status = 'Pending Manager' WHERE status = 'Pending'").run();
+  } catch (e) {}
+
+  // Migrate employees table to support comprehensive personal, contact, contract, payroll, nssf, emergency, and documents
+  try {
+    const empCols = db.prepare("PRAGMA table_info(employees)").all() as any[];
+    const colNames = new Set(empCols.map((c) => c.name));
+    const newEmpCols: [string, string][] = [
+      ['gender', 'TEXT DEFAULT "ប្រុស (Male)"'],
+      ['dob', 'TEXT'],
+      ['nationality', 'TEXT DEFAULT "កម្ពុជា (Cambodian)"'],
+      ['marital_status', 'TEXT DEFAULT "នៅលីវ (Single)"'],
+      ['national_id', 'TEXT'],
+      ['current_address', 'TEXT'],
+      ['province_city', 'TEXT DEFAULT "រាជធានីភ្នំពេញ (Phnom Penh)"'],
+      ['district', 'TEXT'],
+      ['commune_sangkat', 'TEXT'],
+      ['village', 'TEXT'],
+      ['employee_type', 'TEXT DEFAULT "បុគ្គលិកពេញសិទ្ធិ (Regular / Permanent)"'],
+      ['contract_type', 'TEXT DEFAULT "UDC (មិនកំណត់ថិរវេលា)"'],
+      ['contract_start', 'TEXT'],
+      ['contract_end', 'TEXT'],
+      ['work_location', 'TEXT DEFAULT "ការិយាល័យកណ្តាល (Head Office)"'],
+      ['salary_currency', 'TEXT DEFAULT "USD ($)"'],
+      ['salary_frequency', 'TEXT DEFAULT "ប្រចាំខែ (Monthly)"'],
+      ['bank_name', 'TEXT DEFAULT "ABA Bank"'],
+      ['bank_account_name', 'TEXT'],
+      ['bank_account_number', 'TEXT'],
+      ['nssf_member', 'TEXT DEFAULT "មាន (Yes)"'],
+      ['nssf_number', 'TEXT'],
+      ['nssf_reg_date', 'TEXT'],
+      ['emergency_contact_relationship', 'TEXT'],
+      ['emergency_contact_address', 'TEXT'],
+      ['doc_national_id', 'TEXT'],
+      ['doc_passport', 'TEXT'],
+      ['doc_contract', 'TEXT'],
+      ['doc_others', 'TEXT'],
+    ];
+
+    for (const [col, colDef] of newEmpCols) {
+      if (!colNames.has(col)) {
+        try {
+          db.prepare(`ALTER TABLE employees ADD COLUMN ${col} ${colDef}`).run();
+        } catch (err) {
+          console.error(`Error adding column ${col} to employees:`, err);
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Error migrating employees table columns:', err);
+  }
 
   // Initialize users if none exist
   try {
@@ -226,21 +338,21 @@ function initDatabase(db: Database.Database) {
         {
           id: 'usr-1',
           username: 'sarath',
-          name: 'សារ៉ាត់ (Sarath)',
+          name: 'សារ៉ាត់ ចាន់ថា (Sarath Chantha)',
           email: 'sarath@hestra.kh',
           role: 'Admin',
           status: 'Active',
           employee_id: 'emp-13',
           department_name: 'ផ្នែកធនធានមនុស្ស (People & Culture)',
           avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=256&h=256&fit=crop&crop=faces',
-          two_factor_enabled: 1,
+          two_factor_enabled: 0,
           permissions: 'all,manage_users,manage_payroll,approve_leaves,system_settings,export_data',
           last_login: '2026-10-24 08:30',
           created_at: '2024-01-01',
         },
         {
           id: 'usr-2',
-          username: 'van',
+          username: 'sopheak',
           name: 'វ៉ាន់ សុភ័ក្ត្រ (Van Sopheak)',
           email: 'van.sopheak@hestra.kh',
           role: 'Manager',
@@ -248,14 +360,14 @@ function initDatabase(db: Database.Database) {
           employee_id: 'emp-1',
           department_name: 'ផ្នែកបច្ចេកវិទ្យា (Engineering)',
           avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=256&h=256&fit=crop&crop=faces',
-          two_factor_enabled: 1,
+          two_factor_enabled: 0,
           permissions: 'view_team,approve_leaves,evaluate_performance,attendance_management',
           last_login: '2026-10-24 09:12',
           created_at: '2024-01-15',
         },
         {
           id: 'usr-3',
-          username: 'chan',
+          username: 'thida',
           name: 'ចាន់ ធីតា (Chan Thida)',
           email: 'chan.thida@hestra.kh',
           role: 'Employee',
@@ -270,7 +382,7 @@ function initDatabase(db: Database.Database) {
         },
         {
           id: 'usr-4',
-          username: 'sim',
+          username: 'kakkada',
           name: 'ស៊ឹម កក្កដា (Sim Kakkada)',
           email: 'sim.kakkada@hestra.kh',
           role: 'Employee',
@@ -285,7 +397,7 @@ function initDatabase(db: Database.Database) {
         },
         {
           id: 'usr-5',
-          username: 'heng',
+          username: 'sophal',
           name: 'ហេង សុផល (Heng Sophal)',
           email: 'heng.sophal@hestra.kh',
           role: 'Manager',
@@ -293,7 +405,7 @@ function initDatabase(db: Database.Database) {
           employee_id: 'emp-8',
           department_name: 'ផ្នែកគណនេយ្យ & ហិរញ្ញវត្ថុ (Finance)',
           avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=256&h=256&fit=crop&crop=faces',
-          two_factor_enabled: 1,
+          two_factor_enabled: 0,
           permissions: 'view_team,approve_leaves,view_payroll,evaluate_performance',
           last_login: '2026-10-22 11:05',
           created_at: '2024-02-20',

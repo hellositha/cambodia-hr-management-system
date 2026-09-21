@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
 import { Employee, Department } from '@/lib/types';
+import { formatLocalizedText } from '@/lib/translations';
 import {
   Users,
   Search,
@@ -30,10 +31,15 @@ import {
   Edit2,
   UserX,
   Trash2,
+  ShieldCheck,
+  CreditCard,
+  FolderOpen,
+  IdCard,
+  User,
 } from 'lucide-react';
 
 export default function EmployeesPage() {
-  const { openModal, showToast, triggerRefresh, refreshKey } = useApp();
+  const { openModal, showToast, triggerRefresh, refreshKey, language, t } = useApp();
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -50,7 +56,7 @@ export default function EmployeesPage() {
   const [activeEmployeeId, setActiveEmployeeId] = useState<string | null>(null);
   const [drawerDetails, setDrawerDetails] = useState<any | null>(null);
   const [drawerLoading, setDrawerLoading] = useState(false);
-  const [drawerTab, setDrawerTab] = useState<'overview' | 'leaves' | 'attendance' | 'payroll' | 'reviews'>('overview');
+  const [drawerTab, setDrawerTab] = useState<'overview' | 'hr_profile' | 'leaves' | 'attendance' | 'payroll' | 'reviews'>('overview');
 
   // Load departments
   useEffect(() => {
@@ -173,31 +179,31 @@ export default function EmployeesPage() {
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
             <Users className="text-indigo-600" size={26} />
-            បញ្ជីបុគ្គលិក & ធនធានមនុស្ស (Employee Directory)
+            {t('emp_directory_title')}
           </h1>
           <p className="text-xs text-slate-500">
-            ស្វែងរក, ច្រោះតាមផ្នែក, គ្រប់គ្រងប្រវត្តិរូប, ប្រាក់បៀវត្សរ៍, វត្តមាន និងច្បាប់ឈប់សម្រាក
+            {t('emp_directory_sub')}
           </p>
         </div>
         <div className="flex items-center gap-2.5">
           <button
             onClick={handleClearAll}
             className="px-3.5 py-2 rounded-xl bg-white border border-rose-200 text-xs font-semibold text-rose-600 hover:bg-rose-50 flex items-center gap-2 shadow-2xs transition-colors cursor-pointer"
-            title="លុបបុគ្គលិកទាំងអស់ចេញពីប្រព័ន្ធ"
+            title={language === 'km' ? 'លុបបុគ្គលិកទាំងអស់ចេញពីប្រព័ន្ធ' : 'Clear all employee records'}
           >
-            <Trash2 size={15} /> សម្អាតបញ្ជី (Clear)
+            <Trash2 size={15} /> {t('emp_clear_btn')}
           </button>
           <button
             onClick={handleExportCSV}
             className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 shadow-2xs transition-colors cursor-pointer"
           >
-            <Download size={15} /> ទាញយក CSV
+            <Download size={15} /> {t('emp_export_csv')}
           </button>
           <button
             onClick={() => openModal('add-employee')}
             className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
           >
-            <Plus size={16} /> បញ្ចូលបុគ្គលិក (Add Staff)
+            <Plus size={16} /> {t('emp_add_staff')}
           </button>
         </div>
       </div>
@@ -210,7 +216,7 @@ export default function EmployeesPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input
               type="text"
-              placeholder="ស្វែងរកតាមឈ្មោះ, អ៊ីមែល, មុខតំណែង... (Search by name, role...)"
+              placeholder={t('emp_search_placeholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 transition-all font-sans"
@@ -223,10 +229,10 @@ export default function EmployeesPage() {
             onChange={(e) => setSelectedDept(e.target.value)}
             className="w-full md:w-48 px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 font-sans"
           >
-            <option value="all">គ្រប់ដេប៉ាតឺម៉ង់ (All Departments)</option>
+            <option value="all">{t('emp_all_departments')}</option>
             {departments.map((d) => (
               <option key={d.id} value={d.id}>
-                {d.name}
+                {formatLocalizedText(d.name, language)}
               </option>
             ))}
           </select>
@@ -237,11 +243,11 @@ export default function EmployeesPage() {
             onChange={(e) => setSelectedType(e.target.value)}
             className="w-full md:w-40 px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 font-sans"
           >
-            <option value="all">គ្រប់ប្រភេទការងារ (All Types)</option>
-            <option value="Full-Time">ពេញម៉ោង (Full-Time)</option>
-            <option value="Part-Time">ក្រៅម៉ោង (Part-Time)</option>
-            <option value="Contract">កិច្ចសន្យា (Contract)</option>
-            <option value="Intern">កម្មសិក្សា (Intern)</option>
+            <option value="all">{t('emp_all_types')}</option>
+            <option value="Full-Time">{t('emp_type_fulltime')}</option>
+            <option value="Part-Time">{t('emp_type_parttime')}</option>
+            <option value="Contract">{t('emp_type_contract')}</option>
+            <option value="Intern">{t('emp_type_intern')}</option>
           </select>
 
           {/* View Toggle */}
@@ -507,7 +513,7 @@ export default function EmployeesPage() {
                   className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
                 >
                   <FileText size={14} />
-                  <span>ចេញលិខិតផ្លូវការ</span>
+                  <span>{t('emp_official_letter')}</span>
                 </Link>
                 <button
                   onClick={() => setActiveEmployeeId(null)}
@@ -521,22 +527,23 @@ export default function EmployeesPage() {
             {/* Drawer Tabs */}
             <div className="flex items-center px-6 border-b border-slate-200 bg-slate-50 text-xs font-semibold overflow-x-auto">
               {[
-                { id: 'overview', label: 'Overview' },
-                { id: 'leaves', label: 'Leave Balances' },
-                { id: 'attendance', label: 'Attendance' },
-                { id: 'payroll', label: 'Compensation & Payslips' },
-                { id: 'reviews', label: 'Performance Reviews' },
-              ].map((t) => (
+                { id: 'overview', label: language === 'km' ? 'សង្ខេប' : 'Overview' },
+                { id: 'hr_profile', label: t('emp_hr_profile_tab') },
+                { id: 'leaves', label: language === 'km' ? 'ច្បាប់ឈប់សម្រាក' : 'Leave Balances' },
+                { id: 'attendance', label: language === 'km' ? 'វត្តមាន' : 'Attendance' },
+                { id: 'payroll', label: language === 'km' ? 'ប្រាក់បៀវត្សរ៍' : 'Compensation & Payslips' },
+                { id: 'reviews', label: language === 'km' ? 'ការវាយតម្លៃ' : 'Performance Reviews' },
+              ].map((tb) => (
                 <button
-                  key={t.id}
-                  onClick={() => setDrawerTab(t.id as any)}
-                  className={`py-3 px-3 border-b-2 transition-colors whitespace-nowrap ${
-                    drawerTab === t.id
+                  key={tb.id}
+                  onClick={() => setDrawerTab(tb.id as any)}
+                  className={`py-3 px-3 border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
+                    drawerTab === tb.id
                       ? 'border-indigo-600 text-indigo-600 font-bold'
                       : 'border-transparent text-slate-500 hover:text-slate-800'
                   }`}
                 >
-                  {t.label}
+                  {tb.label}
                 </button>
               ))}
             </div>
@@ -544,32 +551,38 @@ export default function EmployeesPage() {
             {/* Drawer Body */}
             <div className="flex-1 overflow-y-auto p-6 text-xs text-slate-700">
               {drawerLoading || !drawerDetails ? (
-                <div className="py-20 text-center text-slate-400">Loading profile records...</div>
+                <div className="py-20 text-center text-slate-400">
+                  {language === 'km' ? 'កំពុងទាញយកទិន្នន័យ...' : 'Loading profile records...'}
+                </div>
               ) : (
                 <>
                   {/* 1. OVERVIEW TAB */}
                   {drawerTab === 'overview' && (
                     <div className="space-y-6">
                       <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-                        <h4 className="font-bold text-slate-900 mb-2">Professional Summary</h4>
+                        <h4 className="font-bold text-slate-900 mb-2">
+                          {language === 'km' ? 'សេចក្តីសង្ខេបវិជ្ជាជីវៈ' : 'Professional Summary'}
+                        </h4>
                         <p className="text-slate-600 leading-relaxed">
-                          {drawerDetails.employee.bio ||
-                            'Dedicated team member contributing actively to corporate initiatives and cross-functional pod velocity.'}
+                          {formatLocalizedText(drawerDetails.employee.bio, language) ||
+                            (language === 'km'
+                              ? 'បុគ្គលិកដែលមានការប្តេជ្ញាចិត្តខ្ពស់ និងចូលរួមយ៉ាងសកម្មក្នុងភាពជោគជ័យរបស់ក្រុមហ៊ុន។'
+                              : 'Dedicated team member contributing actively to corporate initiatives and cross-functional pod velocity.')}
                         </p>
                       </div>
 
                       <div className="grid grid-cols-2 gap-4">
                         <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
                           <span className="text-[10px] text-slate-400 block uppercase font-bold">
-                            Direct Manager
+                            {language === 'km' ? 'អ្នកគ្រប់គ្រងផ្ទាល់' : 'Direct Manager'}
                           </span>
                           <span className="font-semibold text-slate-800">
-                            {drawerDetails.employee.manager_name || 'Executive Leadership'}
+                            {drawerDetails.employee.manager_name || (language === 'km' ? 'ថ្នាក់ដឹកនាំ' : 'Executive Leadership')}
                           </span>
                         </div>
                         <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
                           <span className="text-[10px] text-slate-400 block uppercase font-bold">
-                            Hire Date
+                            {language === 'km' ? 'ថ្ងៃចូលបម្រើការ' : 'Hire Date'}
                           </span>
                           <span className="font-semibold text-slate-800">
                             {drawerDetails.employee.join_date}
@@ -577,7 +590,7 @@ export default function EmployeesPage() {
                         </div>
                         <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
                           <span className="text-[10px] text-slate-400 block uppercase font-bold">
-                            Work Email
+                            {language === 'km' ? 'អ៊ីមែលការងារ' : 'Work Email'}
                           </span>
                           <span className="font-semibold text-slate-800 truncate block">
                             {drawerDetails.employee.email}
@@ -585,27 +598,63 @@ export default function EmployeesPage() {
                         </div>
                         <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
                           <span className="text-[10px] text-slate-400 block uppercase font-bold">
-                            Contact Phone
+                            {language === 'km' ? 'លេខទូរស័ព្ទ' : 'Contact Phone'}
                           </span>
                           <span className="font-semibold text-slate-800">
-                            {drawerDetails.employee.phone || 'Not recorded'}
+                            {drawerDetails.employee.phone || (language === 'km' ? 'មិនមាន' : 'Not recorded')}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Key HR & Compliance Badges */}
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="p-3 bg-purple-50/70 rounded-xl border border-purple-200/70 space-y-1">
+                          <span className="text-[10px] text-purple-700 font-bold block uppercase">
+                            {language === 'km' ? 'ប.ស.ស' : 'NSSF'}
+                          </span>
+                          <span className="font-bold text-purple-950 block truncate">
+                            {formatLocalizedText(drawerDetails.employee.nssf_number || drawerDetails.employee.nssf_member, language) || 'N/A'}
+                          </span>
+                        </div>
+                        <div className="p-3 bg-blue-50/70 rounded-xl border border-blue-200/70 space-y-1">
+                          <span className="text-[10px] text-blue-700 font-bold block uppercase">
+                            {language === 'km' ? 'កិច្ចសន្យា' : 'Contract'}
+                          </span>
+                          <span className="font-bold text-blue-950 block truncate">
+                            {formatLocalizedText(drawerDetails.employee.contract_type, language) || 'UDC'}
+                          </span>
+                        </div>
+                        <div className="p-3 bg-emerald-50/70 rounded-xl border border-emerald-200/70 space-y-1">
+                          <span className="text-[10px] text-emerald-700 font-bold block uppercase">
+                            {language === 'km' ? 'ធនាគារ' : 'Bank'}
+                          </span>
+                          <span className="font-bold text-emerald-950 block truncate">
+                            {formatLocalizedText(drawerDetails.employee.bank_name, language)?.split(' ')[0] || 'ABA Bank'}
                           </span>
                         </div>
                       </div>
 
                       <div className="p-4 bg-white rounded-xl border border-slate-200">
-                        <h4 className="font-bold text-slate-900 mb-3">Emergency Contact</h4>
+                        <h4 className="font-bold text-slate-900 mb-3">
+                          {language === 'km' ? 'ទំនាក់ទំនងពេលមានអាសន្ន' : 'Emergency Contact'}
+                        </h4>
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <span className="text-[10px] text-slate-400 block">Name & Relation</span>
+                            <span className="text-[10px] text-slate-400 block">
+                              {language === 'km' ? 'ឈ្មោះ & ត្រូវជា' : 'Name & Relation'}
+                            </span>
                             <span className="font-semibold text-slate-800">
-                              {drawerDetails.employee.emergency_contact_name || 'On File with HR'}
+                              {drawerDetails.employee.emergency_contact_name
+                                ? `${drawerDetails.employee.emergency_contact_name} (${formatLocalizedText(drawerDetails.employee.emergency_contact_relationship, language) || (language === 'km' ? 'ទំនាក់ទំនង' : 'Contact')})`
+                                : (language === 'km' ? 'មានក្នុងប្រព័ន្ធ HR' : 'On File with HR')}
                             </span>
                           </div>
                           <div>
-                            <span className="text-[10px] text-slate-400 block">Phone Number</span>
-                            <span className="font-semibold text-slate-800">
-                              {drawerDetails.employee.emergency_contact_phone || '+1 (555) 999-0000'}
+                            <span className="text-[10px] text-slate-400 block">
+                              {language === 'km' ? 'លេខទូរស័ព្ទ' : 'Phone Number'}
+                            </span>
+                            <span className="font-semibold text-slate-800 font-mono">
+                              {drawerDetails.employee.emergency_contact_phone || '+855 12 000 000'}
                             </span>
                           </div>
                         </div>
@@ -614,10 +663,407 @@ export default function EmployeesPage() {
                       <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
                         <button
                           onClick={() => handleTerminate(drawerDetails.employee.id, `${drawerDetails.employee.first_name} ${drawerDetails.employee.last_name}`)}
-                          className="px-3 py-2 rounded-lg text-rose-600 hover:bg-rose-50 font-semibold flex items-center gap-1.5"
+                          className="px-3 py-2 rounded-lg text-rose-600 hover:bg-rose-50 font-semibold flex items-center gap-1.5 cursor-pointer"
                         >
-                          <UserX size={15} /> Terminate Employee
+                          <UserX size={15} /> {language === 'km' ? 'បញ្ចប់ការងារ' : 'Terminate Employee'}
                         </button>
+                        <button
+                          onClick={() => setDrawerTab('hr_profile')}
+                          className="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold text-xs flex items-center gap-1 cursor-pointer"
+                        >
+                          <span>{t('emp_view_7_sections')}</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 1.5 HR PROFILE (7 DETAILED SECTIONS) */}
+                  {drawerTab === 'hr_profile' && (
+                    <div className="space-y-6">
+                      {/* Section 1: Personal Information */}
+                      <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                        <div className="flex items-center gap-2 pb-2 border-b border-slate-100 text-indigo-700 font-bold text-xs">
+                          <User size={16} />
+                          <span>{language === 'km' ? 'ផ្នែកទី ១៖ ព័ត៌មានផ្ទាល់ខ្លួន' : 'Section 1: Personal Information'}</span>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'នាមត្រកូល' : 'Last name'}
+                            </span>
+                            <span className="font-bold text-slate-800">{drawerDetails.employee.last_name}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'នាមខ្លួន' : 'First name'}
+                            </span>
+                            <span className="font-bold text-slate-800">{drawerDetails.employee.first_name}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ភេទ' : 'Gender'}
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              {formatLocalizedText(drawerDetails.employee.gender || (language === 'km' ? 'ប្រុស' : 'Male'), language)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ថ្ងៃខែឆ្នាំកំណើត' : 'Date of Birth'}
+                            </span>
+                            <span className="font-semibold text-slate-700">{drawerDetails.employee.dob || 'N/A'}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'សញ្ជាតិ' : 'Nationality'}
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              {formatLocalizedText(drawerDetails.employee.nationality || (language === 'km' ? 'កម្ពុជា' : 'Cambodian'), language)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ស្ថានភាពគ្រួសារ' : 'Marital Status'}
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              {formatLocalizedText(drawerDetails.employee.marital_status || (language === 'km' ? 'នៅលីវ' : 'Single'), language)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'អត្តសញ្ញាណប័ណ្ណ' : 'National ID'}
+                            </span>
+                            <span className="font-mono font-bold text-indigo-600">{drawerDetails.employee.national_id || 'N/A'}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ស្ថានភាព' : 'Status'}
+                            </span>
+                            <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                              {formatLocalizedText(drawerDetails.employee.status, language)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ប្រភេទការងារ' : 'Employment Type'}
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              {formatLocalizedText(drawerDetails.employee.employment_type, language)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ប្រាក់បៀវត្សរ៍' : 'Salary'}
+                            </span>
+                            <span className="font-mono font-bold text-emerald-700">${drawerDetails.employee.salary?.toLocaleString()}</span>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ទីតាំង' : 'Location'}
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              {formatLocalizedText(drawerDetails.employee.location || (language === 'km' ? 'រាជធានីភ្នំពេញ' : 'Phnom Penh'), language)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Section 2: Contact Information */}
+                      <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                        <div className="flex items-center gap-2 pb-2 border-b border-slate-100 text-emerald-700 font-bold text-xs">
+                          <Phone size={16} />
+                          <span>{language === 'km' ? 'ផ្នែកទី ២៖ ព័ត៌មានទំនាក់ទំនង' : 'Section 2: Contact Information'}</span>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'លេខទូរស័ព្ទ' : 'Phone Number'}
+                            </span>
+                            <span className="font-mono font-bold text-slate-800">{drawerDetails.employee.phone || 'N/A'}</span>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'អ៊ីមែលការងារ' : 'Work Email'}
+                            </span>
+                            <span className="font-semibold text-slate-800">{drawerDetails.employee.email}</span>
+                          </div>
+                          <div className="col-span-3">
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'អាសយដ្ឋានបច្ចុប្បន្ន' : 'Current Address'}
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              {formatLocalizedText(drawerDetails.employee.current_address, language) || 'N/A'}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ខេត្ត/រាជធានី' : 'Province/City'}
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              {formatLocalizedText(drawerDetails.employee.province_city || (language === 'km' ? 'រាជធានីភ្នំពេញ' : 'Phnom Penh'), language)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ស្រុក/ខណ្ឌ' : 'District'}
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              {formatLocalizedText(drawerDetails.employee.district, language) || 'N/A'}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ឃុំ/សង្កាត់' : 'Commune/Sangkat'}
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              {formatLocalizedText(drawerDetails.employee.commune_sangkat, language) || 'N/A'}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ភូមិ' : 'Village'}
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              {formatLocalizedText(drawerDetails.employee.village, language) || 'N/A'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Section 3: Employee Information */}
+                      <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                        <div className="flex items-center gap-2 pb-2 border-b border-slate-100 text-blue-700 font-bold text-xs">
+                          <Briefcase size={16} />
+                          <span>{language === 'km' ? 'ផ្នែកទី ៣៖ ព័ត៌មានការងារ' : 'Section 3: Employee Information'}</span>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'អត្តលេខ' : 'Employee ID'}
+                            </span>
+                            <span className="font-mono font-bold text-slate-900">{drawerDetails.employee.id}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ដេប៉ាតឺម៉ង់' : 'Department'}
+                            </span>
+                            <span className="font-bold text-slate-800">
+                              {formatLocalizedText(drawerDetails.employee.department_name, language)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'មុខតំណែង' : 'Position'}
+                            </span>
+                            <span className="font-bold text-indigo-700">
+                              {formatLocalizedText(drawerDetails.employee.role, language)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ប្រភេទបុគ្គលិក' : 'Employee Type'}
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              {formatLocalizedText(drawerDetails.employee.employee_type || (language === 'km' ? 'ពេញសិទ្ធិ' : 'Full-Time'), language)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ចូលបម្រើការ' : 'Join Date'}
+                            </span>
+                            <span className="font-semibold text-slate-700">{drawerDetails.employee.join_date}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ប្រភេទកិច្ចសន្យា' : 'Contract Type'}
+                            </span>
+                            <span className="font-bold text-blue-700">
+                              {formatLocalizedText(drawerDetails.employee.contract_type || 'UDC', language)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'កាលបរិច្ឆេទចាប់ផ្តើម' : 'Contract Start'}
+                            </span>
+                            <span className="font-semibold text-slate-700">{drawerDetails.employee.contract_start || drawerDetails.employee.join_date}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'កាលបរិច្ឆេទបញ្ចប់' : 'Contract End'}
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              {formatLocalizedText(drawerDetails.employee.contract_end || (language === 'km' ? 'មិនកំណត់' : 'Indefinite'), language)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'អ្នកគ្រប់គ្រង' : 'Manager'}
+                            </span>
+                            <span className="font-semibold text-slate-800">
+                              {formatLocalizedText(drawerDetails.employee.manager_name || (language === 'km' ? 'ថ្នាក់ដឹកនាំ' : 'Executive Leadership'), language)}
+                            </span>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ការិយាល័យធ្វើការ' : 'Work Location'}
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              {formatLocalizedText(drawerDetails.employee.work_location || (language === 'km' ? 'ការិយាល័យកណ្តាល' : 'Head Office'), language)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Section 4: Salary & Payroll */}
+                      <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                        <div className="flex items-center gap-2 pb-2 border-b border-slate-100 text-amber-700 font-bold text-xs">
+                          <DollarSign size={16} />
+                          <span>{language === 'km' ? 'ផ្នែកទី ៤៖ ប្រាក់បៀវត្សរ៍ & ធនាគារ' : 'Section 4: Salary & Payroll'}</span>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ប្រាក់បៀវត្សរ៍គោល' : 'Basic Salary'}
+                            </span>
+                            <span className="font-mono font-bold text-base text-emerald-700">${drawerDetails.employee.salary?.toLocaleString()}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'រូបិយប័ណ្ណ' : 'Currency'}
+                            </span>
+                            <span className="font-semibold text-slate-700">{drawerDetails.employee.salary_currency || 'USD ($)'}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ភាពញឹកញាប់បើក' : 'Frequency'}
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              {formatLocalizedText(drawerDetails.employee.salary_frequency || (language === 'km' ? 'ប្រចាំខែ' : 'Monthly'), language)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ឈ្មោះធនាគារ' : 'Bank Name'}
+                            </span>
+                            <span className="font-bold text-indigo-700">
+                              {formatLocalizedText(drawerDetails.employee.bank_name || 'ABA Bank', language)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ឈ្មោះម្ចាស់គណនី' : 'Account Name'}
+                            </span>
+                            <span className="font-mono font-bold text-slate-800">{drawerDetails.employee.bank_account_name || `${drawerDetails.employee.first_name} ${drawerDetails.employee.last_name}`}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'លេខគណនី' : 'Account Number'}
+                            </span>
+                            <span className="font-mono font-bold text-slate-800">{drawerDetails.employee.bank_account_number || 'N/A'}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Section 5: NSSF Information */}
+                      <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                        <div className="flex items-center gap-2 pb-2 border-b border-slate-100 text-purple-700 font-bold text-xs">
+                          <ShieldCheck size={16} />
+                          <span>{language === 'km' ? 'ផ្នែកទី ៥៖ ព័ត៌មាន ប.ស.ស' : 'Section 5: NSSF Information'}</span>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'សមាជិក ប.ស.ស' : 'NSSF Member'}
+                            </span>
+                            <span className="font-bold text-purple-800">
+                              {formatLocalizedText(drawerDetails.employee.nssf_member || (language === 'km' ? 'មាន' : 'Yes'), language)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'លេខកាត ប.ស.ស' : 'NSSF Number'}
+                            </span>
+                            <span className="font-mono font-bold text-purple-900">{drawerDetails.employee.nssf_number || 'N/A'}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'កាលបរិច្ឆេទចុះបញ្ជី' : 'Registration Date'}
+                            </span>
+                            <span className="font-semibold text-slate-700">{drawerDetails.employee.nssf_reg_date || drawerDetails.employee.join_date}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Section 6: Emergency Contact */}
+                      <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                        <div className="flex items-center gap-2 pb-2 border-b border-slate-100 text-rose-700 font-bold text-xs">
+                          <AlertCircle size={16} />
+                          <span>{language === 'km' ? 'ផ្នែកទី ៦៖ ទំនាក់ទំនងពេលមានអាសន្ន' : 'Section 6: Emergency Contact'}</span>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-2 gap-3">
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ឈ្មោះអ្នកទំនាក់ទំនង' : 'Contact Name'}
+                            </span>
+                            <span className="font-bold text-slate-800">{drawerDetails.employee.emergency_contact_name || 'N/A'}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'ត្រូវជា' : 'Relationship'}
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              {formatLocalizedText(drawerDetails.employee.emergency_contact_relationship || (language === 'km' ? 'ប្តី/ប្រពន្ធ' : 'Spouse'), language)}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'លេខទូរស័ព្ទអាសន្ន' : 'Emergency Phone'}
+                            </span>
+                            <span className="font-mono font-bold text-slate-800">{drawerDetails.employee.emergency_contact_phone || 'N/A'}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-slate-400 block uppercase font-semibold">
+                              {language === 'km' ? 'អាសយដ្ឋាន' : 'Address'}
+                            </span>
+                            <span className="font-semibold text-slate-700">
+                              {formatLocalizedText(drawerDetails.employee.emergency_contact_address || (language === 'km' ? 'រាជធានីភ្នំពេញ' : 'Phnom Penh'), language)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Section 7: Documents */}
+                      <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs space-y-3">
+                        <div className="flex items-center gap-2 pb-2 border-b border-slate-100 text-slate-700 font-bold text-xs">
+                          <FolderOpen size={16} />
+                          <span>{language === 'km' ? 'ផ្នែកទី ៧៖ ឯកសារភ្ជាប់' : 'Section 7: Attached Documents'}</span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                            <span className="text-slate-600 font-medium">
+                              {language === 'km' ? 'ច្បាប់ចម្លងអត្តសញ្ញាណប័ណ្ណ' : 'National ID Copy'}
+                            </span>
+                            <span className="font-mono text-[11px] text-indigo-600 truncate max-w-[140px]">{drawerDetails.employee.doc_national_id || 'National_ID_Scan.pdf'}</span>
+                          </div>
+                          <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                            <span className="text-slate-600 font-medium">
+                              {language === 'km' ? 'លិខិតឆ្លងដែន' : 'Passport Copy'}
+                            </span>
+                            <span className="font-mono text-[11px] text-indigo-600 truncate max-w-[140px]">{drawerDetails.employee.doc_passport || 'Passport_Copy.pdf'}</span>
+                          </div>
+                          <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                            <span className="text-slate-600 font-medium">
+                              {language === 'km' ? 'កិច្ចសន្យាការងារ' : 'Employment Contract'}
+                            </span>
+                            <span className="font-mono text-[11px] text-indigo-600 truncate max-w-[140px]">{drawerDetails.employee.doc_contract || 'Contract_Signed.pdf'}</span>
+                          </div>
+                          <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-200 flex items-center justify-between">
+                            <span className="text-slate-600 font-medium">
+                              {language === 'km' ? 'ឯកសារផ្សេងៗ' : 'Other Documents'}
+                            </span>
+                            <span className="font-mono text-[11px] text-indigo-600 truncate max-w-[140px]">{drawerDetails.employee.doc_others || 'Certificates.zip'}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}

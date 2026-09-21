@@ -15,13 +15,35 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Allow background API calls
-  if (pathname.startsWith('/api/')) {
-    return NextResponse.next();
-  }
-
   const authCookie = request.cookies.get('hestra_auth')?.value;
   const roleCookie = request.cookies.get('hestra_role')?.value;
+
+  // API RBAC Checks
+  if (pathname.startsWith('/api/')) {
+    if (roleCookie === 'Employee') {
+      // Prohibit employee from sensitive admin/management APIs
+      if (
+        pathname.startsWith('/api/users') ||
+        pathname.startsWith('/api/settings') ||
+        pathname.startsWith('/api/reports') ||
+        pathname.startsWith('/api/seed') ||
+        pathname.startsWith('/api/recruitment/seed') ||
+        (pathname.startsWith('/api/payroll') && request.method !== 'GET') ||
+        (pathname.startsWith('/api/employees') && ['POST', 'PUT', 'DELETE'].includes(request.method)) ||
+        (pathname.startsWith('/api/departments') && ['POST', 'PUT', 'DELETE'].includes(request.method)) ||
+        (pathname.startsWith('/api/announcements') && ['POST', 'PUT', 'DELETE'].includes(request.method)) ||
+        (pathname.startsWith('/api/leaves') && ['PATCH', 'PUT', 'DELETE'].includes(request.method))
+      ) {
+        return NextResponse.json(
+          {
+            error: 'ការអនុញ្ញាតត្រូវបានបដិសេធ៖ តួនាទីបុគ្គលិកមិនមានសិទ្ធិចូលដំណើរការមុខងាររដ្ឋបាលនេះទេ (Forbidden: Employee role has limited permissions)',
+          },
+          { status: 403 }
+        );
+      }
+    }
+    return NextResponse.next();
+  }
 
   // If user is accessing the login page
   if (pathname === '/login') {
@@ -30,9 +52,7 @@ export function proxy(request: NextRequest) {
       if (roleCookie === 'Employee') {
         return NextResponse.redirect(new URL('/portal/staff', request.url));
       }
-      if (roleCookie === 'Manager') {
-        return NextResponse.redirect(new URL('/portal/manager', request.url));
-      }
+      // Both Manager and Admin redirect to the Dashboard
       return NextResponse.redirect(new URL('/', request.url));
     }
     return NextResponse.next();
@@ -47,20 +67,32 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  // Role-Based Access Control (RBAC)
+  // Role-Based Access Control (RBAC) for Pages
   if (roleCookie === 'Employee') {
-    // Restrict employees from sensitive management sections
+    // Strictly restrict employees to Employee Self-Service (ESS), Leaves, Attendance, and public company notices
+    const isAllowedForEmployee =
+      pathname === '/portal/staff' ||
+      pathname.startsWith('/portal/staff') ||
+      pathname === '/attendance' ||
+      pathname.startsWith('/attendance') ||
+      pathname === '/leaves' ||
+      pathname.startsWith('/leaves') ||
+      pathname === '/announcements' ||
+      pathname.startsWith('/announcements');
+
+    if (!isAllowedForEmployee) {
+      const redirectUrl = new URL('/portal/staff', request.url);
+      redirectUrl.searchParams.set('restricted', '1');
+      return NextResponse.redirect(redirectUrl);
+    }
+  } else if (roleCookie === 'Manager') {
+    // Restrict managers from full user administration, system settings, executive reports, and bulk payroll
     if (
       pathname.startsWith('/users') ||
       pathname.startsWith('/settings') ||
-      pathname.startsWith('/payroll') ||
-      pathname.startsWith('/recruitment')
+      pathname.startsWith('/reports') ||
+      pathname.startsWith('/payroll')
     ) {
-      return NextResponse.redirect(new URL('/portal/staff', request.url));
-    }
-  } else if (roleCookie === 'Manager') {
-    // Restrict managers from full user administration and core system settings
-    if (pathname.startsWith('/users') || pathname.startsWith('/settings')) {
       return NextResponse.redirect(new URL('/portal/manager', request.url));
     }
   }
@@ -70,9 +102,7 @@ export function proxy(request: NextRequest) {
     if (roleCookie === 'Employee') {
       return NextResponse.redirect(new URL('/portal/staff', request.url));
     }
-    if (roleCookie === 'Manager') {
-      return NextResponse.redirect(new URL('/portal/manager', request.url));
-    }
+    // Managers and Admins access the Dashboard ('/') directly
   }
 
   return NextResponse.next();

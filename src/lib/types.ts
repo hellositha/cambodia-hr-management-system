@@ -24,8 +24,8 @@ export interface Employee {
   role: string;
   department_id: string;
   department_name?: string;
-  employment_type: EmploymentType;
-  status: EmployeeStatus;
+  employment_type: string;
+  status: string;
   salary: number;
   join_date: string;
   manager_id?: string;
@@ -33,8 +33,43 @@ export interface Employee {
   avatar: string;
   location: string;
   bio?: string;
+  // 1. Personal Information
+  gender?: string;
+  dob?: string;
+  nationality?: string;
+  marital_status?: string;
+  national_id?: string;
+  // 2. Contact Information
+  current_address?: string;
+  province_city?: string;
+  district?: string;
+  commune_sangkat?: string;
+  village?: string;
+  // 3. Employee & Contract Information
+  contract_type?: string;
+  contract_start?: string;
+  contract_end?: string;
+  work_location?: string;
+  // 4. Salary & Payroll
+  salary_currency?: string;
+  salary_frequency?: string;
+  bank_name?: string;
+  bank_account_name?: string;
+  bank_account_number?: string;
+  // 5. NSSF Information
+  nssf_member?: string;
+  nssf_number?: string;
+  nssf_reg_date?: string;
+  // 6. Emergency Contact
   emergency_contact_name?: string;
+  emergency_contact_relationship?: string;
   emergency_contact_phone?: string;
+  emergency_contact_address?: string;
+  // 7. Documents
+  doc_national_id?: string;
+  doc_passport?: string;
+  doc_contract?: string;
+  doc_others?: string;
   created_at: string;
 }
 
@@ -56,7 +91,7 @@ export interface AttendanceRecord {
 }
 
 export type LeaveType = 'Annual' | 'Sick' | 'Maternity/Paternity' | 'Casual' | 'Unpaid';
-export type LeaveStatus = 'Pending' | 'Approved' | 'Rejected';
+export type LeaveStatus = 'Pending' | 'Pending Manager' | 'Pending Admin' | 'Approved' | 'Rejected';
 
 export interface LeaveRequest {
   id: string;
@@ -71,6 +106,17 @@ export interface LeaveRequest {
   days_count: number;
   reason: string;
   status: LeaveStatus;
+  // Step 1: Line Manager
+  line_manager_id?: string;
+  line_manager_name?: string;
+  line_manager_reviewed_at?: string;
+  line_manager_comments?: string;
+  // Step 2: Administrator
+  admin_reviewer_id?: string;
+  admin_reviewer_name?: string;
+  admin_reviewed_at?: string;
+  admin_comments?: string;
+  // General Reviewer fields
   reviewer_id?: string;
   reviewer_name?: string;
   reviewed_at?: string;

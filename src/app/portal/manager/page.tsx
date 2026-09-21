@@ -52,7 +52,7 @@ export default function ManagementPortalPage() {
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) {
-          const pending = data.filter((l: any) => l.status === 'Pending');
+          const pending = data.filter((l: any) => l.status === 'Pending' || l.status === 'Pending Manager');
           setPendingLeaves(pending);
         }
         setLoadingLeaves(false);
@@ -147,11 +147,13 @@ export default function ManagementPortalPage() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          status: decision,
+          status: decision === 'Approved' ? 'Pending Admin' : 'Rejected',
+          stage: 'manager',
           reviewer_id: currentPersona.id,
+          reviewer_role: 'Manager',
           reviewer_comments:
             decision === 'Approved'
-              ? 'អនុម័តដោយប្រធានផ្នែក (Approved by Manager)'
+              ? `អនុម័តជំហានទី១ ដោយប្រធានផ្នែក ${currentPersona.name}។ បានបញ្ជូនទៅរដ្ឋបាល (Step 1 Approved by Line Manager. Forwarded to Admin).`
               : 'ពុំអាចអនុញ្ញាតបានដោយសារតម្រូវការការងារបន្ទាន់ (Declined due to work schedule)',
         }),
       });
@@ -159,7 +161,7 @@ export default function ManagementPortalPage() {
       if (res.ok) {
         showToast(
           decision === 'Approved'
-            ? 'បានអនុម័តសំណើសុំច្បាប់ដោយជោគជ័យ! ✓'
+            ? 'បានអនុម័តជំហានទី១ និងបញ្ជូនទៅរដ្ឋបាល Admin ដោយជោគជ័យ! ✓'
             : 'បានបដិសេធសំណើសុំច្បាប់',
           decision === 'Approved' ? 'success' : 'info'
         );
@@ -334,7 +336,7 @@ export default function ManagementPortalPage() {
                     className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-transform active:scale-95 cursor-pointer disabled:opacity-50"
                   >
                     <Check size={14} />
-                    <span>{approvingId === leave.id ? 'កំពុងដំណើរការ...' : 'អនុម័ត (Approve)'}</span>
+                    <span>{approvingId === leave.id ? 'កំពុងបញ្ជូន...' : 'អនុម័តជំហាន១ ➔ បញ្ជូនទៅរដ្ឋបាល'}</span>
                   </button>
 
                   <button
