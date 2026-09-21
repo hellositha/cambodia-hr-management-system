@@ -14,11 +14,13 @@ import {
   Layers,
   Code,
   Sparkles,
+  Trash2,
 } from 'lucide-react';
 
 export default function SettingsPage() {
   const { currentPersona, switchPersona, showToast, triggerRefresh } = useApp();
   const [resetting, setResetting] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   const [companySettings, setCompanySettings] = useState({
     name: 'PulseHR Technologies Inc.',
@@ -50,6 +52,25 @@ export default function SettingsPage() {
       showToast('Network error resetting database', 'error');
     } finally {
       setResetting(false);
+    }
+  };
+
+  const handleClearEmployees = async () => {
+    if (!confirm('Are you sure you want to remove all employees? This will clear all employee profiles, attendance, leaves, and payroll records.')) return;
+    setClearing(true);
+    try {
+      const res = await fetch('/api/employees', { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) {
+        showToast(data.message || 'All employees cleared successfully!', 'info');
+        triggerRefresh();
+      } else {
+        showToast(data.error || 'Failed to clear employees', 'error');
+      }
+    } catch {
+      showToast('Network error clearing employees', 'error');
+    } finally {
+      setClearing(false);
     }
   };
 
@@ -165,21 +186,31 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+        <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h4 className="text-xs font-bold text-slate-900">Reset Demo Database</h4>
+            <h4 className="text-xs font-bold text-slate-900">Database Records & Controls</h4>
             <p className="text-[11px] text-slate-500">
-              Restore initial seed state with 18 employees, 6 departments, attendance logs, and job postings.
+              Clear all employees or restore initial seed state with 18 employees and full history.
             </p>
           </div>
-          <button
-            onClick={handleResetDatabase}
-            disabled={resetting}
-            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-transform active:scale-95 shadow-sm"
-          >
-            <RefreshCw size={14} className={resetting ? 'animate-spin' : ''} />
-            {resetting ? 'Resetting...' : 'Reset to Fresh Seed'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleClearEmployees}
+              disabled={clearing}
+              className="px-4 py-2 bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-bold flex items-center gap-2 transition-transform active:scale-95 shadow-2xs cursor-pointer"
+            >
+              <Trash2 size={14} className={clearing ? 'animate-spin' : ''} />
+              {clearing ? 'Clearing...' : 'Clear All Employees'}
+            </button>
+            <button
+              onClick={handleResetDatabase}
+              disabled={resetting}
+              className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-transform active:scale-95 shadow-sm cursor-pointer"
+            >
+              <RefreshCw size={14} className={resetting ? 'animate-spin' : ''} />
+              {resetting ? 'Resetting...' : 'Reset to Fresh Seed'}
+            </button>
+          </div>
         </div>
       </div>
 

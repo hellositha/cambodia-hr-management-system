@@ -448,7 +448,7 @@ export default function ModernDashboardPage() {
           {activeChartTab === 'departments' ? (
             <div className="space-y-4">
               {stats.departmentDistribution.map((dept) => {
-                const percentage = Math.round((dept.count / stats.totalEmployees) * 100);
+                const percentage = stats.totalEmployees > 0 ? Math.round((dept.count / stats.totalEmployees) * 100) : 0;
                 return (
                   <div key={dept.name} className="group space-y-1.5 cursor-pointer">
                     <div className="flex items-center justify-between text-xs">
@@ -493,7 +493,7 @@ export default function ModernDashboardPage() {
                 <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
                   <span className="text-[11px] text-slate-500 block font-medium">Avg Pod Size</span>
                   <span className="text-xl font-black text-slate-900">
-                    {(stats.totalEmployees / stats.departmentDistribution.length).toFixed(1)}
+                    {stats.departmentDistribution.length > 0 ? (stats.totalEmployees / stats.departmentDistribution.length).toFixed(1) : '0'}
                   </span>
                 </div>
               </div>

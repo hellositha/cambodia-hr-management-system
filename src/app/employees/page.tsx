@@ -28,6 +28,7 @@ import {
   UserCheck,
   Edit2,
   UserX,
+  Trash2,
 } from 'lucide-react';
 
 export default function EmployeesPage() {
@@ -146,6 +147,24 @@ export default function EmployeesPage() {
     }
   };
 
+  // Clear All Employees
+  const handleClearAll = async () => {
+    if (!confirm('Are you sure you want to remove all employees? This will clear all employee profiles, attendance, leaves, and payroll records.')) return;
+    try {
+      const res = await fetch('/api/employees', { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) {
+        showToast(data.message || 'All employees have been removed.', 'info');
+        triggerRefresh();
+        setActiveEmployeeId(null);
+      } else {
+        showToast(data.error || 'Failed to clear employees', 'error');
+      }
+    } catch {
+      showToast('Network error clearing employees', 'error');
+    }
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       {/* Page Title & Top Actions */}
@@ -161,14 +180,21 @@ export default function EmployeesPage() {
         </div>
         <div className="flex items-center gap-2.5">
           <button
+            onClick={handleClearAll}
+            className="px-3.5 py-2 rounded-xl bg-white border border-rose-200 text-xs font-semibold text-rose-600 hover:bg-rose-50 flex items-center gap-2 shadow-2xs transition-colors cursor-pointer"
+            title="Remove all employees from system"
+          >
+            <Trash2 size={15} /> Clear All
+          </button>
+          <button
             onClick={handleExportCSV}
-            className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 shadow-2xs transition-colors"
+            className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 shadow-2xs transition-colors cursor-pointer"
           >
             <Download size={15} /> Export CSV
           </button>
           <button
             onClick={() => openModal('add-employee')}
-            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-2 transition-transform active:scale-95"
+            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
           >
             <Plus size={16} /> Add Employee
           </button>

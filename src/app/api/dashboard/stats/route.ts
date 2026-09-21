@@ -132,18 +132,18 @@ export async function GET() {
       onLeaveEmployees: leaveRow.count,
       newHiresThisMonth: newHiresRow.count,
       attendanceToday: {
-        present: present || 13,
-        remote: remote || 2,
-        absent: absent || 1,
-        late: late || 2,
-        percentage: attendancePercentage,
+        present: present,
+        remote: remote,
+        absent: absent,
+        late: late,
+        percentage: totalTracked > 0 ? Math.round(((present + remote + late) / totalTracked) * 100) : 0,
       },
       pendingLeavesCount: pendingLeaves.count,
       openPositionsCount: openJobs.count,
-      monthlyPayrollTotal: payrollSum.total || 178500,
+      monthlyPayrollTotal: payrollSum.total || 0,
       departmentDistribution: deptDistribution,
       recentActivities: activities,
-      upcomingBirthdaysAndAnniversaries: celebrations,
+      upcomingBirthdaysAndAnniversaries: totalRow.count > 0 ? celebrations : [],
     };
 
     return NextResponse.json(stats);

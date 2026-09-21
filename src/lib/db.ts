@@ -166,13 +166,29 @@ function initDatabase(db: Database.Database) {
       status TEXT NOT NULL DEFAULT 'Completed',
       created_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS system_meta (
+      key TEXT PRIMARY KEY,
+      value TEXT
+    );
   `);
 
-  // Check if seeding is needed
-  const count = db.prepare('SELECT count(*) as cnt FROM employees').get() as { cnt: number };
-  if (count.cnt === 0) {
+  // Check if initial seeding is needed on very first database creation
+  const meta = db.prepare("SELECT value FROM system_meta WHERE key = 'initialized'").get() as { value: string } | undefined;
+  if (!meta) {
     seedDatabase(db);
+    db.prepare("INSERT OR REPLACE INTO system_meta (key, value) VALUES ('initialized', 'true')").run();
   }
+}
+
+export function clearAllEmployees(db: Database.Database) {
+  db.prepare("UPDATE departments SET manager_id = NULL").run();
+  db.prepare("DELETE FROM attendance").run();
+  db.prepare("DELETE FROM leave_requests").run();
+  db.prepare("DELETE FROM leave_balances").run();
+  db.prepare("DELETE FROM payrolls").run();
+  db.prepare("DELETE FROM performance_reviews").run();
+  db.prepare("DELETE FROM employees").run();
 }
 
 export function seedDatabase(db: Database.Database) {

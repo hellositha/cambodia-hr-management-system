@@ -153,3 +153,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export async function DELETE() {
+  try {
+    const { getDb, clearAllEmployees } = await import('@/lib/db');
+    const db = getDb();
+    clearAllEmployees(db);
+    return NextResponse.json({ success: true, message: 'All employees and related records have been removed.' });
+  } catch (error: any) {
+    console.error('Error clearing employees:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
