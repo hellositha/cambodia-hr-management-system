@@ -42,6 +42,10 @@ export default function ManagementPortalPage() {
   const [loadingLeaves, setLoadingLeaves] = useState(true);
   const [approvingId, setApprovingId] = useState<string | null>(null);
 
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [loadingTeam, setLoadingTeam] = useState(true);
+  const [departmentName, setDepartmentName] = useState('ផ្នែកបច្ចេកវិទ្យា (Engineering)');
+
   // Load pending leaves
   const fetchLeaves = () => {
     fetch('/api/leaves')
@@ -59,9 +63,82 @@ export default function ManagementPortalPage() {
       });
   };
 
-  useEffect(() => {
-    fetchLeaves();
-  }, []);
+  // Load dynamic team members
+  const fetchTeam = async () => {
+    setLoadingTeam(true);
+    try {
+      const [empRes, attRes] = await Promise.all([
+        fetch('/api/employees'),
+        fetch('/api/attendance'),
+      ]);
+      const employees = await empRes.json();
+      const attendance = await attRes.json();
+
+      if (Array.isArray(employees)) {
+        // Find current manager's record
+        const managerEmp = employees.find(
+          (e: any) => e.id === currentPersona.id || e.email.toLowerCase() === currentPersona.email.toLowerCase()
+        );
+
+        const targetDeptId = managerEmp?.department_id || 'dept-1';
+        if (managerEmp?.department_name) {
+          setDepartmentName(managerEmp.department_name);
+        }
+
+        // Filter direct reports or department members (excluding manager themselves)
+        let filtered = employees.filter(
+          (e: any) =>
+            e.id !== currentPersona.id &&
+            (e.manager_id === currentPersona.id || e.department_id === targetDeptId)
+        );
+
+        if (filtered.length === 0) {
+          // fallback to engineering team if none found
+          filtered = employees.filter((e: any) => e.department_id === 'dept-1' && e.id !== currentPersona.id);
+        }
+
+        const todayStr = '2026-09-21';
+        const mapped = filtered.map((emp: any) => {
+          const att = Array.isArray(attendance)
+            ? attendance.find((a: any) => a.employee_id === emp.id && a.date === todayStr)
+            : null;
+
+          let status = 'In Office';
+          let statusColor = 'bg-emerald-500';
+          let clockIn = att?.clock_in ? att.clock_in.slice(0, 5) : '08:30 AM';
+
+          if (emp.status === 'Remote' || att?.status === 'Remote') {
+            status = 'Remote (WFH)';
+            statusColor = 'bg-blue-500';
+          } else if (emp.status === 'On Leave' || att?.status === 'Absent') {
+            status = 'On Leave';
+            statusColor = 'bg-amber-500';
+            clockIn = '--:--';
+          } else if (att?.status === 'Late') {
+            status = 'Late';
+            statusColor = 'bg-amber-500';
+          }
+
+          return {
+            id: emp.id,
+            name: `${emp.first_name} ${emp.last_name}`,
+            role: emp.role,
+            avatar: emp.avatar,
+            status,
+            statusColor,
+            clockIn,
+            leaveBalance: `${Math.floor(12 + (emp.id.charCodeAt(emp.id.length - 1) % 6))} ថ្ងៃ`,
+          };
+        });
+
+        setTeamMembers(mapped);
+      }
+    } catch (err) {
+      console.error('Failed to load team members:', err);
+    } finally {
+      setLoadingTeam(false);
+    }
+  };
 
   const handleDecision = async (leaveId: string, decision: 'Approved' | 'Rejected') => {
     setApprovingId(leaveId);
@@ -72,7 +149,10 @@ export default function ManagementPortalPage() {
         body: JSON.stringify({
           status: decision,
           reviewer_id: currentPersona.id,
-          reviewer_comments: decision === 'Approved' ? 'អនុម័តដោយប្រធានផ្នែក' : 'ពុំអាចអនុញ្ញាតបានដោយសារតម្រូវការការងារបន្ទាន់',
+          reviewer_comments:
+            decision === 'Approved'
+              ? 'អនុម័តដោយប្រធានផ្នែក (Approved by Manager)'
+              : 'ពុំអាចអនុញ្ញាតបានដោយសារតម្រូវការការងារបន្ទាន់ (Declined due to work schedule)',
         }),
       });
 
@@ -94,49 +174,10 @@ export default function ManagementPortalPage() {
     }
   };
 
-  // Mock team roster for Engineering department
-  const teamMembers = [
-    {
-      id: 'emp-18',
-      name: 'ចាន់ ធីតា (Chan Thida)',
-      role: 'វិស្វករកម្មវិធីជាន់ខ្ពស់ (Senior Software Engineer)',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces',
-      status: 'In Office',
-      statusColor: 'bg-emerald-500',
-      clockIn: '08:25 AM',
-      leaveBalance: '14 days',
-    },
-    {
-      id: 'emp-19',
-      name: 'ម៉ៅ វាសនា (Mao Veasna)',
-      role: 'វិស្វករ Frontend (Frontend Engineer)',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=256&h=256&fit=crop&crop=faces',
-      status: 'Remote (WFH)',
-      statusColor: 'bg-blue-500',
-      clockIn: '08:40 AM',
-      leaveBalance: '12 days',
-    },
-    {
-      id: 'emp-20',
-      name: 'កែវ ពិសាល (Keo Pisal)',
-      role: 'វិស្វករ Backend & DevOps (DevOps Engineer)',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=256&h=256&fit=crop&crop=faces',
-      status: 'In Office',
-      statusColor: 'bg-emerald-500',
-      clockIn: '08:15 AM',
-      leaveBalance: '16 days',
-    },
-    {
-      id: 'emp-21',
-      name: 'អ៊ុំ ម៉ាលីស (Oum Malis)',
-      role: 'អ្នករចនាផលិតផល (UI/UX Designer)',
-      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=256&h=256&fit=crop&crop=faces',
-      status: 'On Leave',
-      statusColor: 'bg-amber-500',
-      clockIn: '--:--',
-      leaveBalance: '10 days',
-    },
-  ];
+  useEffect(() => {
+    fetchLeaves();
+    fetchTeam();
+  }, [currentPersona]);
 
   return (
     <div className="space-y-6">

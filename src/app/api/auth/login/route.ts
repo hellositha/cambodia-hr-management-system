@@ -129,13 +129,28 @@ export async function POST(request: Request) {
     // Return authenticated user profile (excluding password)
     const { password: _, ...safeUser } = user;
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       user: safeUser,
       redirectUrl,
       portalWarning,
       token: `hestra_tok_${Date.now()}_${user.id}`,
     });
+
+    response.cookies.set('hestra_auth', user.id, {
+      path: '/',
+      httpOnly: false,
+      maxAge: 60 * 60 * 24 * 7,
+      sameSite: 'lax',
+    });
+    response.cookies.set('hestra_role', user.role, {
+      path: '/',
+      httpOnly: false,
+      maxAge: 60 * 60 * 24 * 7,
+      sameSite: 'lax',
+    });
+
+    return response;
   } catch (error) {
     console.error('Error during login:', error);
     return NextResponse.json(

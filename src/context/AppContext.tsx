@@ -152,6 +152,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const parsed = JSON.parse(savedUser);
         if (parsed && parsed.name && parsed.role) {
           setCurrentPersona(parsed);
+          document.cookie = `hestra_auth=${encodeURIComponent(parsed.id)}; path=/; max-age=604800; SameSite=Lax`;
+          document.cookie = `hestra_role=${encodeURIComponent(parsed.role)}; path=/; max-age=604800; SameSite=Lax`;
         }
       }
     } catch {}
@@ -163,6 +165,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setCurrentPersona(found);
       try {
         localStorage.setItem('hestra_current_user', JSON.stringify(found));
+        document.cookie = `hestra_auth=${encodeURIComponent(found.id)}; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `hestra_role=${encodeURIComponent(found.role)}; path=/; max-age=604800; SameSite=Lax`;
       } catch {}
       showToast(`Switched view to ${found.name} (${found.role})`, 'info');
     }
@@ -180,12 +184,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setCurrentPersona(newPersona);
     try {
       localStorage.setItem('hestra_current_user', JSON.stringify(newPersona));
+      document.cookie = `hestra_auth=${encodeURIComponent(userData.id)}; path=/; max-age=604800; SameSite=Lax`;
+      document.cookie = `hestra_role=${encodeURIComponent(userData.role)}; path=/; max-age=604800; SameSite=Lax`;
     } catch {}
   };
 
   const logout = () => {
     try {
       localStorage.removeItem('hestra_current_user');
+      document.cookie = 'hestra_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+      document.cookie = 'hestra_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
     } catch {}
     setCurrentPersona(PERSONAS[0]);
     showToast('បានចាកចេញពីប្រព័ន្ធដោយជោគជ័យ (Logged out)', 'info');

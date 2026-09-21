@@ -23,6 +23,7 @@ export const TRANSLATIONS = {
     nav_tools: 'ឧបករណ៍ & ច្បាប់ការងារ',
     nav_staff_portal: 'ផតថលបុគ្គលិក',
     nav_manager_portal: 'ផតថលគណៈគ្រប់គ្រង',
+    nav_reports: 'របាយការណ៍ & ស្ថិតិ HR',
     nav_users: 'គ្រប់គ្រងគណនី',
     nav_settings: 'ការកំណត់ប្រព័ន្ធ',
 
@@ -153,6 +154,7 @@ export const TRANSLATIONS = {
     nav_tools: 'HR Tools & Legal',
     nav_staff_portal: 'Staff Portal (ESS)',
     nav_manager_portal: 'Manager Portal (MSS)',
+    nav_reports: 'Reports & Analytics',
     nav_users: 'User Management',
     nav_settings: 'System Settings',
 

@@ -41,8 +41,7 @@ export default function StaffPortalPage() {
 
   const [activePayslipModal, setActivePayslipModal] = useState<StaffPayslip | null>(null);
 
-  // Sample employee data matching active persona
-  const staffData = {
+  const [staffData, setStaffData] = useState({
     name: currentPersona.name,
     role: currentPersona.title,
     empId: currentPersona.id.toUpperCase(),
@@ -54,15 +53,15 @@ export default function StaffPortalPage() {
     managerName: 'វ៉ាន់ សុភ័ក្ត្រ (Van Sopheak)',
     managerRole: 'នាយកផ្នែកបច្ចេកវិទ្យា (VP of Engineering)',
     managerEmail: 'van.sopheak@hestra.kh',
-  };
+  });
 
-  const leaveBalances = {
-    annual: { total: 18, used: 4, remaining: 14 },
+  const [leaveBalances, setLeaveBalances] = useState({
+    annual: { total: 20, used: 4, remaining: 16 },
     sick: { total: 10, used: 2, remaining: 8 },
     casual: { total: 5, used: 0, remaining: 5 },
-  };
+  });
 
-  const myLeaveHistory = [
+  const [myLeaveHistory, setMyLeaveHistory] = useState<any[]>([
     {
       id: 'l-01',
       type: 'Annual Leave (ច្បាប់ប្រចាំឆ្នាំ)',
@@ -83,19 +82,9 @@ export default function StaffPortalPage() {
       status: 'Approved',
       reviewer: 'វ៉ាន់ សុភ័ក្ត្រ',
     },
-    {
-      id: 'l-03',
-      type: 'Casual Leave (ច្បាប់ធុរៈផ្ទាល់ខ្លួន)',
-      startDate: '2026-11-02',
-      endDate: '2026-11-02',
-      days: 1,
-      reason: 'បន្តសុពលភាពលិខិតឆ្លងដែន',
-      status: 'Pending',
-      reviewer: 'វ៉ាន់ សុភ័ក្ត្រ',
-    },
-  ];
+  ]);
 
-  const myPayslips: StaffPayslip[] = [
+  const [myPayslips, setMyPayslips] = useState<StaffPayslip[]>([
     {
       id: 'PAY-2026-09-018',
       period: 'ខែកញ្ញា ២០២៦ (September 2026)',
@@ -116,17 +105,101 @@ export default function StaffPortalPage() {
       tax_deduction: 145.2,
       net_salary: 2198.95,
     },
-    {
-      id: 'PAY-2026-07-018',
-      period: 'ខែកក្កដា ២០២៦ (July 2026)',
-      payment_date: '2026-07-31',
-      base_salary: 2200,
-      allowances: 150,
-      nssf_deduction: 5.85,
-      tax_deduction: 145.2,
-      net_salary: 2198.95,
-    },
-  ];
+  ]);
+
+  useEffect(() => {
+    async function loadEmployeeProfile() {
+      try {
+        let empId = currentPersona.id;
+        // If currentPersona id starts with usr-, look up corresponding employee by email
+        if (empId.startsWith('usr-')) {
+          const empRes = await fetch('/api/employees');
+          const allEmps = await empRes.json();
+          if (Array.isArray(allEmps)) {
+            const match = allEmps.find(
+              (e: any) => e.email.toLowerCase() === currentPersona.email.toLowerCase()
+            );
+            if (match) empId = match.id;
+          }
+        }
+
+        const res = await fetch(`/api/employees/${empId}`);
+        if (res.ok) {
+          const data = await res.json();
+          const emp = data.employee;
+          if (emp) {
+            setStaffData({
+              name: `${emp.first_name} ${emp.last_name}`,
+              role: emp.role || currentPersona.title,
+              empId: emp.id.toUpperCase(),
+              email: emp.email,
+              department: emp.department_name || 'General Department',
+              location: emp.location || 'រាជធានីភ្នំពេញ (Phnom Penh Office)',
+              joinDate: emp.join_date || '2024-01-01',
+              phone: emp.phone || '+855 12 778 990',
+              managerName: emp.manager_name || 'វ៉ាន់ សុភ័ក្ត្រ (Van Sopheak)',
+              managerRole: 'ប្រធានផ្នែក (Department Head)',
+              managerEmail: 'van.sopheak@hestra.kh',
+            });
+          }
+
+          if (data.leaveBalance) {
+            setLeaveBalances({
+              annual: {
+                total: data.leaveBalance.annual_total,
+                used: data.leaveBalance.annual_used,
+                remaining: Math.max(0, data.leaveBalance.annual_total - data.leaveBalance.annual_used),
+              },
+              sick: {
+                total: data.leaveBalance.sick_total,
+                used: data.leaveBalance.sick_used,
+                remaining: Math.max(0, data.leaveBalance.sick_total - data.leaveBalance.sick_used),
+              },
+              casual: {
+                total: data.leaveBalance.casual_total,
+                used: data.leaveBalance.casual_used,
+                remaining: Math.max(0, data.leaveBalance.casual_total - data.leaveBalance.casual_used),
+              },
+            });
+          }
+
+          if (Array.isArray(data.leaves) && data.leaves.length > 0) {
+            setMyLeaveHistory(
+              data.leaves.map((l: any) => ({
+                id: l.id,
+                type: `${l.leave_type} Leave (ច្បាប់${l.leave_type === 'Annual' ? 'ប្រចាំឆ្នាំ' : l.leave_type === 'Sick' ? 'ឈឺ' : 'ធុរៈ'})`,
+                startDate: l.start_date,
+                endDate: l.end_date,
+                days: l.days_count,
+                reason: l.reason,
+                status: l.status,
+                reviewer: l.reviewer_name || 'ប្រធានផ្នែក',
+              }))
+            );
+          }
+
+          if (Array.isArray(data.payrolls) && data.payrolls.length > 0) {
+            setMyPayslips(
+              data.payrolls.map((p: any) => ({
+                id: p.id,
+                period: p.pay_period,
+                payment_date: p.payment_date,
+                base_salary: p.base_salary,
+                allowances: p.allowances,
+                nssf_deduction: p.insurance_deduction || 5.85,
+                tax_deduction: p.tax_deduction,
+                net_salary: p.net_salary,
+              }))
+            );
+          }
+        }
+      } catch (err) {
+        console.error('Error loading employee profile in portal:', err);
+      }
+    }
+
+    loadEmployeeProfile();
+  }, [currentPersona]);
 
   return (
     <div className="space-y-6">
