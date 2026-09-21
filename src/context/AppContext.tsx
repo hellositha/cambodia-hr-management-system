@@ -101,6 +101,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = language;
+      if (language === 'km') {
+        document.documentElement.classList.add('lang-km');
+      } else {
+        document.documentElement.classList.remove('lang-km');
+      }
+    }
+  }, [language]);
+
   const setLanguage = useCallback((newLang: Language) => {
     setLanguageState(newLang);
     try {

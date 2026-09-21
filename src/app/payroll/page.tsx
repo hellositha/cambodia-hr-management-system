@@ -323,17 +323,20 @@ export default function PayrollPage() {
                     <img src="/hestra-logo.svg" alt="HESTRA HRM" className="w-full h-full object-contain" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-black text-slate-900 tracking-tight">HESTRA HRM កម្ពុជា (HESTRA HRM Cambodia Co., Ltd.)</h2>
-                    <p className="text-[11px] text-slate-500">អគារ Exchange Square, មហាវិថីព្រះនរោត្តម, រាជធានីភ្នំពេញ</p>
-                    <p className="text-[11px] text-slate-500">លេខសារពើពន្ធ TIN: K009-90218928 &bull; លេខបញ្ជិកា ប.ស.ស (NSSF): 1029482</p>
+                    <h2 className="text-lg font-bold text-slate-900 font-khmer">HESTRA HRM កម្ពុជា (HESTRA HRM Cambodia Co., Ltd.)</h2>
+                    <p className="text-[11px] text-slate-500 font-khmer">អគារ Exchange Square, មហាវិថីព្រះនរោត្តម, រាជធានីភ្នំពេញ</p>
+                    <p className="text-[11px] text-slate-500 font-khmer">លេខសារពើពន្ធ TIN: K009-90218928 &bull; លេខបញ្ជិកា ប.ស.ស (NSSF): 1029482</p>
                   </div>
                 </div>
                 <div className="text-right">
+                  <span className="text-sm text-slate-900 font-khmer-moul block leading-normal">
+                    ប័ណ្ណបើកប្រាក់បៀវត្សរ៍
+                  </span>
                   <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
-                    ប័ណ្ណបើកប្រាក់បៀវត្សរ៍ (Payslip)
+                    Official Salary Payslip
                   </span>
                   <span className="text-sm font-mono font-bold text-slate-900">{activePayslip.id}</span>
-                  <span className="text-xs text-slate-500 block mt-1">កាលបរិច្ឆេទបើក៖ {activePayslip.payment_date}</span>
+                  <span className="text-xs text-slate-500 block mt-1 font-khmer">កាលបរិច្ឆេទបើក៖ {activePayslip.payment_date}</span>
                 </div>
               </div>
 

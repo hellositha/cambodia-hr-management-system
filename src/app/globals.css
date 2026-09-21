@@ -1,17 +1,120 @@
-@import url('https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,300..700;1,300..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,100..700;1,100..700&family=Koh+Santepheap:wght@300;400;700;900&family=Moul&family=Noto+Sans+Khmer:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --font-sans: 'Kantumruy Pro', 'Noto Sans Khmer', 'Koh Santepheap', 'Khmer OS Siemreap', 'Khmer OS Battambang', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-khmer: 'Kantumruy Pro', 'Noto Sans Khmer', 'Koh Santepheap', 'Khmer OS Siemreap', 'Khmer OS Battambang', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-khmer-moul: 'Moul', 'Khmer OS Muol Light', 'Khmer OS Muol', cursive, serif;
+  --font-khmer-serif: 'Koh Santepheap', 'Khmer OS Siemreap', Georgia, serif;
+}
 
 :root {
   --background: #f8fafc;
   --foreground: #0f172a;
+  --font-khmer-standard: 'Kantumruy Pro', 'Noto Sans Khmer', 'Koh Santepheap', 'Khmer OS Siemreap', 'Khmer OS Battambang', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-khmer-moul: 'Moul', 'Khmer OS Muol Light', 'Khmer OS Muol', cursive, serif;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: 'Kantumruy Pro', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-khmer-standard);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+}
+
+/* ==========================================================================
+   STANDARD KHMER TYPOGRAPHY & LEGIBILITY (Cambodian Banking & Enterprise Standard)
+   ========================================================================== */
+
+/* 1. Global Khmer language scope */
+:lang(km),
+.lang-km,
+[lang="km"] {
+  font-family: var(--font-khmer-standard);
+  line-height: 1.65;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* 2. Neutralize harmful letter-spacing on Khmer script
+   (Tailwind's tracking-tight / tracking-wider causes broken subscript consonants & dotted circles) */
+:lang(km),
+:lang(km) *,
+.lang-km,
+.lang-km *,
+[lang="km"],
+[lang="km"] * {
+  letter-spacing: normal !important;
+}
+
+/* 3. Khmer Headings: Clear line height & balanced weights */
+:lang(km) h1,
+:lang(km) h2,
+:lang(km) h3,
+:lang(km) h4,
+:lang(km) h5,
+:lang(km) h6,
+.lang-km h1,
+.lang-km h2,
+.lang-km h3,
+.lang-km h4,
+.lang-km h5,
+.lang-km h6 {
+  line-height: 1.45 !important;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+}
+
+/* 4. Subscript (ជើង - Coeng) Safety: Prevent vertical clipping in UI components */
+:lang(km) button,
+:lang(km) a,
+:lang(km) input,
+:lang(km) select,
+:lang(km) textarea,
+.lang-km button,
+.lang-km a,
+.lang-km input,
+.lang-km select,
+.lang-km textarea {
+  line-height: 1.5;
+}
+
+/* Ensure badges and small chips do not truncate lower diacritics / coengs */
+:lang(km) .badge,
+.lang-km .badge {
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  line-height: 1.4;
+}
+
+/* Table cells vertical breathing room for subscript consonants */
+:lang(km) td,
+:lang(km) th,
+.lang-km td,
+.lang-km th {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  line-height: 1.5;
+}
+
+/* 5. Specialized Khmer Typography Utility Classes */
+.font-khmer {
+  font-family: var(--font-khmer-standard) !important;
+  letter-spacing: normal !important;
+}
+
+.font-khmer-moul {
+  font-family: var(--font-khmer-moul) !important;
+  font-weight: normal !important;
+  letter-spacing: normal !important;
+  line-height: 1.8 !important;
+}
+
+.font-khmer-serif {
+  font-family: 'Koh Santepheap', 'Khmer OS Siemreap', Georgia, serif !important;
+  letter-spacing: normal !important;
 }
 
 /* Custom modern scrollbars */
