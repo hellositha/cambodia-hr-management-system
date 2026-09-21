@@ -50,33 +50,39 @@ export default function AnnouncementsPage() {
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
             <Megaphone className="text-pink-600" size={26} />
-            Company Bulletin & Announcements
+            ព្រឹត្តិបត្រ & សេចក្តីជូនដំណឹងក្រុមហ៊ុន (Announcements)
           </h1>
           <p className="text-xs text-slate-500">
-            Official company news, policy releases, wellness initiatives, and celebrations
+            ព័ត៌មានផ្លូវការក្រុមហ៊ុន, គោលការណ៍ច្បាប់ការងារ, ពិធីបុណ្យប្រពៃណី និងដំណឹងបន្ទាន់
           </p>
         </div>
         <button
           onClick={() => openModal('post-announcement')}
-          className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-2 transition-transform active:scale-95 self-start sm:self-auto"
+          className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-2 transition-transform active:scale-95 self-start sm:self-auto cursor-pointer"
         >
-          <Plus size={16} /> New Announcement
+          <Plus size={16} /> ផ្សាយដំណឹងថ្មី (New Announcement)
         </button>
       </div>
 
       {/* Category Pills */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        {['all', 'General', 'Policy', 'Celebration', 'Urgent'].map((cat) => (
+        {[
+          { key: 'all', label: 'ទាំងអស់ (All)' },
+          { key: 'General', label: 'ទូទៅ (General)' },
+          { key: 'Policy', label: 'គោលការណ៍ (Policy)' },
+          { key: 'Celebration', label: 'អបអរសាទរ (Celebration)' },
+          { key: 'Urgent', label: 'បន្ទាន់ (Urgent)' },
+        ].map((cat) => (
           <button
-            key={cat}
-            onClick={() => setCategoryFilter(cat)}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              categoryFilter === cat
+            key={cat.key}
+            onClick={() => setCategoryFilter(cat.key)}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              categoryFilter === cat.key
                 ? 'bg-slate-900 text-white shadow-xs'
                 : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
             }`}
           >
-            {cat === 'all' ? 'All Updates' : cat}
+            {cat.label}
           </button>
         ))}
       </div>

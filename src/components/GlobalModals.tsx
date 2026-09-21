@@ -19,10 +19,10 @@ export default function GlobalModals() {
     phone: '',
     role: '',
     department_id: '',
-    employment_type: 'Full-Time',
+    employment_type: 'ពេញម៉ោង (Full-Time)',
     status: 'Active',
-    salary: '95000',
-    location: 'San Francisco, CA',
+    salary: '1200',
+    location: 'រាជធានីភ្នំពេញ (Phnom Penh)',
     bio: '',
     emergency_contact_name: '',
     emergency_contact_phone: '',
@@ -39,10 +39,10 @@ export default function GlobalModals() {
   const [jobForm, setJobForm] = useState({
     title: '',
     department_id: '',
-    location: 'Remote / Hybrid',
+    location: 'រាជធានីភ្នំពេញ / Hybrid',
     type: 'Full-Time',
-    experience_level: 'Mid-Senior / 4+ Years',
-    salary_range: '$130k - $165k',
+    experience_level: 'កម្រិតមធ្យម-ជាន់ខ្ពស់ (3+ ឆ្នាំ)',
+    salary_range: '$800 - $1,600 / ខែ',
     description: '',
     requirements: '',
   });
@@ -55,7 +55,7 @@ export default function GlobalModals() {
   });
 
   const [payrollForm, setPayrollForm] = useState({
-    period: 'October 2026',
+    period: 'ខែតុលា ឆ្នាំ២០២៦ (October 2026)',
     payment_date: '2026-10-31',
   });
 
@@ -242,18 +242,18 @@ export default function GlobalModals() {
             )}
             <div>
               <h2 className="text-base font-bold text-slate-900">
-                {activeModal === 'add-employee' && 'Onboard New Employee'}
-                {activeModal === 'request-leave' && 'Submit Time Off Request'}
-                {activeModal === 'post-job' && 'Publish Job Opening (ATS)'}
-                {activeModal === 'post-announcement' && 'Publish Company Announcement'}
-                {activeModal === 'run-payroll' && 'Execute Monthly Payroll Batch'}
+                {activeModal === 'add-employee' && 'បញ្ចូលបុគ្គលិកថ្មី (Onboard New Employee)'}
+                {activeModal === 'request-leave' && 'ពាក្យស្នើសុំច្បាប់ឈប់សម្រាក (Request Leave)'}
+                {activeModal === 'post-job' && 'ប្រកាសជ្រើសរើសបុគ្គលិក (Post Job Opening)'}
+                {activeModal === 'post-announcement' && 'ផ្សាយដំណឹងក្នុងក្រុមហ៊ុន (Announcement)'}
+                {activeModal === 'run-payroll' && 'រៀបចំបើកប្រាក់បៀវត្សរ៍ (Run Monthly Payroll)'}
               </h2>
               <p className="text-xs text-slate-500">
-                {activeModal === 'add-employee' && 'Enter profile, compensation, and team details'}
-                {activeModal === 'request-leave' && 'Select dates and type of leave'}
-                {activeModal === 'post-job' && 'Add new requisition to the recruitment pipeline'}
-                {activeModal === 'post-announcement' && 'Broadcast message to entire organization'}
-                {activeModal === 'run-payroll' && 'Process batch payment for all active staff'}
+                {activeModal === 'add-employee' && 'បំពេញប្រវត្តិរូប ប្រាក់បៀវត្សរ៍ និងផ្នែកការងារ'}
+                {activeModal === 'request-leave' && 'ជ្រើសរើសប្រភេទច្បាប់ និងកាលបរិច្ឆេទសុំឈប់សម្រាក'}
+                {activeModal === 'post-job' && 'បន្ថែមតម្រូវការការងារថ្មីក្នុងប្រព័ន្ធ ATS ក្រុមហ៊ុន'}
+                {activeModal === 'post-announcement' && 'ផ្សព្វផ្សាយដំណឹងទូទៅដល់បុគ្គលិកទាំងអស់'}
+                {activeModal === 'run-payroll' && 'ដំណើរការគណនាបៀវត្សរ៍ & កាត់វិភាគទាន ប.ស.ស (NSSF)'}
               </p>
             </div>
           </div>
@@ -272,67 +272,67 @@ export default function GlobalModals() {
             <form onSubmit={handleAddEmployee} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">First Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={empForm.first_name}
-                    onChange={(e) => setEmpForm({ ...empForm, first_name: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="Jane"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Last Name *</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">នាមត្រកូល (Last Name) *</label>
                   <input
                     type="text"
                     required
                     value={empForm.last_name}
                     onChange={(e) => setEmpForm({ ...empForm, last_name: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="Doe"
+                    placeholder="ចៅ"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">នាមខ្លួន (First Name) *</label>
+                  <input
+                    type="text"
+                    required
+                    value={empForm.first_name}
+                    onChange={(e) => setEmpForm({ ...empForm, first_name: e.target.value })}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                    placeholder="សុខា"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Work Email *</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">អ៊ីមែលការងារ (Work Email) *</label>
                   <input
                     type="email"
                     required
                     value={empForm.email}
                     onChange={(e) => setEmpForm({ ...empForm, email: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="jane.doe@pulsehr.io"
+                    placeholder="sokha.chav@pulsehr.kh"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">លេខទូរស័ព្ទ (Phone Number)</label>
                   <input
                     type="text"
                     value={empForm.phone}
                     onChange={(e) => setEmpForm({ ...empForm, phone: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="+1 (555) 000-0000"
+                    placeholder="+855 12 345 678"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Role / Job Title *</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">មុខតំណែង (Role / Title) *</label>
                   <input
                     type="text"
                     required
                     value={empForm.role}
                     onChange={(e) => setEmpForm({ ...empForm, role: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="Senior Software Engineer"
+                    placeholder="Senior Software Engineer / អ្នកគ្រប់គ្រង"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Department *</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">នាយកដ្ឋាន / ផ្នែក (Department) *</label>
                   <select
                     value={empForm.department_id}
                     onChange={(e) => setEmpForm({ ...empForm, department_id: e.target.value })}
@@ -349,49 +349,49 @@ export default function GlobalModals() {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Employment Type</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">ប្រភេទការងារ</label>
                   <select
                     value={empForm.employment_type}
                     onChange={(e) => setEmpForm({ ...empForm, employment_type: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                   >
-                    <option value="Full-Time">Full-Time</option>
-                    <option value="Part-Time">Part-Time</option>
-                    <option value="Contract">Contract</option>
-                    <option value="Intern">Intern</option>
+                    <option value="ពេញម៉ោង (Full-Time)">ពេញម៉ោង (Full-Time)</option>
+                    <option value="ក្រៅម៉ោង (Part-Time)">ក្រៅម៉ោង (Part-Time)</option>
+                    <option value="កិច្ចសន្យា (Contract)">កិច្ចសន្យា (Contract)</option>
+                    <option value="កម្មសិក្សា (Intern)">កម្មសិក្សា (Intern)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Status</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">ស្ថានភាព (Status)</label>
                   <select
                     value={empForm.status}
                     onChange={(e) => setEmpForm({ ...empForm, status: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                   >
-                    <option value="Active">Active</option>
-                    <option value="Remote">Remote</option>
+                    <option value="Active">សកម្ម (Active)</option>
+                    <option value="Remote">ធ្វើការពីផ្ទះ (Remote)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Annual Salary ($)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">បៀវត្សរ៍មូលដ្ឋាន ($/ខែ)</label>
                   <input
                     type="number"
                     value={empForm.salary}
                     onChange={(e) => setEmpForm({ ...empForm, salary: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="95000"
+                    placeholder="1200"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Location</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">ទីតាំងការងារ (Location)</label>
                 <input
                   type="text"
                   value={empForm.location}
                   onChange={(e) => setEmpForm({ ...empForm, location: e.target.value })}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                  placeholder="San Francisco, CA (or Remote)"
+                  placeholder="រាជធានីភ្នំពេញ (Phnom Penh) / សៀមរាប"
                 />
               </div>
 
@@ -401,14 +401,14 @@ export default function GlobalModals() {
                   onClick={closeModal}
                   className="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg"
                 >
-                  Cancel
+                  បោះបង់ (Cancel)
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
                   className="px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm shadow-indigo-600/30"
                 >
-                  {loading ? 'Creating...' : 'Create Employee'}
+                  {loading ? 'កំពុងបញ្ចូល...' : 'យល់ព្រមបញ្ចូលបុគ្គលិក'}
                 </button>
               </div>
             </form>
@@ -418,23 +418,23 @@ export default function GlobalModals() {
           {activeModal === 'request-leave' && (
             <form onSubmit={handleRequestLeave} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Leave Type</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">ប្រភេទច្បាប់ (Leave Type)</label>
                 <select
                   value={leaveForm.leave_type}
                   onChange={(e) => setLeaveForm({ ...leaveForm, leave_type: e.target.value })}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                 >
-                  <option value="Annual">Annual Leave (PTO)</option>
-                  <option value="Sick">Sick Leave</option>
-                  <option value="Casual">Casual / Floating Day</option>
-                  <option value="Maternity/Paternity">Maternity / Paternity</option>
-                  <option value="Unpaid">Unpaid Leave</option>
+                  <option value="Annual">ច្បាប់ប្រចាំឆ្នាំ (Annual Leave - 18 ថ្ងៃ/ឆ្នាំ)</option>
+                  <option value="Sick">ច្បាប់ឈឺ (Sick Leave - មានវេជ្ជបញ្ជា)</option>
+                  <option value="Casual">ច្បាប់ធុរៈផ្ទាល់ខ្លួន (Casual / Family Leave)</option>
+                  <option value="Maternity/Paternity">ច្បាប់លំហែមាតុភាព/បិតុភាព (Maternity / Paternity)</option>
+                  <option value="Unpaid">ឈប់សម្រាកគ្មានប្រាក់ឈ្នួល (Unpaid Leave)</option>
                 </select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Start Date</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">ថ្ងៃចាប់ផ្តើម (Start Date)</label>
                   <input
                     type="date"
                     required
@@ -444,7 +444,7 @@ export default function GlobalModals() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">End Date</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">ថ្ងៃបញ្ចប់ (End Date)</label>
                   <input
                     type="date"
                     required
@@ -456,19 +456,19 @@ export default function GlobalModals() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Reason / Notes</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">មូលហេតុ / សេចក្តីលម្អិត (Reason)</label>
                 <textarea
                   rows={3}
                   value={leaveForm.reason}
                   onChange={(e) => setLeaveForm({ ...leaveForm, reason: e.target.value })}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                  placeholder="Family commitment, vacation trip, medical reason..."
+                  placeholder="ធុរៈគ្រួសារ, ទៅស្រុកកំណើត, ពិនិត្យសុខភាព..."
                 />
               </div>
 
               <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-800 text-xs flex items-center justify-between">
-                <span>Requested as: <strong>{currentPersona.name}</strong></span>
-                <span className="font-semibold text-amber-900">Standard SLA: 24h Approval</span>
+                <span>ស្នើសុំដោយ៖ <strong>{currentPersona.name}</strong></span>
+                <span className="font-semibold text-amber-900">ការអនុម័តស្តង់ដារ៖ ក្នុងរង្វង់ ២៤ ម៉ោង</span>
               </div>
 
               <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
@@ -477,14 +477,14 @@ export default function GlobalModals() {
                   onClick={closeModal}
                   className="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg"
                 >
-                  Cancel
+                  បោះបង់ (Cancel)
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
                   className="px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm shadow-indigo-600/30"
                 >
-                  {loading ? 'Submitting...' : 'Submit Request'}
+                  {loading ? 'កំពុងផ្ញើ...' : 'ដាក់ពាក្យស្នើសុំច្បាប់'}
                 </button>
               </div>
             </form>
@@ -494,20 +494,20 @@ export default function GlobalModals() {
           {activeModal === 'post-job' && (
             <form onSubmit={handlePostJob} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Job Title *</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">មុខតំណែងជ្រើសរើស (Job Title) *</label>
                 <input
                   type="text"
                   required
                   value={jobForm.title}
                   onChange={(e) => setJobForm({ ...jobForm, title: e.target.value })}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                  placeholder="Senior Cloud Security Architect"
+                  placeholder="Senior Mobile Developer (Flutter / React Native)"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Department</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">នាយកដ្ឋាន (Department)</label>
                   <select
                     value={jobForm.department_id}
                     onChange={(e) => setJobForm({ ...jobForm, department_id: e.target.value })}
@@ -521,48 +521,48 @@ export default function GlobalModals() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Location</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">ទីតាំង (Location)</label>
                   <input
                     type="text"
                     value={jobForm.location}
                     onChange={(e) => setJobForm({ ...jobForm, location: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="San Francisco / Remote"
+                    placeholder="រាជធានីភ្នំពេញ / Exchange Square"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Experience Level</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">បទពិសោធន៍ (Experience)</label>
                   <input
                     type="text"
                     value={jobForm.experience_level}
                     onChange={(e) => setJobForm({ ...jobForm, experience_level: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="Senior / 5+ Years"
+                    placeholder="កម្រិតមធ្យម / ៣+ ឆ្នាំ"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Salary Range</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">កម្រិតប្រាក់បៀវត្សរ៍ (Salary Range)</label>
                   <input
                     type="text"
                     value={jobForm.salary_range}
                     onChange={(e) => setJobForm({ ...jobForm, salary_range: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="$140,000 - $180,000"
+                    placeholder="$1,200 - $2,000 / ខែ"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Job Description</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">ការពិពណ៌នាការងារ (Job Description)</label>
                 <textarea
                   rows={2}
                   value={jobForm.description}
                   onChange={(e) => setJobForm({ ...jobForm, description: e.target.value })}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                  placeholder="Key responsibilities and goals of the position..."
+                  placeholder="ការទទួលខុសត្រូវ និងគោលដៅចម្បងនៃតួនាទី..."
                 />
               </div>
 
@@ -572,14 +572,14 @@ export default function GlobalModals() {
                   onClick={closeModal}
                   className="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg"
                 >
-                  Cancel
+                  បោះបង់ (Cancel)
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
                   className="px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm shadow-indigo-600/30"
                 >
-                  {loading ? 'Posting...' : 'Publish Job'}
+                  {loading ? 'កំពុងផ្សាយ...' : 'ប្រកាសដំណឹងការងារ'}
                 </button>
               </div>
             </form>
@@ -589,40 +589,40 @@ export default function GlobalModals() {
           {activeModal === 'post-announcement' && (
             <form onSubmit={handlePostAnnouncement} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Headline / Title *</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">ចំណងជើងសេចក្តីជូនដំណឹង (Title) *</label>
                 <input
                   type="text"
                   required
                   value={annForm.title}
                   onChange={(e) => setAnnForm({ ...annForm, title: e.target.value })}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                  placeholder="Company Summer Picnic & Hackathon Dates"
+                  placeholder="សេចក្តីជូនដំណឹងស្តីពី ឈប់សម្រាកបុណ្យអុំទូក ឬគោលការណ៍ថ្មី..."
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Category</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">ប្រភេទទូទៅ (Category)</label>
                 <select
                   value={annForm.category}
                   onChange={(e) => setAnnForm({ ...annForm, category: e.target.value })}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                 >
-                  <option value="General">General Announcement</option>
-                  <option value="Policy">Policy & Compliance</option>
-                  <option value="Celebration">Celebration & Perks</option>
-                  <option value="Urgent">Urgent / Important Notice</option>
+                  <option value="General">សេចក្តីជូនដំណឹងទូទៅ (General)</option>
+                  <option value="Policy">គោលការណ៍ & ច្បាប់ការងារ (Policy)</option>
+                  <option value="Celebration">កម្មវិធីអបអរ & អត្ថប្រយោជន៍ (Celebration)</option>
+                  <option value="Urgent">ដំណឹងបន្ទាន់ / សំខាន់ (Urgent)</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Content Details *</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">ខ្លឹមសារលម្អិត (Content) *</label>
                 <textarea
                   rows={4}
                   required
                   value={annForm.content}
                   onChange={(e) => setAnnForm({ ...annForm, content: e.target.value })}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                  placeholder="Share details with the team..."
+                  placeholder="ចែករំលែកព័ត៌មានលម្អិតជូនបុគ្គលិកទាំងអស់..."
                 />
               </div>
 
@@ -635,7 +635,7 @@ export default function GlobalModals() {
                   className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                 />
                 <label htmlFor="pinCheck" className="text-xs font-medium text-slate-700 cursor-pointer">
-                  Pin announcement to the top of bulletin board
+                  ខ្ទាស់សេចក្តីជូនដំណឹងនេះនៅខាងលើគេ (Pin Announcement)
                 </label>
               </div>
 
@@ -645,14 +645,14 @@ export default function GlobalModals() {
                   onClick={closeModal}
                   className="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg"
                 >
-                  Cancel
+                  បោះបង់ (Cancel)
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
                   className="px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm shadow-indigo-600/30"
                 >
-                  {loading ? 'Posting...' : 'Post Bulletin'}
+                  {loading ? 'កំពុងផ្សាយ...' : 'ផ្សាយសេចក្តីជូនដំណឹង'}
                 </button>
               </div>
             </form>
@@ -663,16 +663,16 @@ export default function GlobalModals() {
             <form onSubmit={handleRunPayroll} className="space-y-4">
               <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-xs space-y-2">
                 <div className="font-bold flex items-center gap-1.5 text-sm">
-                  <Check size={16} /> Automated Multi-tier Payout Run
+                  <Check size={16} /> គណនាប្រាក់បៀវត្សរ៍ & បង់វិភាគទាន ប.ស.ស (NSSF Automated Payroll)
                 </div>
                 <p>
-                  This operation calculates base salaries, standard tech allowances ($500), management bonuses, automated federal/state tax withholdings (22%), and retirement deductions for all active employees.
+                  ប្រព័ន្ធនឹងគណនាប្រាក់ខែមូលដ្ឋាន, ប្រាក់ឧបត្ថម្ភការងារ, ប្រាក់រង្វាន់, កាត់កងវិភាគទាន ប.ស.ស (បេឡាជាតិសន្តិសុខសង្គម) តាមច្បាប់ការងារនៃព្រះរាជាណាចក្រកម្ពុជា និងពន្ធលើប្រាក់បៀវត្សរ៍ជូនបុគ្គលិកទាំងអស់។
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Pay Period</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">ខែបើកបៀវត្សរ៍ (Pay Period)</label>
                   <input
                     type="text"
                     required
@@ -682,7 +682,7 @@ export default function GlobalModals() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Disbursement Date</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">កាលបរិច្ឆេទបើកប្រាក់ (Disbursement Date)</label>
                   <input
                     type="date"
                     required
@@ -699,14 +699,14 @@ export default function GlobalModals() {
                   onClick={closeModal}
                   className="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg"
                 >
-                  Cancel
+                  បោះបង់ (Cancel)
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
                   className="px-5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm shadow-emerald-600/30"
                 >
-                  {loading ? 'Processing...' : 'Confirm & Execute Payroll'}
+                  {loading ? 'កំពុងដំណើរការ...' : 'យល់ព្រមដំណើរការបើកប្រាក់ខែ'}
                 </button>
               </div>
             </form>

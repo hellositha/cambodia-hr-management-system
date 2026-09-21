@@ -114,24 +114,24 @@ export default function RecruitmentPage() {
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
             <Briefcase className="text-purple-600" size={26} />
-            Recruitment & Applicant Tracking System (ATS)
+            ជ្រើសរើសបុគ្គលិក & ប្រព័ន្ធ ATS (Recruitment Pipeline)
           </h1>
           <p className="text-xs text-slate-500">
-            Manage open requisitions, interview pipelines, candidate scorecards, and hiring offers
+            គ្រប់គ្រងការប្រកាសដំណឹងការងារ, តាមដានបេក្ខជន, វគ្គសម្ភាស និងការផ្តល់ការងារ
           </p>
         </div>
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => setAddCandModal(true)}
-            className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 shadow-2xs"
+            className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 shadow-2xs cursor-pointer"
           >
-            <Plus size={15} /> Add Candidate
+            <Plus size={15} /> បញ្ចូលបេក្ខជន (Add Candidate)
           </button>
           <button
             onClick={() => openModal('post-job')}
-            className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-md shadow-purple-600/30 flex items-center gap-2 transition-transform active:scale-95"
+            className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-md shadow-purple-600/30 flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
           >
-            <Plus size={16} /> Post Job Opening
+            <Plus size={16} /> ប្រកាសការងារ (Post Job)
           </button>
         </div>
       </div>
@@ -139,8 +139,8 @@ export default function RecruitmentPage() {
       {/* Top Requisitions Row */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-slate-900">Active Job Requisitions</h2>
-          <span className="text-xs text-slate-500">{jobs.length} open positions</span>
+          <h2 className="text-sm font-bold text-slate-900">មុខតំណែងកំពុងប្រកាសជ្រើសរើស (Job Requisitions)</h2>
+          <span className="text-xs text-slate-500">{jobs.length} មុខតំណែងសកម្ម</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

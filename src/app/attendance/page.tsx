@@ -112,18 +112,18 @@ export default function AttendancePage() {
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
             <Clock className="text-emerald-600" size={26} />
-            Attendance & Time Tracking
+            វត្តមាន & ម៉ោងធ្វើការ (Attendance & Time Tracking)
           </h1>
           <p className="text-xs text-slate-500">
-            Real-time punch clock, timesheets, remote presence, and daily rosters
+            កត់ត្រាវត្តមានជាក់ស្តែង, ធ្វើការពីផ្ទះ, តាមដានម៉ោងធ្វើការ និងរបាយការណ៍ប្រចាំថ្ងៃ
           </p>
         </div>
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => setManualModalOpen(true)}
-            className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md shadow-slate-900/20 flex items-center gap-2 transition-transform active:scale-95"
+            className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md shadow-slate-900/20 flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
           >
-            <Plus size={16} /> Log Manual Shift
+            <Plus size={16} /> កត់ត្រាវត្តមានដោយដៃ (Manual Shift)
           </button>
         </div>
       </div>
@@ -133,28 +133,28 @@ export default function AttendancePage() {
         <div className="space-y-1.5 text-center md:text-left">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-semibold">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            <span>Live Punch Clock</span>
+            <span>នាឡិកាកត់ត្រាវត្តមានផ្ទាល់ (Live Punch Clock)</span>
           </div>
           <div className="text-3xl sm:text-4xl font-black font-mono tracking-wider text-emerald-400">
-            {currentTime || '09:00:00 AM'}
+            {currentTime || '08:30:00 AM'}
           </div>
           <p className="text-xs text-slate-300">
-            Logging shifts for: <span className="font-bold text-white">{currentPersona.name}</span> ({currentPersona.title})
+            កត់ត្រាវត្តមានសម្រាប់៖ <span className="font-bold text-white">{currentPersona.name}</span> ({currentPersona.title})
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
           <div className="p-3 bg-white/10 rounded-xl border border-white/10 text-center px-6">
-            <span className="text-[10px] text-slate-300 block uppercase font-bold">Shift Status</span>
+            <span className="text-[10px] text-slate-300 block uppercase font-bold">ស្ថានភាពវេនការងារ</span>
             <span className="text-sm font-extrabold text-white flex items-center justify-center gap-1.5 mt-0.5">
               <span className={`w-2 h-2 rounded-full ${isClockedIn ? 'bg-emerald-400' : 'bg-slate-400'}`}></span>
-              {isClockedIn ? 'Currently Clocked In' : 'Shift Inactive'}
+              {isClockedIn ? 'កំពុងបំពេញការងារ (Clocked In)' : 'មិនទាន់កត់ត្រាចូល (Shift Inactive)'}
             </span>
           </div>
 
           <button
             onClick={toggleClock}
-            className={`w-full sm:w-auto px-6 py-3.5 rounded-xl font-bold text-xs shadow-lg transition-all flex items-center justify-center gap-2.5 active:scale-95 ${
+            className={`w-full sm:w-auto px-6 py-3.5 rounded-xl font-bold text-xs shadow-lg transition-all flex items-center justify-center gap-2.5 active:scale-95 cursor-pointer ${
               isClockedIn
                 ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/30'
                 : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/30'
@@ -162,11 +162,11 @@ export default function AttendancePage() {
           >
             {isClockedIn ? (
               <>
-                <Square size={16} className="fill-current" /> End Shift (Clock Out)
+                <Square size={16} className="fill-current" /> កត់ត្រាចេញ (Clock Out)
               </>
             ) : (
               <>
-                <Play size={16} className="fill-current" /> Begin Shift (Clock In)
+                <Play size={16} className="fill-current" /> កត់ត្រាចូល (Clock In)
               </>
             )}
           </button>
@@ -176,35 +176,33 @@ export default function AttendancePage() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-          <span className="text-[11px] font-bold text-slate-400 uppercase">Present in Office</span>
-          <div className="text-2xl font-black text-emerald-600 my-1">{presentCount}</div>
-          <span className="text-[11px] text-slate-500">HQ Desk punches</span>
+          <span className="text-[11px] font-bold text-slate-400 uppercase">វត្តមានការិយាល័យ</span>
+          <div className="text-2xl font-black text-emerald-600 my-1">{presentCount} នាក់</div>
+          <span className="text-[11px] text-slate-500">ការិយាល័យភ្នំពេញ</span>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-          <span className="text-[11px] font-bold text-slate-400 uppercase">Remote (WFH)</span>
-          <div className="text-2xl font-black text-blue-600 my-1">{remoteCount}</div>
-          <span className="text-[11px] text-slate-500">Virtual attendance</span>
+          <span className="text-[11px] font-bold text-slate-400 uppercase">ធ្វើការពីផ្ទះ (WFH)</span>
+          <div className="text-2xl font-black text-blue-600 my-1">{remoteCount} នាក់</div>
+          <span className="text-[11px] text-slate-500">កត់ត្រាតាមអនឡាញ</span>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-          <span className="text-[11px] font-bold text-slate-400 uppercase">Late Arrivals</span>
-          <div className="text-2xl font-black text-amber-600 my-1">{lateCount}</div>
-          <span className="text-[11px] text-slate-500">Checked in &gt; 9:30 AM</span>
+          <span className="text-[11px] font-bold text-slate-400 uppercase">មកយឺត (Late)</span>
+          <div className="text-2xl font-black text-amber-600 my-1">{lateCount} នាក់</div>
+          <span className="text-[11px] text-slate-500">ចូលក្រោយ ០៨:៣០ ព្រឹក</span>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-          <span className="text-[11px] font-bold text-slate-400 uppercase">On Leave / Away</span>
-          <div className="text-2xl font-black text-rose-600 my-1">{absentCount}</div>
-          <span className="text-[11px] text-slate-500">Approved leave</span>
+          <span className="text-[11px] font-bold text-slate-400 uppercase">ឈប់សម្រាកមានច្បាប់</span>
+          <div className="text-2xl font-black text-rose-600 my-1">{absentCount} នាក់</div>
+          <span className="text-[11px] text-slate-500">ច្បាប់អនុម័តរួច</span>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs col-span-2 lg:col-span-1">
-          <span className="text-[11px] font-bold text-slate-400 uppercase">Attendance Rate</span>
-          <div className="text-2xl font-black text-slate-900 my-1">{rate}%</div>
-          <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-0.5">
-            <TrendingUp size={12} /> Target 95% met
-          </span>
+          <span className="text-[11px] font-bold text-slate-400 uppercase">អត្រាវត្តមាន</span>
+          <div className="text-2xl font-black text-indigo-600 my-1">{rate}%</div>
+          <span className="text-[11px] text-slate-500">គោលដៅ &ge; ៩០%</span>
         </div>
       </div>
 

@@ -60,8 +60,8 @@ export default function Header() {
   const notifications = [
     {
       id: 1,
-      title: '3 Leave Requests Pending',
-      time: '10m ago',
+      title: 'សំណើសុំច្បាប់ ៣ កំពុងរង់ចាំ (3 Leave Requests Pending)',
+      time: '10m មុន',
       unread: true,
       href: '/leaves',
       icon: CalendarPlus,
@@ -69,8 +69,8 @@ export default function Header() {
     },
     {
       id: 2,
-      title: 'Offer stage reached: Dmitri Voronov',
-      time: '1h ago',
+      title: 'បេក្ខជនដល់វគ្គផ្តល់ការងារ: ឌី វុទ្ធី (Offer Stage Reached)',
+      time: '1h មុន',
       unread: true,
       href: '/recruitment',
       icon: Briefcase,
@@ -78,8 +78,8 @@ export default function Header() {
     },
     {
       id: 3,
-      title: 'September Payroll Draft Ready',
-      time: '3h ago',
+      title: 'ព្រាងបញ្ជីប្រាក់បៀវត្សរ៍ខែនេះរួចរាល់ (Payroll Draft Ready)',
+      time: '3h មុន',
       unread: false,
       href: '/payroll',
       icon: DollarSign,
@@ -99,10 +99,10 @@ export default function Header() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input
             type="text"
-            placeholder="Search employees, departments, jobs..."
+            placeholder="ស្វែងរកបុគ្គលិក, ផ្នែកការងារ... (Search employees, departments...)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+            className="w-full pl-9 pr-4 py-1.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-sans"
           />
         </div>
       </div>
@@ -112,7 +112,7 @@ export default function Header() {
         {/* Live Clock-In / Out Toggle */}
         <button
           onClick={toggleClock}
-          title={isClockedIn ? 'Click to clock out' : 'Click to clock in'}
+          title={isClockedIn ? 'ចុចដើម្បីចេញ (Clock Out)' : 'ចុចដើម្បីចូល (Clock In)'}
           className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border shadow-xs ${
             isClockedIn
               ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
@@ -130,7 +130,7 @@ export default function Header() {
             ></span>
           </span>
           <Clock size={14} />
-          <span>{isClockedIn ? `Clocked In (${clockInTime || '09:00 AM'})` : 'Clock In'}</span>
+          <span>{isClockedIn ? `បានកត់ត្រា (${clockInTime || '08:30 AM'})` : 'កត់ត្រាវត្តមាន (Clock In)'}</span>
         </button>
 
         {/* Quick Action Button */}
@@ -140,14 +140,14 @@ export default function Header() {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 shadow-sm shadow-indigo-600/20 transition-colors"
           >
             <Plus size={15} />
-            <span>Quick Action</span>
+            <span>សកម្មភាពរហ័ស</span>
             <ChevronDown size={14} className={quickActionOpen ? 'rotate-180 transition-transform' : ''} />
           </button>
 
           {quickActionOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-xl py-1 z-50 text-slate-700 animate-in fade-in slide-in-from-top-1 duration-150">
+            <div className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-xl py-1 z-50 text-slate-700 animate-in fade-in slide-in-from-top-1 duration-150">
               <div className="px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                Create & Request
+                បង្កើត & ស្នើសុំ (Actions)
               </div>
               <button
                 onClick={() => {
@@ -160,8 +160,8 @@ export default function Header() {
                   <UserCheck size={14} />
                 </div>
                 <div>
-                  <div className="font-semibold text-slate-800">Add New Employee</div>
-                  <div className="text-[10px] text-slate-500">Onboard hire & set salary</div>
+                  <div className="font-semibold text-slate-800">បញ្ចូលបុគ្គលិកថ្មី (Add Staff)</div>
+                  <div className="text-[10px] text-slate-500">ចុះឈ្មោះ & កំណត់ប្រាក់ខែ</div>
                 </div>
               </button>
 
@@ -176,8 +176,8 @@ export default function Header() {
                   <CalendarPlus size={14} />
                 </div>
                 <div>
-                  <div className="font-semibold text-slate-800">Request Time Off</div>
-                  <div className="text-[10px] text-slate-500">Annual, sick, or casual</div>
+                  <div className="font-semibold text-slate-800">សុំច្បាប់ឈប់សម្រាក (Request Leave)</div>
+                  <div className="text-[10px] text-slate-500">ច្បាប់ប្រចាំឆ្នាំ, ឈឺ ឬធុរៈ</div>
                 </div>
               </button>
 
@@ -192,8 +192,8 @@ export default function Header() {
                   <Briefcase size={14} />
                 </div>
                 <div>
-                  <div className="font-semibold text-slate-800">Post Job Opening</div>
-                  <div className="text-[10px] text-slate-500">Publish role to ATS pipeline</div>
+                  <div className="font-semibold text-slate-800">ប្រកាសជ្រើសរើសបុគ្គលិក (Post Job)</div>
+                  <div className="text-[10px] text-slate-500">ផ្សាយដំណឹងការងារថ្មី</div>
                 </div>
               </button>
 
@@ -208,8 +208,8 @@ export default function Header() {
                   <DollarSign size={14} />
                 </div>
                 <div>
-                  <div className="font-semibold text-slate-800">Run Monthly Payroll</div>
-                  <div className="text-[10px] text-slate-500">Process batch pay slips</div>
+                  <div className="font-semibold text-slate-800">បើកប្រាក់បៀវត្សរ៍ (Run Payroll)</div>
+                  <div className="text-[10px] text-slate-500">គណនាបៀវត្សរ៍ & ប.ស.ស (NSSF)</div>
                 </div>
               </button>
 
@@ -224,8 +224,8 @@ export default function Header() {
                   <Megaphone size={14} />
                 </div>
                 <div>
-                  <div className="font-semibold text-slate-800">New Announcement</div>
-                  <div className="text-[10px] text-slate-500">Pin bulletin to company feed</div>
+                  <div className="font-semibold text-slate-800">សេចក្តីជូនដំណឹង (Announcement)</div>
+                  <div className="text-[10px] text-slate-500">ផ្សព្វផ្សាយដំណឹងក្នុងក្រុមហ៊ុន</div>
                 </div>
               </button>
             </div>
@@ -245,9 +245,9 @@ export default function Header() {
           {notificationsOpen && (
             <div className="absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
               <div className="flex items-center justify-between px-4 py-2 border-b border-slate-100">
-                <span className="font-bold text-xs text-slate-900">Notifications</span>
+                <span className="font-bold text-xs text-slate-900">ការជូនដំណឹង (Notifications)</span>
                 <span className="text-[10px] font-semibold text-indigo-600 hover:underline cursor-pointer">
-                  Mark all read
+                  សម្គាល់ថាបានអានទាំងអស់
                 </span>
               </div>
               <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto">
@@ -297,7 +297,7 @@ export default function Header() {
           {personaOpen && (
             <div className="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-xl shadow-xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
               <div className="px-2 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                Switch Role / View
+                ប្តូរតួនាទី / Switch Persona
               </div>
               <div className="space-y-1">
                 {PERSONAS.map((p) => {

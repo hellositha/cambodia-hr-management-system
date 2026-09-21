@@ -25,15 +25,15 @@ export default function Sidebar() {
   const { currentPersona, sidebarCollapsed, toggleSidebar } = useApp();
 
   const navItems = [
-    { label: 'Dashboard', href: '/', icon: LayoutDashboard },
-    { label: 'Employees', href: '/employees', icon: Users, badge: 'Directory' },
-    { label: 'Attendance', href: '/attendance', icon: Clock },
-    { label: 'Time Off & Leaves', href: '/leaves', icon: CalendarCheck, badge: 'PTO' },
-    { label: 'Payroll & Comp', href: '/payroll', icon: CreditCard },
-    { label: 'Recruitment (ATS)', href: '/recruitment', icon: Briefcase, badge: 'ATS' },
-    { label: 'Performance', href: '/performance', icon: Award },
-    { label: 'Announcements', href: '/announcements', icon: Megaphone },
-    { label: 'Settings & DB', href: '/settings', icon: Settings },
+    { label: 'ផ្ទាំងព័ត៌មាន (Dashboard)', href: '/', icon: LayoutDashboard },
+    { label: 'បញ្ជីបុគ្គលិក (Employees)', href: '/employees', icon: Users, badge: 'បុគ្គលិក' },
+    { label: 'វត្តមាន & ម៉ោងការងារ (Attendance)', href: '/attendance', icon: Clock },
+    { label: 'ច្បាប់ឈប់សម្រាក (Leaves)', href: '/leaves', icon: CalendarCheck, badge: 'ច្បាប់' },
+    { label: 'ប្រាក់បៀវត្សរ៍ (Payroll)', href: '/payroll', icon: CreditCard },
+    { label: 'ជ្រើសរើសបុគ្គលិក (Recruitment)', href: '/recruitment', icon: Briefcase, badge: 'ការងារ' },
+    { label: 'ការវាយតម្លៃការងារ (Performance)', href: '/performance', icon: Award },
+    { label: 'សេចក្តីជូនដំណឹង (Notices)', href: '/announcements', icon: Megaphone },
+    { label: 'ការកំណត់ប្រព័ន្ធ (Settings)', href: '/settings', icon: Settings },
   ];
 
   return (
@@ -45,18 +45,20 @@ export default function Sidebar() {
       {/* Brand Header */}
       <div className="flex items-center justify-between px-4 h-16 border-b border-slate-100 bg-white">
         <Link href="/" className="flex items-center gap-3 overflow-hidden">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-500 flex items-center justify-center text-white font-black text-xl shadow-sm shadow-indigo-500/20 shrink-0">
-            P
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-amber-500 flex items-center justify-center text-white font-black text-xl shadow-sm shadow-indigo-500/20 shrink-0">
+            🇰🇭
           </div>
           {!sidebarCollapsed && (
             <div className="flex flex-col">
-              <span className="font-extrabold text-slate-900 text-lg tracking-tight flex items-center gap-1.5">
-                PulseHR
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold bg-indigo-50 text-indigo-600 border border-indigo-200">
-                  PRO
+              <span className="font-extrabold text-slate-900 text-base tracking-tight flex items-center gap-1.5">
+                PulseHR កម្ពុជា
+                <span className="text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                  HRMS
                 </span>
               </span>
-              <span className="text-[11px] text-slate-400 font-medium">Enterprise Suite</span>
+              <span className="text-[10px] text-slate-400 font-medium truncate">
+                គ្រប់គ្រងធនធានមនុស្ស
+              </span>
             </div>
           )}
         </Link>

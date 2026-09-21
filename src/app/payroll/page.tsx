@@ -95,18 +95,18 @@ export default function PayrollPage() {
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
             <CreditCard className="text-indigo-600" size={26} />
-            Payroll & Compensation Management
+            គ្រប់គ្រងប្រាក់បៀវត្សរ៍ & ប.ស.ស (Payroll & NSSF Management)
           </h1>
           <p className="text-xs text-slate-500">
-            Monthly payroll ledgers, itemized tax withholdings, and digital payslips
+            បញ្ជីបៀវត្សរ៍ប្រចាំខែ, ការកាត់កងពន្ធ និងវិភាគទាន ប.ស.ស (NSSF), និងប័ណ្ណបើកប្រាក់បៀវត្សរ៍
           </p>
         </div>
         <div className="flex items-center gap-2.5">
           <button
             onClick={() => openModal('run-payroll')}
-            className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/30 flex items-center gap-2 transition-transform active:scale-95"
+            className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/30 flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
           >
-            <Plus size={16} /> Run Monthly Payroll
+            <Plus size={16} /> រៀបចំបើកប្រាក់ខែ (Run Payroll)
           </button>
         </div>
       </div>
@@ -115,42 +115,44 @@ export default function PayrollPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
           <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            Total Net Payout
+            ប្រាក់បៀវត្សរ៍សុទ្ធសរុប (Net Pay)
           </span>
           <div className="text-2xl font-black text-slate-900 my-1">
             ${totalNet.toLocaleString()}
           </div>
-          <span className="text-[11px] text-slate-500">For {selectedPeriod}</span>
+          <span className="text-[11px] text-slate-500">
+            ~ {((totalNet * 4100) / 1000000).toFixed(1)}M ៛ (KHR)
+          </span>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
           <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            Total Base Salaries
+            បៀវត្សរ៍គោលសរុប (Base Pay)
           </span>
           <div className="text-2xl font-black text-indigo-600 my-1">
             ${totalBase.toLocaleString()}
           </div>
-          <span className="text-[11px] text-slate-500">Aggregated baseline</span>
+          <span className="text-[11px] text-slate-500">ប្រាក់ខែគោលសរុប</span>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
           <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            Tax & Withholdings
+            ពន្ធ & ប.ស.ស (Tax & NSSF)
           </span>
           <div className="text-2xl font-black text-rose-600 my-1">
             ${totalTax.toLocaleString()}
           </div>
-          <span className="text-[11px] text-slate-500">Federal & State withholdings</span>
+          <span className="text-[11px] text-slate-500">កាត់បង់ពន្ធ & សន្តិសុខសង្គម</span>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
           <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            Allowances & Bonuses
+            ប្រាក់ឧបត្ថម្ភ & រង្វាន់
           </span>
           <div className="text-2xl font-black text-emerald-600 my-1">
             ${totalAllowances.toLocaleString()}
           </div>
-          <span className="text-[11px] text-slate-500">Health, tech & performance</span>
+          <span className="text-[11px] text-slate-500">ឧបត្ថម្ភទូរស័ព្ទ, ធ្វើដំណើរ, ស្នាក់នៅ</span>
         </div>
       </div>
 
@@ -313,39 +315,39 @@ export default function PayrollPage() {
             </div>
 
             {/* Printable Payslip Body */}
-            <div className="flex-1 overflow-y-auto p-8 space-y-6 text-slate-800 text-xs">
+            <div className="flex-1 overflow-y-auto p-8 space-y-6 text-slate-800 text-xs font-sans">
               {/* Company Branding Header */}
               <div className="flex items-start justify-between pb-6 border-b-2 border-slate-900">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-slate-900 text-white font-extrabold flex items-center justify-center text-2xl">
-                    P
+                  <div className="w-12 h-12 rounded-xl bg-slate-900 text-white font-extrabold flex items-center justify-center text-xl">
+                    🇰🇭
                   </div>
                   <div>
-                    <h2 className="text-xl font-black text-slate-900 tracking-tight">PulseHR Technologies Inc.</h2>
-                    <p className="text-[11px] text-slate-500">500 Howard Street, Suite 400 &bull; San Francisco, CA 94105</p>
-                    <p className="text-[11px] text-slate-500">EIN: 84-2918291 &bull; support@pulsehr.io</p>
+                    <h2 className="text-lg font-black text-slate-900 tracking-tight">PulseHR កម្ពុជា (PulseHR Cambodia Co., Ltd.)</h2>
+                    <p className="text-[11px] text-slate-500">អគារ Exchange Square, មហាវិថីព្រះនរោត្តម, រាជធានីភ្នំពេញ</p>
+                    <p className="text-[11px] text-slate-500">លេខសារពើពន្ធ TIN: K009-90218928 &bull; លេខបញ្ជិកា ប.ស.ស (NSSF): 1029482</p>
                   </div>
                 </div>
                 <div className="text-right">
                   <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
-                    Payslip Voucher
+                    ប័ណ្ណបើកប្រាក់បៀវត្សរ៍ (Payslip)
                   </span>
                   <span className="text-sm font-mono font-bold text-slate-900">{activePayslip.id}</span>
-                  <span className="text-xs text-slate-500 block mt-1">Disbursed: {activePayslip.payment_date}</span>
+                  <span className="text-xs text-slate-500 block mt-1">កាលបរិច្ឆេទបើក៖ {activePayslip.payment_date}</span>
                 </div>
               </div>
 
               {/* Employee & Payroll Meta */}
               <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Employee Name</span>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block">ឈ្មោះបុគ្គលិក (Employee Name)</span>
                   <span className="text-sm font-bold text-slate-900">{activePayslip.employee_name}</span>
                   <span className="text-slate-500 block mt-0.5">{activePayslip.employee_role}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Department & ID</span>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block">ដេប៉ាតឺម៉ង់ & អត្តលេខ (Dept & ID)</span>
                   <span className="text-sm font-bold text-slate-900">{activePayslip.department_name}</span>
-                  <span className="text-slate-500 block mt-0.5">Emp ID: {activePayslip.employee_id}</span>
+                  <span className="text-slate-500 block mt-0.5">អត្តលេខ៖ {activePayslip.employee_id}</span>
                 </div>
               </div>
 
@@ -354,23 +356,23 @@ export default function PayrollPage() {
                 {/* Earnings */}
                 <div className="border border-slate-200 rounded-xl overflow-hidden">
                   <div className="bg-slate-100 px-4 py-2 font-bold text-slate-800 text-[11px] uppercase tracking-wider">
-                    Gross Earnings
+                    ប្រាក់ចំណូលសរុប (Gross Earnings)
                   </div>
                   <div className="p-4 space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <span>Basic Monthly Salary</span>
+                      <span>ប្រាក់ខែគោល (Basic Salary)</span>
                       <span className="font-bold font-mono">${activePayslip.base_salary.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between text-slate-600">
-                      <span>Tech & Housing Allowance</span>
+                      <span>ប្រាក់ឧបត្ថម្ភការងារ (Allowances)</span>
                       <span className="font-mono">${activePayslip.allowances.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between text-slate-600">
-                      <span>Performance Bonus</span>
+                      <span>ប្រាក់រង្វាន់លើកទឹកចិត្ត (Bonus)</span>
                       <span className="font-mono">${activePayslip.bonuses.toLocaleString()}</span>
                     </div>
                     <div className="pt-2 border-t border-slate-200 flex items-center justify-between font-bold text-slate-900">
-                      <span>Total Gross Pay</span>
+                      <span>ប្រាក់បៀវត្សរ៍សរុប (Total Gross)</span>
                       <span className="font-mono">
                         ${(activePayslip.base_salary + activePayslip.allowances + activePayslip.bonuses).toLocaleString()}
                       </span>
@@ -381,23 +383,23 @@ export default function PayrollPage() {
                 {/* Deductions */}
                 <div className="border border-slate-200 rounded-xl overflow-hidden">
                   <div className="bg-slate-100 px-4 py-2 font-bold text-slate-800 text-[11px] uppercase tracking-wider">
-                    Statutory Deductions
+                    ការកាត់កងតាមច្បាប់ (Statutory Deductions)
                   </div>
                   <div className="p-4 space-y-2.5">
                     <div className="flex items-center justify-between text-slate-600">
-                      <span>Income Tax (Fed/State 22%)</span>
+                      <span>ពន្ធលើប្រាក់បៀវត្សរ៍ (Salary Tax)</span>
                       <span className="font-mono text-rose-600">-${activePayslip.tax_deduction.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between text-slate-600">
-                      <span>Health & Dental Plan</span>
+                      <span>វិភាគទាន ប.ស.ស (NSSF Healthcare/Pension)</span>
                       <span className="font-mono text-rose-600">-${activePayslip.insurance_deduction.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between text-slate-600">
-                      <span>401(k) Retirement Plan</span>
+                      <span>ការកាត់កងផ្សេងៗ (Other Deductions)</span>
                       <span className="font-mono text-rose-600">-${activePayslip.other_deductions.toLocaleString()}</span>
                     </div>
                     <div className="pt-2 border-t border-slate-200 flex items-center justify-between font-bold text-slate-900">
-                      <span>Total Deductions</span>
+                      <span>ការកាត់កងសរុប (Total Deductions)</span>
                       <span className="font-mono text-rose-600">
                         -${(activePayslip.tax_deduction + activePayslip.insurance_deduction + activePayslip.other_deductions).toLocaleString()}
                       </span>
@@ -407,27 +409,30 @@ export default function PayrollPage() {
               </div>
 
               {/* Net Pay Callout */}
-              <div className="p-5 rounded-2xl bg-indigo-950 text-white flex items-center justify-between">
+              <div className="p-5 rounded-2xl bg-slate-900 text-white flex items-center justify-between shadow-lg">
                 <div>
-                  <span className="text-[10px] text-indigo-300 uppercase font-bold tracking-wider block">
-                    Net Take-Home Pay
+                  <span className="text-[10px] text-slate-300 uppercase font-bold tracking-wider block">
+                    ប្រាក់បៀវត្សរ៍សុទ្ធទទួលបាន (Net Take-Home Pay)
                   </span>
                   <div className="text-2xl sm:text-3xl font-black font-mono mt-0.5 text-emerald-400">
-                    ${activePayslip.net_salary.toLocaleString()}
+                    ${activePayslip.net_salary.toLocaleString()} USD
                   </div>
-                  <p className="text-[11px] text-indigo-200 mt-1">
-                    Disbursed via {activePayslip.payment_method} &bull; Trans ID: ACH-9928192
+                  <div className="text-xs text-amber-300 font-semibold mt-0.5">
+                    ~ {(activePayslip.net_salary * 4100).toLocaleString()} ៛ (រៀលកម្ពុជា KHR)
+                  </div>
+                  <p className="text-[11px] text-slate-300 mt-1">
+                    បើកប្រាក់តាម៖ {activePayslip.payment_method} (ABA Bank / Bakong KHQR)
                   </p>
                 </div>
                 <div className="text-right">
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                    Status: {activePayslip.status}
+                    ស្ថានភាព៖ {activePayslip.status === 'Paid' ? 'បានទូទាត់រួចរាល់' : activePayslip.status}
                   </span>
                 </div>
               </div>
 
               <div className="text-center text-[10px] text-slate-400 pt-4 border-t border-slate-200">
-                This is a computer-generated tax and wage statement authorized by PulseHR Inc. People Operations.
+                នេះជាឯកសារគណនាប្រាក់បៀវត្សរ៍ និងពន្ធស្របតាមច្បាប់ការងារនៃព្រះរាជាណាចក្រកម្ពុជា បញ្ជាក់ដោយ PulseHR Cambodia People Operations។
               </div>
             </div>
           </div>

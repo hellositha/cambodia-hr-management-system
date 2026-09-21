@@ -94,17 +94,17 @@ export default function LeavesPage() {
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
             <CalendarCheck className="text-amber-500" size={26} />
-            Time Off & Leave Management
+            គ្រប់គ្រងច្បាប់ឈប់សម្រាក (Leave Management)
           </h1>
           <p className="text-xs text-slate-500">
-            Submit leave requests, track PTO balances, and review manager approvals
+            ដាក់ពាក្យស្នើសុំច្បាប់, តាមដានសមតុល្យច្បាប់ប្រចាំឆ្នាំ និងការអនុម័តពីប្រធានផ្នែក
           </p>
         </div>
         <button
           onClick={() => openModal('request-leave')}
-          className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-2 transition-transform active:scale-95"
+          className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
         >
-          <Plus size={16} /> Request Time Off
+          <Plus size={16} /> សុំច្បាប់ឈប់សម្រាក (Request Leave)
         </button>
       </div>
 
@@ -113,47 +113,47 @@ export default function LeavesPage() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-sm font-bold text-slate-900">
-              Personal Leave Allowance ({currentPersona.name})
+              សមតុល្យច្បាប់ផ្ទាល់ខ្លួន ({currentPersona.name})
             </h2>
-            <p className="text-[11px] text-slate-500">Yearly accrual for fiscal 2026</p>
+            <p className="text-[11px] text-slate-500">សិទ្ធិឈប់សម្រាកប្រចាំឆ្នាំ ស្របតាមច្បាប់ការងារកម្ពុជា</p>
           </div>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
-            Resets Dec 31
+            ផុតកំណត់ត្រឹម ៣១ ធ្នូ
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-100 space-y-2">
             <div className="flex items-center justify-between text-xs font-bold text-blue-900">
-              <span>Annual Paid Time Off</span>
-              <span>15 / 20 days</span>
+              <span>ច្បាប់ប្រចាំឆ្នាំ (Annual Leave)</span>
+              <span>14 / 18 ថ្ងៃ</span>
             </div>
             <div className="w-full h-2 bg-blue-200 rounded-full overflow-hidden">
-              <div className="h-full bg-blue-600 rounded-full" style={{ width: '75%' }}></div>
+              <div className="h-full bg-blue-600 rounded-full" style={{ width: '77%' }}></div>
             </div>
-            <span className="text-[10px] text-blue-700 block">5 days used &bull; 15 available</span>
+            <span className="text-[10px] text-blue-700 block">ប្រើអស់ ៤ ថ្ងៃ &bull; នៅសល់ ១៤ ថ្ងៃ</span>
           </div>
 
           <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-100 space-y-2">
             <div className="flex items-center justify-between text-xs font-bold text-emerald-900">
-              <span>Sick & Wellness Leave</span>
-              <span>8 / 10 days</span>
+              <span>ច្បាប់ឈឺ (Sick Leave)</span>
+              <span>8 / 10 ថ្ងៃ</span>
             </div>
             <div className="w-full h-2 bg-emerald-200 rounded-full overflow-hidden">
               <div className="h-full bg-emerald-600 rounded-full" style={{ width: '80%' }}></div>
             </div>
-            <span className="text-[10px] text-emerald-700 block">2 days used &bull; 8 available</span>
+            <span className="text-[10px] text-emerald-700 block">ប្រើអស់ ២ ថ្ងៃ &bull; នៅសល់ ៨ ថ្ងៃ</span>
           </div>
 
           <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-100 space-y-2">
             <div className="flex items-center justify-between text-xs font-bold text-amber-900">
-              <span>Floating / Casual Days</span>
-              <span>4 / 5 days</span>
+              <span>ច្បាប់ធុរៈគ្រួសារ (Casual Days)</span>
+              <span>4 / 5 ថ្ងៃ</span>
             </div>
             <div className="w-full h-2 bg-amber-200 rounded-full overflow-hidden">
               <div className="h-full bg-amber-600 rounded-full" style={{ width: '80%' }}></div>
             </div>
-            <span className="text-[10px] text-amber-700 block">1 day used &bull; 4 available</span>
+            <span className="text-[10px] text-amber-700 block">ប្រើអស់ ១ ថ្ងៃ &bull; នៅសល់ ៤ ថ្ងៃ</span>
           </div>
         </div>
       </div>

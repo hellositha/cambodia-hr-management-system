@@ -67,9 +67,9 @@ export default function StyledDashboardPage() {
         now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
       );
       const hours = now.getHours();
-      if (hours < 12) setGreeting('Good morning');
-      else if (hours < 18) setGreeting('Good afternoon');
-      else setGreeting('Good evening');
+      if (hours < 12) setGreeting('សួស្តីពេលព្រឹក (Good morning)');
+      else if (hours < 18) setGreeting('សួស្តីពេលរសៀល (Good afternoon)');
+      else setGreeting('សួស្តីពេលល្ងាច (Good evening)');
     };
     updateTime();
     const interval = setInterval(updateTime, 1000);
@@ -79,7 +79,7 @@ export default function StyledDashboardPage() {
   const changeTheme = (newTheme: DashboardTheme) => {
     setTheme(newTheme);
     localStorage.setItem('pulsehr_theme', newTheme);
-    showToast(`Dashboard style changed to ${newTheme.toUpperCase()}`, 'info');
+    showToast(`រចនាប័ទ្មផ្ទាំងគ្រប់គ្រងត្រូវបានប្តូរទៅជា ${newTheme.toUpperCase()}`, 'info');
   };
 
   useEffect(() => {
@@ -104,18 +104,18 @@ export default function StyledDashboardPage() {
         colors: ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#3b82f6'],
       });
     }
-    showToast(`Celebration wish sent to ${name} for ${event}! 🎉`, 'success');
+    showToast(`បានផ្ញើសារអបអរសាទរជូន ${name} សម្រាប់ ${event}! 🎉`, 'success');
   };
 
   const handleQuickSeed = async () => {
     try {
       const res = await fetch('/api/seed', { method: 'POST' });
       if (res.ok) {
-        showToast('Demo data seeded successfully!', 'success');
+        showToast('ទិន្នន័យគំរូកម្ពុជាត្រូវបានបញ្ចូលដោយជោគជ័យ!', 'success');
         triggerRefresh();
       }
     } catch {
-      showToast('Failed to seed demo data', 'error');
+      showToast('បរាជ័យក្នុងការបញ្ចូលទិន្នន័យគំរូ', 'error');
     }
   };
 
@@ -125,7 +125,7 @@ export default function StyledDashboardPage() {
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-2xl border-4 border-indigo-500 border-t-transparent animate-spin"></div>
           <p className="text-xs text-slate-500 font-medium tracking-wide">
-            Rendering dashboard telemetry...
+            កំពុងដំណើរការទិន្នន័យគ្រប់គ្រងធនធានមនុស្ស...
           </p>
         </div>
       </div>
@@ -185,26 +185,26 @@ export default function StyledDashboardPage() {
           <div className="flex items-center gap-2">
             <Palette size={16} className={themeClasses.accentText} />
             <span className="text-xs font-bold uppercase tracking-wider opacity-80">
-              Dashboard Theme:
+              រចនាប័ទ្មផ្ទាំង (Theme):
             </span>
           </div>
 
           <div className={`flex items-center p-1 rounded-xl text-xs font-semibold ${themeClasses.subtleBox}`}>
-            <button
-              onClick={() => changeTheme('midnight')}
-              className={`px-3 py-1 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
-                theme === 'midnight' ? themeClasses.pillActive : themeClasses.pillInactive
-              }`}
-            >
-              <Moon size={13} /> Midnight Obsidian
-            </button>
             <button
               onClick={() => changeTheme('nordic')}
               className={`px-3 py-1 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
                 theme === 'nordic' ? themeClasses.pillActive : themeClasses.pillInactive
               }`}
             >
-              <Sun size={13} /> Nordic Minimal
+              <Sun size={13} /> ពន្លឺធម្មជាតិ (Nordic Light)
+            </button>
+            <button
+              onClick={() => changeTheme('midnight')}
+              className={`px-3 py-1 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
+                theme === 'midnight' ? themeClasses.pillActive : themeClasses.pillInactive
+              }`}
+            >
+              <Moon size={13} /> ងងឹត (Midnight Dark)
             </button>
             <button
               onClick={() => changeTheme('indigo')}
@@ -212,14 +212,14 @@ export default function StyledDashboardPage() {
                 theme === 'indigo' ? themeClasses.pillActive : themeClasses.pillInactive
               }`}
             >
-              <Flame size={13} /> Indigo Electric
+              <Flame size={13} /> ខៀវចាស់ (Indigo Electric)
             </button>
           </div>
         </div>
 
         {/* Persona quick preview */}
         <div className="flex items-center gap-2 text-xs">
-          <span className={`text-[11px] font-semibold ${themeClasses.textMuted}`}>Active View:</span>
+          <span className={`text-[11px] font-semibold ${themeClasses.textMuted}`}>ទិដ្ឋភាពបច្ចុប្បន្ន (Role):</span>
           <div className={`flex items-center gap-1 p-1 rounded-xl ${themeClasses.subtleBox}`}>
             {PERSONAS.map((p) => {
               const isCur = p.id === currentPersona.id;
@@ -232,7 +232,7 @@ export default function StyledDashboardPage() {
                   }`}
                 >
                   <img src={p.avatar} alt={p.name} className="w-3.5 h-3.5 rounded-full object-cover" />
-                  <span>{p.name.split(' ')[0]}</span>
+                  <span>{p.name.split(' ')[1] || p.name}</span>
                 </button>
               );
             })}
@@ -245,42 +245,42 @@ export default function StyledDashboardPage() {
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-3 max-w-2xl">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>All Systems Operational</span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-600">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>ប្រព័ន្ធដំណើរការប្រក្រតី (All Systems Operational)</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-mono bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-mono bg-indigo-500/10 border border-indigo-500/30 text-indigo-600">
                 <Clock size={13} />
-                <span>{currentTime || '09:00:00 AM'}</span>
+                <span>ម៉ោងនៅកម្ពុជា៖ {currentTime || '08:30:00 AM'}</span>
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-purple-500/10 border border-purple-500/30 text-purple-400">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-purple-500/10 border border-purple-500/30 text-purple-600">
                 <Sparkles size={12} />
-                <span>Q3 Fiscal 2026</span>
+                <span>ត្រីមាសទី ៤ ឆ្នាំ២០២៦</span>
               </span>
             </div>
 
             <h1 className="text-2xl sm:text-4xl font-black tracking-tight">
-              {greeting}, {currentPersona.name.split(' ')[0]}!
+              {greeting}, {currentPersona.name}!
             </h1>
 
             <p className={`text-xs sm:text-sm leading-relaxed max-w-xl ${themeClasses.textMuted}`}>
-              Currently operating in{' '}
-              <strong className="text-current font-bold">{currentPersona.role} Mode</strong> ({currentPersona.title}).
+              កំពុងដំណើរការក្នុងតួនាទី{' '}
+              <strong className="text-current font-bold">{currentPersona.role}</strong> ({currentPersona.title})។
               {stats.totalEmployees > 0 ? (
-                <> Headcount is at <strong className="text-current">{stats.totalEmployees} staff</strong> with <span className="text-emerald-400 font-bold">{stats.attendanceToday.percentage}% attendance</span> today.</>
+                <> បុគ្គលិកសរុបមានចំនួន <strong className="text-current">{stats.totalEmployees} នាក់</strong> ជាមួយនឹង <span className="text-emerald-600 font-bold">អត្រាវត្តមាន {stats.attendanceToday.percentage}%</span> ថ្ងៃនេះ។</>
               ) : (
-                <> The workforce roster is currently clear. You can onboard new staff or restore demo data with 1 click.</>
+                <> បញ្ជីបុគ្គលិកបច្ចុប្បន្នទំនេរ។ លោកអ្នកអាចបញ្ចូលបុគ្គលិកថ្មី ឬទាញយកទិន្នន័យគំរូកម្ពុជាដោយចុច ១ ដង។</>
               )}
             </p>
           </div>
 
           {/* Quick Action Dock */}
-          <div className="flex flex-wrap sm:flex-nowrap lg:flex-col gap-2.5 lg:w-52 shrink-0">
+          <div className="flex flex-wrap sm:flex-nowrap lg:flex-col gap-2.5 lg:w-56 shrink-0">
             <button
               onClick={() => openModal('add-employee')}
               className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-transform active:scale-95 cursor-pointer"
             >
-              <UserPlus size={15} /> Onboard Employee
+              <UserPlus size={15} /> បញ្ចូលបុគ្គលិក (Add Staff)
             </button>
             <button
               onClick={() => openModal('request-leave')}
@@ -288,13 +288,13 @@ export default function StyledDashboardPage() {
                 theme === 'nordic' ? 'bg-slate-100 hover:bg-slate-200 text-slate-800' : 'bg-white/10 hover:bg-white/20 text-white'
               }`}
             >
-              <CalendarCheck size={15} /> Request Time Off
+              <CalendarCheck size={15} /> សុំច្បាប់សម្រាក (Request Leave)
             </button>
             <button
               onClick={() => openModal('run-payroll')}
               className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-600/30 flex items-center justify-center gap-2 transition-transform active:scale-95 cursor-pointer"
             >
-              <CreditCard size={15} /> Run Payroll
+              <CreditCard size={15} /> បើកប្រាក់ខែ (Run Payroll)
             </button>
           </div>
         </div>
@@ -346,24 +346,24 @@ export default function StyledDashboardPage() {
               <Users size={20} />
             </div>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center gap-1">
-              <TrendingUp size={11} /> Directory
+              <TrendingUp size={11} /> បញ្ជីបុគ្គលិក
             </span>
           </div>
 
           <div className="mt-4">
             <span className={`text-[11px] font-bold uppercase tracking-wider block ${themeClasses.textMuted}`}>
-              Total Workforce
+              ចំនួនបុគ្គលិកសរុប (Workforce)
             </span>
             <div className="text-3xl font-black tracking-tight mt-0.5">
-              {stats.totalEmployees} <span className="text-xs font-semibold opacity-60">colleagues</span>
+              {stats.totalEmployees} <span className="text-xs font-semibold opacity-60">នាក់</span>
             </div>
             <p className={`text-[11px] mt-1 ${themeClasses.textMuted}`}>
-              {stats.activeEmployees} active &bull; {stats.onLeaveEmployees} on leave
+              {stats.activeEmployees} កំពុងបម្រើការ &bull; {stats.onLeaveEmployees} កំពុងសុំច្បាប់
             </p>
           </div>
 
           <div className={`mt-4 pt-3 border-t flex items-center justify-between text-xs font-semibold border-current/10 ${themeClasses.accentText}`}>
-            <span>Open Directory</span>
+            <span>មើលបញ្ជីបុគ្គលិកទាំងអស់</span>
             <ArrowUpRight size={15} />
           </div>
         </Link>
@@ -378,24 +378,24 @@ export default function StyledDashboardPage() {
               <Clock size={20} />
             </div>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              Live Roster
+              វត្តមានជាក់ស្តែង
             </span>
           </div>
 
           <div className="mt-4">
             <span className={`text-[11px] font-bold uppercase tracking-wider block ${themeClasses.textMuted}`}>
-              Attendance Today
+              វត្តមានថ្ងៃនេះ (Attendance)
             </span>
             <div className="text-3xl font-black tracking-tight mt-0.5">
               {stats.attendanceToday.percentage}%
             </div>
             <p className={`text-[11px] mt-1 ${themeClasses.textMuted}`}>
-              {stats.attendanceToday.present} In Office &bull; {stats.attendanceToday.remote} Remote
+              {stats.attendanceToday.present} មកការិយាល័យ &bull; {stats.attendanceToday.remote} ធ្វើការពីផ្ទះ
             </p>
           </div>
 
           <div className={`mt-4 pt-3 border-t flex items-center justify-between text-xs font-semibold border-current/10 ${themeClasses.accentText}`}>
-            <span>Punch Timesheets</span>
+            <span>ពិនិត្យតារាងវត្តមាន</span>
             <ArrowUpRight size={15} />
           </div>
         </Link>
@@ -410,24 +410,24 @@ export default function StyledDashboardPage() {
               <CalendarCheck size={20} />
             </div>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
-              Approvals
+              រង់ចាំអនុម័ត
             </span>
           </div>
 
           <div className="mt-4">
             <span className={`text-[11px] font-bold uppercase tracking-wider block ${themeClasses.textMuted}`}>
-              Pending Time-Off
+              សំណើសុំច្បាប់ (Pending Leaves)
             </span>
             <div className="text-3xl font-black tracking-tight mt-0.5">
-              {stats.pendingLeavesCount} <span className="text-xs font-semibold opacity-60">requests</span>
+              {stats.pendingLeavesCount} <span className="text-xs font-semibold opacity-60">សំណើ</span>
             </div>
             <p className={`text-[11px] mt-1 ${themeClasses.textMuted}`}>
-              Manager review SLA: 24h
+              ស្តង់ដារអនុម័តពីប្រធានផ្នែក៖ &lt; 24 ម៉ោង
             </p>
           </div>
 
           <div className={`mt-4 pt-3 border-t flex items-center justify-between text-xs font-semibold border-current/10 ${themeClasses.accentText}`}>
-            <span>Review Queue</span>
+            <span>ពិនិត្យសំណើសុំច្បាប់</span>
             <ArrowUpRight size={15} />
           </div>
         </Link>
@@ -442,24 +442,24 @@ export default function StyledDashboardPage() {
               <CreditCard size={20} />
             </div>
             <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">
-              Sept 2026
+              ខែតុលា ២០២៦
             </span>
           </div>
 
           <div className="mt-4">
             <span className={`text-[11px] font-bold uppercase tracking-wider block ${themeClasses.textMuted}`}>
-              Monthly Payroll
+              បៀវត្សរ៍ប្រចាំខែ (Monthly Payroll)
             </span>
             <div className="text-3xl font-black tracking-tight mt-0.5">
-              ${(stats.monthlyPayrollTotal / 1000).toFixed(1)}k
+              ${(stats.monthlyPayrollTotal).toLocaleString()}
             </div>
             <p className={`text-[11px] mt-1 ${themeClasses.textMuted}`}>
-              Direct deposits processed
+              ~ {((stats.monthlyPayrollTotal * 4100) / 1000000).toFixed(1)}M រៀល (KHR) + កាត់ ប.ស.ស
             </p>
           </div>
 
           <div className={`mt-4 pt-3 border-t flex items-center justify-between text-xs font-semibold border-current/10 ${themeClasses.accentText}`}>
-            <span>Ledger & Payslips</span>
+            <span>បញ្ជីបើកបៀវត្សរ៍ & ប័ណ្ណបើកប្រាក់</span>
             <ArrowUpRight size={15} />
           </div>
         </Link>
@@ -474,15 +474,15 @@ export default function StyledDashboardPage() {
             </div>
             <div>
               <h3 className="font-bold text-xs sm:text-sm">
-                PulseHR AI Operations Copilot
+                PulseHR AI - ជំនួយការឆ្លាតវៃធនធានមនុស្សកម្ពុជា
               </h3>
               <p className={`text-[11px] ${themeClasses.textMuted}`}>
-                Autonomous HR intelligence & proactive compliance telemetry
+                វិភាគទិន្នន័យបុគ្គលិកដោយស្វ័យប្រវត្តិ អនុលោមភាពច្បាប់ការងារ និង ប.ស.ស
               </p>
             </div>
           </div>
           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-            Real-Time Analysis
+            វិភាគផ្ទាល់ ២៤/៧
           </span>
         </div>
 
@@ -491,19 +491,19 @@ export default function StyledDashboardPage() {
             <div>
               <div className="flex items-center gap-2 text-xs font-bold">
                 <span className="w-2 h-2 rounded-full bg-amber-400"></span>
-                <span>Leave Approval Monitoring</span>
+                <span>តាមដានការអនុម័តច្បាប់ឈប់សម្រាក</span>
               </div>
               <p className={`text-[11px] mt-1.5 leading-relaxed ${themeClasses.textMuted}`}>
                 {stats.pendingLeavesCount > 0
-                  ? `${stats.pendingLeavesCount} leave requests pending manager review. Pod coverage requirements verified.`
-                  : 'No pending leave approvals in the queue. All teammate requests are up to date.'}
+                  ? `មាន ${stats.pendingLeavesCount} សំណើសុំច្បាប់រង់ចាំការពិនិត្យពីប្រធានផ្នែក។ កម្លាំងការងារឆ្លើយតបបានគ្រប់គ្រាន់។`
+                  : 'ពុំមានសំណើសុំច្បាប់ដែលនៅសេសសល់ឡើយ។ សំណើទាំងអស់ត្រូវបានដំណើរការទាន់ពេល។'}
               </p>
             </div>
             <Link
               href="/leaves"
               className={`text-[11px] font-bold flex items-center gap-1 mt-3 ${themeClasses.accentText}`}
             >
-              Open Approvals <ArrowRight size={12} />
+              ពិនិត្យពាក្យសុំច្បាប់ <ArrowRight size={12} />
             </Link>
           </div>
 
@@ -511,17 +511,17 @@ export default function StyledDashboardPage() {
             <div>
               <div className="flex items-center gap-2 text-xs font-bold">
                 <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                <span>Recruitment SLA Status</span>
+                <span>ស្ថានភាពជ្រើសរើសបុគ្គលិក (ATS)</span>
               </div>
               <p className={`text-[11px] mt-1.5 leading-relaxed ${themeClasses.textMuted}`}>
-                {stats.openPositionsCount} active job requisitions published. Candidate pipeline health is optimal.
+                មាន {stats.openPositionsCount} មុខតំណែងកំពុងប្រកាសជ្រើសរើសក្នុងរាជធានីភ្នំពេញ។ បេក្ខជនជាច្រើនកំពុងរង់ចាំការសម្ភាស។
               </p>
             </div>
             <Link
               href="/recruitment"
               className={`text-[11px] font-bold flex items-center gap-1 mt-3 ${themeClasses.accentText}`}
             >
-              Review ATS Pipeline <ArrowRight size={12} />
+              ពិនិត្យប្រព័ន្ធជ្រើសរើស <ArrowRight size={12} />
             </Link>
           </div>
 
@@ -529,19 +529,19 @@ export default function StyledDashboardPage() {
             <div>
               <div className="flex items-center gap-2 text-xs font-bold">
                 <span className="w-2 h-2 rounded-full bg-purple-400"></span>
-                <span>Compensation Audit</span>
+                <span>សវនកម្មបៀវត្សរ៍ & ប.ស.ស (NSSF)</span>
               </div>
               <p className={`text-[11px] mt-1.5 leading-relaxed ${themeClasses.textMuted}`}>
                 {stats.totalEmployees > 0
-                  ? `September 2026 payroll reconciled at $${(stats.monthlyPayrollTotal / 1000).toFixed(1)}k with zero tax discrepancies.`
-                  : 'Payroll ledger is clear. Ready for employee additions and compensation configuration.'}
+                  ? `បញ្ជីបៀវត្សរ៍សរុប $${(stats.monthlyPayrollTotal).toLocaleString()} បានគណនាការកាត់កងបង់វិភាគទាន ប.ស.ស យ៉ាងត្រឹមត្រូវ។`
+                  : 'បញ្ជីប្រាក់ខែបច្ចុប្បន្នទំនេរ។ រួចរាល់សម្រាប់ការកំណត់ប្រាក់បៀវត្សរ៍បុគ្គលិកថ្មី។'}
               </p>
             </div>
             <Link
               href="/payroll"
               className={`text-[11px] font-bold flex items-center gap-1 mt-3 ${themeClasses.accentText}`}
             >
-              Inspect Payslips <ArrowRight size={12} />
+              មើលប័ណ្ណបើកប្រាក់បៀវត្សរ៍ <ArrowRight size={12} />
             </Link>
           </div>
         </div>
@@ -555,10 +555,10 @@ export default function StyledDashboardPage() {
             <div>
               <h2 className="text-base font-bold flex items-center gap-2">
                 <Building2 size={18} className={themeClasses.accentText} />
-                Department Allocation & Team Proportions
+                ការបែងចែកបុគ្គលិកតាមដេប៉ាតឺម៉ង់ (Department Allocation)
               </h2>
               <p className={`text-xs ${themeClasses.textMuted}`}>
-                Staff distribution across all active business pods
+                សមាមាត្រកម្លាំងពលកម្មតាមបណ្តាផ្នែកនីមួយៗក្នុងក្រុមហ៊ុន
               </p>
             </div>
 
@@ -569,7 +569,7 @@ export default function StyledDashboardPage() {
                   activeChartTab === 'departments' ? themeClasses.pillActive : themeClasses.pillInactive
                 }`}
               >
-                Divisions
+                ផ្នែកការងារ
               </button>
               <button
                 onClick={() => setActiveChartTab('weekly_trend')}
@@ -577,7 +577,7 @@ export default function StyledDashboardPage() {
                   activeChartTab === 'weekly_trend' ? themeClasses.pillActive : themeClasses.pillInactive
                 }`}
               >
-                Weekly Trend
+                និន្នាការប្រចាំសប្តាហ៍
               </button>
             </div>
           </div>
@@ -599,7 +599,7 @@ export default function StyledDashboardPage() {
                         {dept.name}
                       </span>
                       <span className={themeClasses.textMuted}>
-                        <strong className="text-current font-bold">{dept.count}</strong> staff ({percentage}%)
+                        <strong className="text-current font-bold">{dept.count}</strong> នាក់ ({percentage}%)
                       </span>
                     </div>
 
@@ -619,7 +619,7 @@ export default function StyledDashboardPage() {
               <div className="mt-6 pt-4 border-t border-current/10 grid grid-cols-3 gap-4 text-center">
                 <div className={`p-3 rounded-xl ${themeClasses.subtleBox}`}>
                   <span className={`text-[11px] block font-medium ${themeClasses.textMuted}`}>
-                    Active Divisions
+                    ដេប៉ាតឺម៉ង់សកម្ម
                   </span>
                   <span className="text-xl font-black mt-0.5 block">
                     {stats.departmentDistribution.length}
@@ -627,15 +627,15 @@ export default function StyledDashboardPage() {
                 </div>
                 <div className={`p-3 rounded-xl ${themeClasses.subtleBox}`}>
                   <span className={`text-[11px] block font-medium ${themeClasses.textMuted}`}>
-                    Primary Division
+                    ផ្នែកកម្លាំងធំជាងគេ
                   </span>
                   <span className={`text-xl font-black mt-0.5 block ${themeClasses.accentText}`}>
-                    {stats.departmentDistribution[0]?.name.split(' ')[0] || 'Engineering'}
+                    {stats.departmentDistribution[0]?.name.split(' ')[0] || 'ផ្នែកបច្ចេកវិទ្យា'}
                   </span>
                 </div>
                 <div className={`p-3 rounded-xl ${themeClasses.subtleBox}`}>
                   <span className={`text-[11px] block font-medium ${themeClasses.textMuted}`}>
-                    Avg Pod Size
+                    មធ្យមភាគក្នុងផ្នែក
                   </span>
                   <span className="text-xl font-black mt-0.5 block">
                     {stats.departmentDistribution.length > 0
@@ -650,12 +650,12 @@ export default function StyledDashboardPage() {
             <div className="space-y-4 py-2">
               <div className="h-44 flex items-end justify-between gap-3 px-2 pt-6">
                 {[
-                  { day: 'Mon Sep 14', height: 95, rate: '95%' },
-                  { day: 'Tue Sep 15', height: 98, rate: '98%' },
-                  { day: 'Wed Sep 16', height: 92, rate: '92%' },
-                  { day: 'Thu Sep 17', height: 94, rate: '94%' },
-                  { day: 'Fri Sep 18', height: 89, rate: '89%' },
-                  { day: 'Mon Sep 21', height: 94, rate: '94% (Today)' },
+                  { day: 'ច័ន្ទ', height: 95, rate: '95%' },
+                  { day: 'អង្គារ', height: 98, rate: '98%' },
+                  { day: 'ពុធ', height: 92, rate: '92%' },
+                  { day: 'ព្រហស្បតិ៍', height: 94, rate: '94%' },
+                  { day: 'សុក្រ', height: 89, rate: '89%' },
+                  { day: 'ថ្ងៃនេះ', height: 94, rate: '94%' },
                 ].map((col) => (
                   <div key={col.day} className="flex-1 flex flex-col items-center gap-2 group">
                     <span className="text-[10px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">
@@ -666,13 +666,13 @@ export default function StyledDashboardPage() {
                       style={{ height: `${col.height}%` }}
                     ></div>
                     <span className={`text-[10px] font-semibold ${themeClasses.textMuted}`}>
-                      {col.day.split(' ')[0]}
+                      {col.day}
                     </span>
                   </div>
                 ))}
               </div>
               <p className={`text-center text-[11px] ${themeClasses.textMuted}`}>
-                Punctuality maintained consistently above 90% SLA throughout the operating cycle.
+                អត្រាវត្តមានបុគ្គលិកត្រូវបានរក្សាខ្ពស់ជាង ៩០% ស្របតាមស្តង់ដារក្រុមហ៊ុន។
               </p>
             </div>
           )}
@@ -684,14 +684,14 @@ export default function StyledDashboardPage() {
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-base font-bold flex items-center gap-2">
                 <Compass size={18} className="text-emerald-500" />
-                Workforce Radar
+                រ៉ាដាវត្តមានបុគ្គលិក (Workforce Radar)
               </h2>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/30">
-                Live
+              <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold border border-emerald-500/30">
+                ផ្ទាល់
               </span>
             </div>
             <p className={`text-xs mb-4 ${themeClasses.textMuted}`}>
-              Location & shift telemetry for all staff
+              ស្ថានភាពវត្តមាន និងទីតាំងការងាររបស់បុគ្គលិកទាំងអស់
             </p>
 
             <div className="space-y-3">
@@ -699,12 +699,12 @@ export default function StyledDashboardPage() {
                 <div className="flex items-center gap-2.5">
                   <div className="w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-emerald-500/30"></div>
                   <div>
-                    <span className="text-xs font-bold block">Present (In Office)</span>
-                    <span className={`text-[10px] ${themeClasses.textMuted}`}>HQ desks & meeting hubs</span>
+                    <span className="text-xs font-bold block">មកការិយាល័យ (In Office)</span>
+                    <span className={`text-[10px] ${themeClasses.textMuted}`}>អគារការិយាល័យភ្នំពេញ</span>
                   </div>
                 </div>
                 <span className="text-base font-black text-emerald-500">
-                  {stats.attendanceToday.present}
+                  {stats.attendanceToday.present} នាក់
                 </span>
               </div>
 
@@ -712,12 +712,12 @@ export default function StyledDashboardPage() {
                 <div className="flex items-center gap-2.5">
                   <div className="w-3 h-3 rounded-full bg-blue-500 ring-2 ring-blue-500/30"></div>
                   <div>
-                    <span className="text-xs font-bold block">Remote (WFH)</span>
-                    <span className={`text-[10px] ${themeClasses.textMuted}`}>Virtual clock-in verified</span>
+                    <span className="text-xs font-bold block">ធ្វើការពីផ្ទះ (Remote / WFH)</span>
+                    <span className={`text-[10px] ${themeClasses.textMuted}`}>បានកត់ត្រាវត្តមានតាមប្រព័ន្ធ</span>
                   </div>
                 </div>
                 <span className="text-base font-black text-blue-500">
-                  {stats.attendanceToday.remote}
+                  {stats.attendanceToday.remote} នាក់
                 </span>
               </div>
 
@@ -725,12 +725,12 @@ export default function StyledDashboardPage() {
                 <div className="flex items-center gap-2.5">
                   <div className="w-3 h-3 rounded-full bg-amber-500 ring-2 ring-amber-500/30"></div>
                   <div>
-                    <span className="text-xs font-bold block">Late Arrivals</span>
-                    <span className={`text-[10px] ${themeClasses.textMuted}`}>Punched in after 9:30 AM</span>
+                    <span className="text-xs font-bold block">មកយឺត (Late Arrivals)</span>
+                    <span className={`text-[10px] ${themeClasses.textMuted}`}>ចូលក្រោយម៉ោង ០៨:៣០ ព្រឹក</span>
                   </div>
                 </div>
                 <span className="text-base font-black text-amber-500">
-                  {stats.attendanceToday.late}
+                  {stats.attendanceToday.late} នាក់
                 </span>
               </div>
 
@@ -738,12 +738,12 @@ export default function StyledDashboardPage() {
                 <div className="flex items-center gap-2.5">
                   <div className="w-3 h-3 rounded-full bg-rose-500 ring-2 ring-rose-500/30"></div>
                   <div>
-                    <span className="text-xs font-bold block">On Leave / PTO</span>
-                    <span className={`text-[10px] ${themeClasses.textMuted}`}>Authorized annual vacation</span>
+                    <span className="text-xs font-bold block">ឈប់សម្រាកមានច្បាប់ (On Leave)</span>
+                    <span className={`text-[10px] ${themeClasses.textMuted}`}>ច្បាប់ប្រចាំឆ្នាំ ឬច្បាប់ឈឺ</span>
                   </div>
                 </div>
                 <span className="text-base font-black text-rose-500">
-                  {stats.attendanceToday.absent}
+                  {stats.attendanceToday.absent} នាក់
                 </span>
               </div>
             </div>
@@ -754,7 +754,7 @@ export default function StyledDashboardPage() {
               href="/attendance"
               className={`text-xs font-bold flex items-center justify-between ${themeClasses.accentText}`}
             >
-              <span>View Live Daily Punch Clock</span>
+              <span>មើលតារាងវត្តមានប្រចាំថ្ងៃ</span>
               <ChevronRight size={14} />
             </Link>
           </div>
@@ -769,10 +769,10 @@ export default function StyledDashboardPage() {
             <div>
               <h2 className="text-base font-bold flex items-center gap-2">
                 <Activity size={18} className={themeClasses.accentText} />
-                Live Operations Stream
+                បច្ចុប្បន្នភាពសកម្មភាពការងារ (Operations Stream)
               </h2>
               <p className={`text-xs ${themeClasses.textMuted}`}>
-                Chronological event stream of approvals, hires, and payroll
+                កំណត់ត្រាសកម្មភាពថ្មីៗ៖ ការសុំច្បាប់, បុគ្គលិកថ្មី និងការបើកបៀវត្សរ៍
               </p>
             </div>
 
@@ -785,7 +785,7 @@ export default function StyledDashboardPage() {
                     activityFilter === filter ? themeClasses.pillActive : themeClasses.pillInactive
                   }`}
                 >
-                  {filter === 'all' ? 'All Events' : filter === 'leave' ? 'Time Off' : 'Hiring'}
+                  {filter === 'all' ? 'សកម្មភាពទាំងអស់' : filter === 'leave' ? 'ច្បាប់ឈប់សម្រាក' : 'បុគ្គលិកថ្មី'}
                 </button>
               ))}
             </div>
@@ -793,7 +793,7 @@ export default function StyledDashboardPage() {
 
           {filteredActivities.length === 0 ? (
             <div className={`py-12 text-center text-xs ${themeClasses.textMuted}`}>
-              No recent activity logged in this category.
+              មិនទាន់មានសកម្មភាពថ្មីៗក្នុងជម្រើសនេះនៅឡើយទេ។
             </div>
           ) : (
             <div className="divide-y divide-current/10">
@@ -843,7 +843,7 @@ export default function StyledDashboardPage() {
               href="/leaves"
               className={`text-xs font-bold flex items-center gap-1 ${themeClasses.accentText}`}
             >
-              Review Full Approval Queue <ChevronRight size={14} />
+              ពិនិត្យបញ្ជីអនុម័តច្បាប់ទាំងអស់ <ChevronRight size={14} />
             </Link>
           </div>
         </div>
@@ -854,17 +854,17 @@ export default function StyledDashboardPage() {
             <div className="flex items-center justify-between mb-2">
               <h2 className="text-base font-bold flex items-center gap-2">
                 <Cake size={18} className="text-pink-500" />
-                Team Celebrations
+                កម្មវិធីអបអរ & ខួបកំណើត (Team Celebrations)
               </h2>
-              <span className={`text-xs ${themeClasses.textMuted}`}>Next 30 Days</span>
+              <span className={`text-xs ${themeClasses.textMuted}`}>ក្នុងខែនេះ</span>
             </div>
             <p className={`text-xs mb-4 ${themeClasses.textMuted}`}>
-              Send congratulations and fire confetti cannons!
+              ផ្ញើសារអបអរសាទរ និងបាញ់កាំជ្រួចឌីជីថលជូនសមាជិកក្រុម!
             </p>
 
             {stats.upcomingBirthdaysAndAnniversaries.length === 0 ? (
               <div className={`py-8 text-center text-xs ${themeClasses.textMuted}`}>
-                No upcoming milestones scheduled.
+                ពុំមានកម្មវិធីខួប ឬបុណ្យទានក្នុងខែនេះទេ។
               </div>
             ) : (
               <div className="space-y-3">
@@ -903,7 +903,7 @@ export default function StyledDashboardPage() {
               href="/announcements"
               className={`text-xs font-bold flex items-center justify-between ${themeClasses.accentText}`}
             >
-              <span>Company Announcements Bulletin</span>
+              <span>ព្រឹត្តិបត្រសេចក្តីជូនដំណឹងក្រុមហ៊ុន</span>
               <ChevronRight size={14} />
             </Link>
           </div>

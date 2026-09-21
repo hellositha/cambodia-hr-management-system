@@ -172,31 +172,31 @@ export default function EmployeesPage() {
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
             <Users className="text-indigo-600" size={26} />
-            Employee Directory & People Management
+            បញ្ជីបុគ្គលិក & ធនធានមនុស្ស (Employee Directory)
           </h1>
           <p className="text-xs text-slate-500">
-            Search, filter, manage profiles, compensation, attendance, and leave balances
+            ស្វែងរក, ច្រោះតាមផ្នែក, គ្រប់គ្រងប្រវត្តិរូប, ប្រាក់បៀវត្សរ៍, វត្តមាន និងច្បាប់ឈប់សម្រាក
           </p>
         </div>
         <div className="flex items-center gap-2.5">
           <button
             onClick={handleClearAll}
             className="px-3.5 py-2 rounded-xl bg-white border border-rose-200 text-xs font-semibold text-rose-600 hover:bg-rose-50 flex items-center gap-2 shadow-2xs transition-colors cursor-pointer"
-            title="Remove all employees from system"
+            title="លុបបុគ្គលិកទាំងអស់ចេញពីប្រព័ន្ធ"
           >
-            <Trash2 size={15} /> Clear All
+            <Trash2 size={15} /> សម្អាតបញ្ជី (Clear)
           </button>
           <button
             onClick={handleExportCSV}
             className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 shadow-2xs transition-colors cursor-pointer"
           >
-            <Download size={15} /> Export CSV
+            <Download size={15} /> ទាញយក CSV
           </button>
           <button
             onClick={() => openModal('add-employee')}
             className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
           >
-            <Plus size={16} /> Add Employee
+            <Plus size={16} /> បញ្ចូលបុគ្គលិក (Add Staff)
           </button>
         </div>
       </div>
@@ -209,10 +209,10 @@ export default function EmployeesPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input
               type="text"
-              placeholder="Search by name, email, job title..."
+              placeholder="ស្វែងរកតាមឈ្មោះ, អ៊ីមែល, មុខតំណែង... (Search by name, role...)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 transition-all"
+              className="w-full pl-9 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 transition-all font-sans"
             />
           </div>
 
@@ -220,9 +220,9 @@ export default function EmployeesPage() {
           <select
             value={selectedDept}
             onChange={(e) => setSelectedDept(e.target.value)}
-            className="w-full md:w-48 px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+            className="w-full md:w-48 px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 font-sans"
           >
-            <option value="all">All Departments</option>
+            <option value="all">គ្រប់ដេប៉ាតឺម៉ង់ (All Departments)</option>
             {departments.map((d) => (
               <option key={d.id} value={d.id}>
                 {d.name}
@@ -234,13 +234,13 @@ export default function EmployeesPage() {
           <select
             value={selectedType}
             onChange={(e) => setSelectedType(e.target.value)}
-            className="w-full md:w-36 px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
+            className="w-full md:w-40 px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500 font-sans"
           >
-            <option value="all">All Types</option>
-            <option value="Full-Time">Full-Time</option>
-            <option value="Part-Time">Part-Time</option>
-            <option value="Contract">Contract</option>
-            <option value="Intern">Intern</option>
+            <option value="all">គ្រប់ប្រភេទការងារ (All Types)</option>
+            <option value="Full-Time">ពេញម៉ោង (Full-Time)</option>
+            <option value="Part-Time">ក្រៅម៉ោង (Part-Time)</option>
+            <option value="Contract">កិច្ចសន្យា (Contract)</option>
+            <option value="Intern">កម្មសិក្សា (Intern)</option>
           </select>
 
           {/* View Toggle */}
