@@ -15,10 +15,10 @@ export interface Persona {
 export const PERSONAS: Persona[] = [
   {
     id: 'emp-13',
-    name: 'ចៅ សុខា (Chav Sokha)',
+    name: 'សារ៉ាត់ (Sarath)',
     role: 'Admin',
     title: 'ប្រធាននាយកដ្ឋានធនធានមនុស្ស (Head of HR)',
-    email: 'chav.sokha@hestra.kh',
+    email: 'sarath@hestra.kh',
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=256&h=256&fit=crop&crop=faces',
   },
   {

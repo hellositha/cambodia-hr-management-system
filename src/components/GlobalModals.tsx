@@ -314,7 +314,7 @@ export default function GlobalModals() {
                     value={empForm.first_name}
                     onChange={(e) => setEmpForm({ ...empForm, first_name: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="សុខា"
+                    placeholder="សារ៉ាត់"
                   />
                 </div>
               </div>
@@ -328,7 +328,7 @@ export default function GlobalModals() {
                     value={empForm.email}
                     onChange={(e) => setEmpForm({ ...empForm, email: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="sokha.chav@hestra.kh"
+                    placeholder="sarath@hestra.kh"
                   />
                 </div>
                 <div>

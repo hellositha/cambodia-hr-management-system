@@ -232,7 +232,7 @@ export default function StyledDashboardPage() {
                   }`}
                 >
                   <img src={p.avatar} alt={p.name} className="w-3.5 h-3.5 rounded-full object-cover" />
-                  <span>{p.name.split(' ')[1] || p.name}</span>
+                  <span>{p.name.replace(/\s*\(.*\)/, '').split(' ').slice(-1)[0] || p.name}</span>
                 </button>
               );
             })}
