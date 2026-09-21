@@ -38,9 +38,9 @@ export default function LoginPage() {
   // Selected portal mode: 'staff' (ESS) or 'management' (MSS/Admin)
   const [portalMode, setPortalMode] = useState<'staff' | 'management'>('staff');
 
-  // Form fields
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  // Form fields (defaults to staff demo username: chan)
+  const [email, setEmail] = useState('chan');
+  const [password, setPassword] = useState('hestra123');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -54,11 +54,13 @@ export default function LoginPage() {
   // Help & Forgot Password Modal
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
 
-  // Quick Demo Accounts
+  // Quick Demo Accounts with Last Name as Username
   const staffDemoAccounts = [
     {
       name: 'ចាន់ ធីតា (Chan Thida)',
       role: 'Employee',
+      username: 'chan',
+      lastName: 'ចាន់ (Chan)',
       title: 'វិស្វករកម្មវិធីជាន់ខ្ពស់ (Senior Software Engineer)',
       email: 'chan.thida@hestra.kh',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces',
@@ -68,11 +70,35 @@ export default function LoginPage() {
     {
       name: 'ស៊ឹម កក្កដា (Sim Kakkada)',
       role: 'Employee',
+      username: 'sim',
+      lastName: 'ស៊ឹម (Sim)',
       title: 'ប្រធានក្រុមទីផ្សារ (Marketing Team Lead)',
       email: 'sim.kakkada@hestra.kh',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=256&h=256&fit=crop&crop=faces',
       descKm: 'ស្នើសុំច្បាប់ឈប់សម្រាកប្រចាំឆ្នាំ និងពិនិត្យម៉ោងការងារ',
       descEn: 'Submit annual leave requests & check work hours',
+    },
+    {
+      name: 'ឌី ដារ៉ា (Dy Dara)',
+      role: 'Employee',
+      username: 'dy',
+      lastName: 'ឌី (Dy)',
+      title: 'វិស្វករ UI/UX (Frontend & Design)',
+      email: 'dy.dara@hestra.kh',
+      avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=256&h=256&fit=crop&crop=faces',
+      descKm: 'កត់ត្រាវត្តមាន ពិនិត្យកាលវិភាគការងារ និងស្នើសុំច្បាប់',
+      descEn: 'Punch attendance, check work shifts & request time off',
+    },
+    {
+      name: 'សេង វណ្ណា (Seng Vanna)',
+      role: 'Employee',
+      username: 'seng',
+      lastName: 'សេង (Seng)',
+      title: 'អ្នកស្រាវជ្រាវផលិតផល (UX Researcher)',
+      email: 'seng.vanna@hestra.kh',
+      avatar: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=256&h=256&fit=crop&crop=faces',
+      descKm: 'មើលសមតុល្យច្បាប់ប្រចាំឆ្នាំ និងទាញយកប័ណ្ណប្រាក់ខែ',
+      descEn: 'Check leave balances and download monthly payslips',
     },
   ];
 
@@ -80,6 +106,8 @@ export default function LoginPage() {
     {
       name: 'សារ៉ាត់ (Sarath)',
       role: 'Admin',
+      username: 'sarath',
+      lastName: 'Sarath',
       title: 'ប្រធាននាយកដ្ឋានធនធានមនុស្ស (Head of HR)',
       email: 'sarath@hestra.kh',
       avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=256&h=256&fit=crop&crop=faces',
@@ -89,6 +117,8 @@ export default function LoginPage() {
     {
       name: 'វ៉ាន់ សុភ័ក្ត្រ (Van Sopheak)',
       role: 'Manager',
+      username: 'van',
+      lastName: 'វ៉ាន់ (Van)',
       title: 'នាយកផ្នែកបច្ចេកវិទ្យា (VP of Engineering)',
       email: 'van.sopheak@hestra.kh',
       avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=256&h=256&fit=crop&crop=faces',
@@ -98,6 +128,8 @@ export default function LoginPage() {
     {
       name: 'ហេង សុផល (Heng Sophal)',
       role: 'Manager',
+      username: 'heng',
+      lastName: 'ហេង (Heng)',
       title: 'ប្រធានផ្នែកប្រតិបត្តិការ (Operations Manager)',
       email: 'heng.sophal@hestra.kh',
       avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=256&h=256&fit=crop&crop=faces',
@@ -107,8 +139,8 @@ export default function LoginPage() {
   ];
 
   // Quick fill demo user
-  const handleSelectDemoUser = (userEmail: string) => {
-    setEmail(userEmail);
+  const handleSelectDemoUser = (userIdentifier: string) => {
+    setEmail(userIdentifier);
     setPassword('hestra123');
   };
 
@@ -379,7 +411,7 @@ export default function LoginPage() {
                     type="button"
                     onClick={() => {
                       setPortalMode('staff');
-                      setEmail('chan.thida@hestra.kh');
+                      setEmail('chan');
                       setPassword('hestra123');
                     }}
                     className={`flex items-center justify-center gap-2.5 py-3 px-3 rounded-xl font-bold text-xs transition-all cursor-pointer ${
@@ -432,8 +464,8 @@ export default function LoginPage() {
                 <p className="text-xs text-gray-500 mt-1">
                   {portalMode === 'staff'
                     ? (language === 'km'
-                        ? 'បញ្ចូលអ៊ីមែលការងារ ឬលេខសម្គាល់បុគ្គលិក (Employee ID) ដើម្បីចូលដំណើរការ'
-                        : 'Enter your company email or employee ID to access your personal dashboard')
+                        ? 'ប្រើប្រាស់នាមត្រកូល (Last Name) ជាឈ្មោះសម្គាល់ ឬអ៊ីមែលការងារដើម្បីចូលដំណើរការ'
+                        : 'Use your employee Last Name as your username or work email to access personal workspace')
                     : (language === 'km'
                         ? 'គណនីមានសិទ្ធិជាប្រធានផ្នែក (Manager) ឬអ្នកគ្រប់គ្រងជាន់ខ្ពស់ (Admin)'
                         : 'Authorized credentials for Team Leads, Department Heads, and HR Admins')}
@@ -442,11 +474,20 @@ export default function LoginPage() {
 
               {/* Login Form */}
               <form onSubmit={handleSubmit} className="space-y-4">
-                {/* Email / ID Input */}
+                {/* Email / Username Input */}
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                    {language === 'km' ? 'អ៊ីមែលការងារ ឬលេខសម្គាល់បុគ្គលិក *' : 'Work Email or Employee ID *'}
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-bold text-gray-700">
+                      {portalMode === 'staff'
+                        ? (language === 'km' ? 'ឈ្មោះសម្គាល់ / នាមត្រកូល (Username / Last Name) *' : 'Staff Username (Last Name) *')
+                        : (language === 'km' ? 'អ៊ីមែលការងារ ឬឈ្មោះសម្គាល់ *' : 'Work Email or Username *')}
+                    </label>
+                    {portalMode === 'staff' && (
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                        {language === 'km' ? 'នាមត្រកូល = Username' : 'Last Name = Username'}
+                      </span>
+                    )}
+                  </div>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
@@ -454,10 +495,24 @@ export default function LoginPage() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder={portalMode === 'staff' ? 'chan.thida@hestra.kh ឬ emp-18' : 'sarath@hestra.kh ឬ van.sopheak@hestra.kh'}
-                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50/50 hover:bg-white focus:bg-white border border-gray-200 focus:border-indigo-500 rounded-xl text-xs text-gray-900 transition-all focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20"
+                      placeholder={
+                        portalMode === 'staff'
+                          ? (language === 'km' ? 'ឧទាហរណ៍៖ chan, sim, dy, van ឬ chan.thida@hestra.kh' : 'e.g. chan, sim, dy, van or chan.thida@hestra.kh')
+                          : (language === 'km' ? 'sarath@hestra.kh ឬ van.sopheak@hestra.kh' : 'sarath@hestra.kh or van.sopheak@hestra.kh')
+                      }
+                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50/50 hover:bg-white focus:bg-white border border-gray-200 focus:border-indigo-500 rounded-xl text-xs text-gray-900 transition-all focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 font-mono"
                     />
                   </div>
+                  {portalMode === 'staff' && (
+                    <p className="text-[11px] text-emerald-700 mt-1.5 flex items-center gap-1.5 bg-emerald-50/70 p-2 rounded-lg border border-emerald-200/60 font-khmer">
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>
+                        {language === 'km'
+                          ? 'ប្រើប្រាស់នាមត្រកូល (Last Name) របស់បុគ្គលិកជា Username សម្រាប់ចូលប្រព័ន្ធ (ឧ. chan, sim, dy, van...)'
+                          : 'Use your employee Last Name as your login username (e.g. chan, sim, dy, van...)'}
+                      </span>
+                    </p>
+                  )}
                 </div>
 
                 {/* Password Input */}
@@ -553,10 +608,10 @@ export default function LoginPage() {
                     <button
                       key={acc.email}
                       type="button"
-                      onClick={() => handleSelectDemoUser(acc.email)}
+                      onClick={() => handleSelectDemoUser(portalMode === 'staff' ? acc.username : acc.email)}
                       className={`p-2.5 rounded-xl border text-left transition-all flex items-center gap-2.5 cursor-pointer hover:scale-[1.01] ${
-                        email === acc.email
-                          ? 'bg-indigo-50/80 border-indigo-300 ring-2 ring-indigo-500/20'
+                        email === acc.username || email === acc.email
+                          ? 'bg-emerald-50/90 border-emerald-300 ring-2 ring-emerald-500/20'
                           : 'bg-gray-50/70 border-gray-200/80 hover:bg-white hover:border-gray-300'
                       }`}
                     >
@@ -580,7 +635,12 @@ export default function LoginPage() {
                             {acc.role}
                           </span>
                         </div>
-                        <p className="text-[10px] text-gray-500 truncate">{acc.email}</p>
+                        <div className="flex items-center justify-between text-[10px] text-gray-500 truncate mt-0.5">
+                          <span className="font-bold text-emerald-700 font-mono">
+                            Username: {acc.username}
+                          </span>
+                          <span className="text-gray-400 text-[9px] font-sans truncate">{acc.lastName}</span>
+                        </div>
                       </div>
                     </button>
                   ))}

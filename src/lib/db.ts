@@ -169,6 +169,7 @@ function initDatabase(db: Database.Database) {
 
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
+      username TEXT,
       name TEXT NOT NULL,
       email TEXT NOT NULL UNIQUE,
       role TEXT NOT NULL DEFAULT 'Employee',
@@ -189,12 +190,27 @@ function initDatabase(db: Database.Database) {
     );
   `);
 
-  // Ensure password column exists if table was created previously
+  // Ensure password and username columns exist if table was created previously
   try {
     const cols = db.prepare("PRAGMA table_info(users)").all() as any[];
     if (!cols.some((c) => c.name === 'password')) {
       db.prepare("ALTER TABLE users ADD COLUMN password TEXT DEFAULT 'hestra123'").run();
     }
+    if (!cols.some((c) => c.name === 'username')) {
+      db.prepare("ALTER TABLE users ADD COLUMN username TEXT").run();
+    }
+    // Automatically set employee last name as username if missing
+    db.prepare(`
+      UPDATE users 
+      SET username = LOWER(
+        CASE 
+          WHEN INSTR(email, '.') > 0 AND INSTR(email, '.') < INSTR(email, '@') THEN SUBSTR(email, 1, INSTR(email, '.') - 1)
+          WHEN INSTR(email, '@') > 0 THEN SUBSTR(email, 1, INSTR(email, '@') - 1)
+          ELSE email
+        END
+      )
+      WHERE username IS NULL OR username = ''
+    `).run();
   } catch (e) {}
 
   // Initialize users if none exist
@@ -202,13 +218,14 @@ function initDatabase(db: Database.Database) {
     const userRow = db.prepare("SELECT count(*) as count FROM users").get() as { count: number } | undefined;
     if (!userRow || userRow.count === 0) {
       const insertUser = db.prepare(`
-        INSERT INTO users (id, name, email, role, status, employee_id, department_name, avatar, two_factor_enabled, permissions, last_login, created_at)
-        VALUES (@id, @name, @email, @role, @status, @employee_id, @department_name, @avatar, @two_factor_enabled, @permissions, @last_login, @created_at)
+        INSERT INTO users (id, username, name, email, role, status, employee_id, department_name, avatar, two_factor_enabled, permissions, last_login, created_at)
+        VALUES (@id, @username, @name, @email, @role, @status, @employee_id, @department_name, @avatar, @two_factor_enabled, @permissions, @last_login, @created_at)
       `);
 
       const defaultUsers = [
         {
           id: 'usr-1',
+          username: 'sarath',
           name: 'សារ៉ាត់ (Sarath)',
           email: 'sarath@hestra.kh',
           role: 'Admin',
@@ -223,6 +240,7 @@ function initDatabase(db: Database.Database) {
         },
         {
           id: 'usr-2',
+          username: 'van',
           name: 'វ៉ាន់ សុភ័ក្ត្រ (Van Sopheak)',
           email: 'van.sopheak@hestra.kh',
           role: 'Manager',
@@ -237,6 +255,7 @@ function initDatabase(db: Database.Database) {
         },
         {
           id: 'usr-3',
+          username: 'chan',
           name: 'ចាន់ ធីតា (Chan Thida)',
           email: 'chan.thida@hestra.kh',
           role: 'Employee',
@@ -251,6 +270,7 @@ function initDatabase(db: Database.Database) {
         },
         {
           id: 'usr-4',
+          username: 'sim',
           name: 'ស៊ឹម កក្កដា (Sim Kakkada)',
           email: 'sim.kakkada@hestra.kh',
           role: 'Employee',
@@ -265,6 +285,7 @@ function initDatabase(db: Database.Database) {
         },
         {
           id: 'usr-5',
+          username: 'heng',
           name: 'ហេង សុផល (Heng Sophal)',
           email: 'heng.sophal@hestra.kh',
           role: 'Manager',

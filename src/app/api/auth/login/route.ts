@@ -7,61 +7,132 @@ export async function POST(request: Request) {
   try {
     const db = getDb();
     const body = await request.json();
-    const { email, password, portalType, otpCode } = body;
+    const rawIdentifier = (body.username || body.email || '').trim();
+    const { password, portalType, otpCode } = body;
 
-    if (!email) {
+    if (!rawIdentifier) {
       return NextResponse.json(
-        { error: 'សូមបញ្ចូលអ៊ីមែល ឬលេខសម្គាល់បុគ្គលិក (Email or Employee ID is required)' },
+        { error: 'សូមបញ្ចូលឈ្មោះសម្គាល់ (នាមត្រកូល) ឬអ៊ីមែល (Username / Last Name or Email is required)' },
         { status: 400 }
       );
     }
 
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanInput = rawIdentifier.toLowerCase();
 
-    // Look up user by email or employee_id
+    // Cambodian Romanized-to-Khmer last name mapping
+    const KHMER_LAST_NAMES_MAP: Record<string, string> = {
+      chan: 'ចាន់',
+      van: 'វ៉ាន់',
+      sim: 'ស៊ឹម',
+      dy: 'ឌី',
+      suon: 'សួន',
+      kong: 'គង់',
+      seng: 'សេង',
+      ly: 'លី',
+      khim: 'ឃឹម',
+      rath: 'រ័ត្ន',
+      heng: 'ហេង',
+      ouk: 'អ៊ុក',
+      mao: 'ម៉ៅ',
+      chea: 'ជា',
+      sarath: 'សារ៉ាត់',
+      prom: 'ព្រំ',
+      yim: 'យឹម',
+      tang: 'តាំង',
+      sun: 'ស៊ុន',
+    };
+
+    const khmerEquivalent = KHMER_LAST_NAMES_MAP[cleanInput] || '';
+
+    // 1. Look up user in `users` table by username, email, employee_id, or name pattern
     let user = db.prepare(`
       SELECT * FROM users 
-      WHERE LOWER(email) = ? OR LOWER(employee_id) = ?
-    `).get(cleanEmail, cleanEmail) as any;
+      WHERE LOWER(username) = ? 
+         OR LOWER(email) = ? 
+         OR LOWER(employee_id) = ?
+         OR LOWER(SUBSTR(email, 1, INSTR(email, '.') - 1)) = ?
+         OR LOWER(SUBSTR(email, 1, INSTR(email, '@') - 1)) = ?
+         OR (? != '' AND (name LIKE ? || ' %' OR name LIKE '%(' || ? || ' %'))
+    `).get(
+      cleanInput,
+      cleanInput,
+      cleanInput,
+      cleanInput,
+      cleanInput,
+      cleanInput,
+      rawIdentifier,
+      cleanInput
+    ) as any;
 
-    // If not found in users, check if exists in employees table
+    // 2. If not found directly in `users`, search in `employees` table by last_name, first_name, email, or id
     if (!user) {
       const emp = db.prepare(`
         SELECT e.*, d.name as dept_name 
         FROM employees e 
         LEFT JOIN departments d ON d.id = e.department_id 
-        WHERE LOWER(e.email) = ? OR LOWER(e.id) = ?
-      `).get(cleanEmail, cleanEmail) as any;
+        WHERE LOWER(e.last_name) = ?
+           OR e.last_name = ?
+           OR LOWER(e.first_name) = ?
+           OR e.first_name = ?
+           OR LOWER(e.email) = ? 
+           OR LOWER(e.id) = ?
+           OR LOWER(SUBSTR(e.email, 1, INSTR(e.email, '.') - 1)) = ?
+           OR LOWER(SUBSTR(e.email, 1, INSTR(e.email, '@') - 1)) = ?
+           OR (? != '' AND e.last_name = ?)
+      `).get(
+        cleanInput,
+        rawIdentifier,
+        cleanInput,
+        rawIdentifier,
+        cleanInput,
+        cleanInput,
+        cleanInput,
+        cleanInput,
+        khmerEquivalent,
+        khmerEquivalent
+      ) as any;
 
       if (emp) {
-        // Auto-provision user account for existing employee
-        const role = (emp.role && (emp.role.toLowerCase().includes('manager') || emp.role.toLowerCase().includes('head') || emp.role.toLowerCase().includes('director'))) 
-          ? 'Manager' 
-          : 'Employee';
-        const newId = `usr-${Date.now().toString().slice(-6)}`;
-        const nowStr = new Date().toISOString().split('T')[0];
+        // Check if user account already exists for this employee
+        user = db.prepare(`
+          SELECT * FROM users 
+          WHERE employee_id = ? OR LOWER(email) = LOWER(?)
+        `).get(emp.id, emp.email) as any;
 
-        db.prepare(`
-          INSERT INTO users (id, name, email, role, status, employee_id, department_name, avatar, two_factor_enabled, permissions, password, last_login, created_at)
-          VALUES (?, ?, ?, ?, 'Active', ?, ?, ?, 0, 'self_service,clock_in,request_leave,view_payslips', 'hestra123', 'Just now', ?)
-        `).run(
-          newId,
-          `${emp.first_name} ${emp.last_name}`,
-          emp.email,
-          role,
-          emp.id,
-          emp.dept_name || 'ទូទៅ (General)',
-          emp.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces',
-          nowStr
-        );
+        if (!user) {
+          // Auto-provision user account for existing employee with last name as username
+          const role = (emp.role && (emp.role.toLowerCase().includes('manager') || emp.role.toLowerCase().includes('head') || emp.role.toLowerCase().includes('director'))) 
+            ? 'Manager' 
+            : 'Employee';
+          const newId = `usr-${Date.now().toString().slice(-6)}`;
+          const nowStr = new Date().toISOString().split('T')[0];
+          const calculatedUsername = emp.email.includes('.') 
+            ? emp.email.split('.')[0].toLowerCase() 
+            : emp.email.split('@')[0].toLowerCase();
 
-        user = db.prepare('SELECT * FROM users WHERE id = ?').get(newId) as any;
+          db.prepare(`
+            INSERT INTO users (id, username, name, email, role, status, employee_id, department_name, avatar, two_factor_enabled, permissions, password, last_login, created_at)
+            VALUES (?, ?, ?, ?, ?, 'Active', ?, ?, ?, 0, 'self_service,clock_in,request_leave,view_payslips', 'hestra123', 'Just now', ?)
+          `).run(
+            newId,
+            calculatedUsername,
+            `${emp.first_name} ${emp.last_name}`,
+            emp.email,
+            role,
+            emp.id,
+            emp.dept_name || 'ទូទៅ (General)',
+            emp.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces',
+            nowStr
+          );
+
+          user = db.prepare('SELECT * FROM users WHERE id = ?').get(newId) as any;
+        }
       }
     }
 
     if (!user) {
       return NextResponse.json(
-        { error: 'រកមិនឃើញគណនីនេះក្នុងប្រព័ន្ធទេ សូមពិនិត្យអ៊ីមែលម្តងទៀត (Account not found)' },
+        { error: 'រកមិនឃើញគណនី ឬនាមត្រកូលនេះក្នុងប្រព័ន្ធទេ សូមពិនិត្យម្តងទៀត (Account/Last Name not found)' },
         { status: 404 }
       );
     }
