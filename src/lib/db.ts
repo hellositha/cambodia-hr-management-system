@@ -178,6 +178,7 @@ function initDatabase(db: Database.Database) {
       avatar TEXT,
       two_factor_enabled INTEGER DEFAULT 0,
       permissions TEXT,
+      password TEXT DEFAULT 'hestra123',
       last_login TEXT,
       created_at TEXT NOT NULL
     );
@@ -187,6 +188,14 @@ function initDatabase(db: Database.Database) {
       value TEXT
     );
   `);
+
+  // Ensure password column exists if table was created previously
+  try {
+    const cols = db.prepare("PRAGMA table_info(users)").all() as any[];
+    if (!cols.some((c) => c.name === 'password')) {
+      db.prepare("ALTER TABLE users ADD COLUMN password TEXT DEFAULT 'hestra123'").run();
+    }
+  } catch (e) {}
 
   // Initialize users if none exist
   try {

@@ -225,6 +225,7 @@ export interface UserAccount {
   avatar?: string;
   two_factor_enabled: number;
   permissions: string;
+  password?: string;
   last_login?: string;
   created_at: string;
 }

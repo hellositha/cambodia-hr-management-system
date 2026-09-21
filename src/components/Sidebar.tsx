@@ -23,11 +23,12 @@ import {
   ChevronRight,
   ShieldAlert,
   Sparkles,
+  LogOut,
 } from 'lucide-react';
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { currentPersona, sidebarCollapsed, toggleSidebar, language, toggleLanguage, t } = useApp();
+  const { currentPersona, sidebarCollapsed, toggleSidebar, language, toggleLanguage, logout, t } = useApp();
 
   const navItems = [
     { label: t('nav_dashboard'), href: '/', icon: LayoutDashboard },
@@ -154,6 +155,19 @@ export default function Sidebar() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
                 <p className="text-xs font-bold text-slate-900 truncate">{currentPersona.name}</p>
+                <button
+                  onClick={() => {
+                    logout();
+                    window.location.href = '/login';
+                  }}
+                  title={language === 'km' ? 'ចាកចេញ (Sign Out)' : 'Sign Out'}
+                  className="text-slate-400 hover:text-rose-600 p-1 hover:bg-rose-50 rounded-md transition-colors cursor-pointer"
+                >
+                  <LogOut size={13} />
+                </button>
+              </div>
+              <div className="flex items-center justify-between mt-0.5">
+                <p className="text-[11px] text-slate-500 truncate">{currentPersona.title}</p>
                 <span
                   className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded ${
                     currentPersona.role === 'Admin'
@@ -166,17 +180,26 @@ export default function Sidebar() {
                   {currentPersona.role}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 truncate mt-0.5">{currentPersona.title}</p>
             </div>
           </div>
         ) : (
-          <div className="flex justify-center">
+          <div className="flex flex-col items-center gap-2">
             <img
               src={currentPersona.avatar}
               alt={currentPersona.name}
               title={`${currentPersona.name} (${currentPersona.role})`}
               className="w-10 h-10 rounded-full object-cover ring-2 ring-indigo-200"
             />
+            <button
+              onClick={() => {
+                logout();
+                window.location.href = '/login';
+              }}
+              title={language === 'km' ? 'ចាកចេញ (Sign Out)' : 'Sign Out'}
+              className="text-slate-400 hover:text-rose-600 p-1.5 hover:bg-rose-50 rounded-md transition-colors cursor-pointer"
+            >
+              <LogOut size={14} />
+            </button>
           </div>
         )}
       </div>

@@ -48,6 +48,8 @@ interface ToastMessage {
 interface AppContextType {
   currentPersona: Persona;
   switchPersona: (personaId: string) => void;
+  loginAs: (user: { id: string; name: string; email: string; role: 'Admin' | 'Manager' | 'Employee'; avatar?: string; title?: string }) => void;
+  logout: () => void;
   isClockedIn: boolean;
   clockInTime: string | null;
   toggleClock: () => Promise<void>;
@@ -143,12 +145,50 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setRefreshKey((k) => k + 1);
   }, []);
 
+  useEffect(() => {
+    try {
+      const savedUser = localStorage.getItem('hestra_current_user');
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        if (parsed && parsed.name && parsed.role) {
+          setCurrentPersona(parsed);
+        }
+      }
+    } catch {}
+  }, []);
+
   const switchPersona = (personaId: string) => {
     const found = PERSONAS.find((p) => p.id === personaId);
     if (found) {
       setCurrentPersona(found);
+      try {
+        localStorage.setItem('hestra_current_user', JSON.stringify(found));
+      } catch {}
       showToast(`Switched view to ${found.name} (${found.role})`, 'info');
     }
+  };
+
+  const loginAs = (userData: { id: string; name: string; email: string; role: 'Admin' | 'Manager' | 'Employee'; avatar?: string; title?: string }) => {
+    const newPersona: Persona = {
+      id: userData.id,
+      name: userData.name,
+      email: userData.email,
+      role: userData.role,
+      title: userData.title || (userData.role === 'Admin' ? 'ប្រធាននាយកដ្ឋានធនធានមនុស្ស (Head of HR)' : userData.role === 'Manager' ? 'ប្រធានផ្នែក (Department Manager)' : 'បុគ្គលិក (Staff Member)'),
+      avatar: userData.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces',
+    };
+    setCurrentPersona(newPersona);
+    try {
+      localStorage.setItem('hestra_current_user', JSON.stringify(newPersona));
+    } catch {}
+  };
+
+  const logout = () => {
+    try {
+      localStorage.removeItem('hestra_current_user');
+    } catch {}
+    setCurrentPersona(PERSONAS[0]);
+    showToast('បានចាកចេញពីប្រព័ន្ធដោយជោគជ័យ (Logged out)', 'info');
   };
 
   const toggleClock = async () => {
@@ -188,6 +228,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       value={{
         currentPersona,
         switchPersona,
+        loginAs,
+        logout,
         isClockedIn,
         clockInTime,
         toggleClock,

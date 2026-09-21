@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { usePathname } from 'next/navigation';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import ToastContainer from './Toast';
@@ -9,6 +10,18 @@ import { useApp } from '@/context/AppContext';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const { sidebarCollapsed } = useApp();
+  const pathname = usePathname();
+
+  const isAuthPage = pathname === '/login';
+
+  if (isAuthPage) {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        {children}
+        <ToastContainer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">

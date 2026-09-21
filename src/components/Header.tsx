@@ -21,6 +21,8 @@ import {
   Check,
   FileText,
   Calculator,
+  LogIn,
+  LogOut,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -36,6 +38,7 @@ export default function Header() {
     language,
     setLanguage,
     toggleLanguage,
+    logout,
     t,
   } = useApp();
 
@@ -433,6 +436,31 @@ export default function Header() {
                     </button>
                   );
                 })}
+              </div>
+
+              <div className="my-1.5 border-t border-slate-100"></div>
+
+              <div className="space-y-1">
+                <Link
+                  href="/login"
+                  onClick={() => setPersonaOpen(false)}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-slate-700 hover:text-indigo-600 hover:bg-slate-50 rounded-lg transition-colors"
+                >
+                  <LogIn size={15} className="text-slate-400" />
+                  <span>{language === 'km' ? 'ទំព័រចូលប្រើប្រព័ន្ធ (Login Page)' : 'Go to Login Portal'}</span>
+                </Link>
+
+                <button
+                  onClick={() => {
+                    setPersonaOpen(false);
+                    logout();
+                    window.location.href = '/login';
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                >
+                  <LogOut size={15} />
+                  <span>{language === 'km' ? 'ចាកចេញពីប្រព័ន្ធ (Sign Out)' : 'Sign Out'}</span>
+                </button>
               </div>
             </div>
           )}
