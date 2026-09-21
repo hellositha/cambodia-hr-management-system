@@ -47,7 +47,7 @@ export default function StyledDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [activityFilter, setActivityFilter] = useState<'all' | 'leave' | 'hire'>('all');
   const [activeChartTab, setActiveChartTab] = useState<'departments' | 'weekly_trend'>('departments');
-  const [theme, setTheme] = useState<DashboardTheme>('midnight');
+  const [theme, setTheme] = useState<DashboardTheme>('nordic');
 
   // Real-time greeting & clock
   const [currentTime, setCurrentTime] = useState<string>('');
@@ -55,7 +55,11 @@ export default function StyledDashboardPage() {
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('pulsehr_theme') as DashboardTheme | null;
-    if (savedTheme) setTheme(savedTheme);
+    if (savedTheme && savedTheme === 'nordic') {
+      setTheme(savedTheme);
+    } else {
+      setTheme('nordic');
+    }
 
     const updateTime = () => {
       const now = new Date();
@@ -143,15 +147,15 @@ export default function StyledDashboardPage() {
       pillInactive: 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800',
     },
     nordic: {
-      wrapper: 'bg-slate-50 text-slate-900 min-h-screen p-2 sm:p-4 rounded-3xl border border-slate-200',
-      hero: 'bg-white border border-slate-200/90 text-slate-900 shadow-xl shadow-slate-200/40',
-      card: 'bg-white border border-slate-200/90 text-slate-800 hover:border-slate-300 shadow-xs hover:shadow-md',
-      cardHighlight: 'bg-slate-50 border border-slate-300 text-slate-900',
+      wrapper: 'bg-slate-50/70 text-slate-900 min-h-screen p-2 sm:p-5 rounded-3xl border border-slate-200/80',
+      hero: 'bg-gradient-to-br from-indigo-50/70 via-white to-blue-50/30 border border-slate-200/90 text-slate-900 shadow-sm shadow-slate-200/60',
+      card: 'bg-white border border-slate-200/80 text-slate-800 hover:border-indigo-300 shadow-xs hover:shadow-md transition-all',
+      cardHighlight: 'bg-indigo-50/40 border border-indigo-200/70 text-slate-900 shadow-2xs',
       textMuted: 'text-slate-500',
-      subtleBox: 'bg-slate-50 border border-slate-200',
+      subtleBox: 'bg-slate-50/90 border border-slate-200/70',
       badge: 'bg-slate-100 text-slate-700 border border-slate-200',
       accentText: 'text-indigo-600',
-      pillActive: 'bg-slate-900 text-white shadow-xs',
+      pillActive: 'bg-indigo-600 text-white shadow-xs',
       pillInactive: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
     },
     indigo: {
