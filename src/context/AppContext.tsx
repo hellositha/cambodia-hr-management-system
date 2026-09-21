@@ -18,7 +18,7 @@ export const PERSONAS: Persona[] = [
     name: 'ចៅ សុខា (Chav Sokha)',
     role: 'Admin',
     title: 'ប្រធាននាយកដ្ឋានធនធានមនុស្ស (Head of HR)',
-    email: 'chav.sokha@pulsehr.kh',
+    email: 'chav.sokha@hestra.kh',
     avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=256&h=256&fit=crop&crop=faces',
   },
   {
@@ -26,7 +26,7 @@ export const PERSONAS: Persona[] = [
     name: 'វ៉ាន់ សុភ័ក្ត្រ (Van Sopheak)',
     role: 'Manager',
     title: 'នាយកផ្នែកបច្ចេកវិទ្យា (VP of Engineering)',
-    email: 'van.sopheak@pulsehr.kh',
+    email: 'van.sopheak@hestra.kh',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=256&h=256&fit=crop&crop=faces',
   },
   {
@@ -34,7 +34,7 @@ export const PERSONAS: Persona[] = [
     name: 'ចាន់ ធីតា (Chan Thida)',
     role: 'Employee',
     title: 'វិស្វករកម្មវិធីជាន់ខ្ពស់ (Senior Software Engineer)',
-    email: 'chan.thida@pulsehr.kh',
+    email: 'chan.thida@hestra.kh',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces',
   },
 ];
@@ -92,7 +92,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem('pulsehr_lang') as Language | null;
+      const saved = (localStorage.getItem('hestra_lang') || localStorage.getItem('pulsehr_lang')) as Language | null;
       if (saved === 'en' || saved === 'km') {
         setLanguageState(saved);
       }
@@ -104,7 +104,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const setLanguage = useCallback((newLang: Language) => {
     setLanguageState(newLang);
     try {
-      localStorage.setItem('pulsehr_lang', newLang);
+      localStorage.setItem('hestra_lang', newLang);
     } catch {}
     showToast(
       newLang === 'km'

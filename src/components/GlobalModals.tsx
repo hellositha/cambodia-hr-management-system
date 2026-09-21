@@ -328,7 +328,7 @@ export default function GlobalModals() {
                     value={empForm.email}
                     onChange={(e) => setEmpForm({ ...empForm, email: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="sokha.chav@pulsehr.kh"
+                    placeholder="sokha.chav@hestra.kh"
                   />
                 </div>
                 <div>

@@ -319,11 +319,11 @@ export default function PayrollPage() {
               {/* Company Branding Header */}
               <div className="flex items-start justify-between pb-6 border-b-2 border-slate-900">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-slate-900 text-white font-extrabold flex items-center justify-center text-xl">
-                    🇰🇭
+                  <div className="w-12 h-12 rounded-xl bg-slate-900 text-white font-extrabold flex items-center justify-center text-xl overflow-hidden p-1">
+                    <img src="/hestra-logo.svg" alt="HESTRA HRM" className="w-full h-full object-contain" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-black text-slate-900 tracking-tight">PulseHR កម្ពុជា (PulseHR Cambodia Co., Ltd.)</h2>
+                    <h2 className="text-lg font-black text-slate-900 tracking-tight">HESTRA HRM កម្ពុជា (HESTRA HRM Cambodia Co., Ltd.)</h2>
                     <p className="text-[11px] text-slate-500">អគារ Exchange Square, មហាវិថីព្រះនរោត្តម, រាជធានីភ្នំពេញ</p>
                     <p className="text-[11px] text-slate-500">លេខសារពើពន្ធ TIN: K009-90218928 &bull; លេខបញ្ជិកា ប.ស.ស (NSSF): 1029482</p>
                   </div>
@@ -432,7 +432,7 @@ export default function PayrollPage() {
               </div>
 
               <div className="text-center text-[10px] text-slate-400 pt-4 border-t border-slate-200">
-                នេះជាឯកសារគណនាប្រាក់បៀវត្សរ៍ និងពន្ធស្របតាមច្បាប់ការងារនៃព្រះរាជាណាចក្រកម្ពុជា បញ្ជាក់ដោយ PulseHR Cambodia People Operations។
+                នេះជាឯកសារគណនាប្រាក់បៀវត្សរ៍ និងពន្ធស្របតាមច្បាប់ការងារនៃព្រះរាជាណាចក្រកម្ពុជា បញ្ជាក់ដោយ HESTRA HRM Cambodia People Operations។
               </div>
             </div>
           </div>

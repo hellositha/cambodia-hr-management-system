@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
+import HestraLogo from '@/components/HestraLogo';
 import {
   LayoutDashboard,
   Users,
@@ -45,22 +46,11 @@ export default function Sidebar() {
       {/* Brand Header */}
       <div className="flex items-center justify-between px-4 h-16 border-b border-slate-100 bg-white">
         <Link href="/" className="flex items-center gap-3 overflow-hidden">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-amber-500 flex items-center justify-center text-white font-black text-xl shadow-sm shadow-indigo-500/20 shrink-0">
-            🇰🇭
-          </div>
-          {!sidebarCollapsed && (
-            <div className="flex flex-col">
-              <span className="font-extrabold text-slate-900 text-base tracking-tight flex items-center gap-1.5">
-                {t('brand_name')}
-                <span className="text-[9px] px-1.5 py-0.2 rounded-full font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                  HRMS
-                </span>
-              </span>
-              <span className="text-[10px] text-slate-400 font-medium truncate">
-                {t('brand_tagline')}
-              </span>
-            </div>
-          )}
+          <HestraLogo
+            size="md"
+            showText={!sidebarCollapsed}
+            subtext={t('brand_tagline')}
+          />
         </Link>
         <button
           onClick={toggleSidebar}

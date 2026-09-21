@@ -55,7 +55,7 @@ export async function POST(request: Request) {
 
       db.prepare(`
         INSERT INTO attendance (id, employee_id, date, clock_in, clock_out, status, work_hours, notes)
-        VALUES (?, ?, ?, ?, NULL, ?, 0, 'Clocked in via PulseHR Web')
+        VALUES (?, ?, ?, ?, NULL, ?, 0, 'Clocked in via HESTRA HRM Web')
       `).run(id, employee_id, today, timeString, status);
 
       const created = db.prepare('SELECT * FROM attendance WHERE id = ?').get(id);

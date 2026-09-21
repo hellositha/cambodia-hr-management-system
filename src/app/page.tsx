@@ -54,8 +54,8 @@ export default function StyledDashboardPage() {
   const [greeting, setGreeting] = useState<string>('Welcome back');
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('pulsehr_theme') as DashboardTheme | null;
-    if (savedTheme && savedTheme === 'nordic') {
+    const savedTheme = (localStorage.getItem('hestra_theme') || localStorage.getItem('pulsehr_theme')) as DashboardTheme | null;
+    if (savedTheme && (savedTheme === 'nordic' || savedTheme === 'midnight' || savedTheme === 'indigo')) {
       setTheme(savedTheme);
     } else {
       setTheme('nordic');
@@ -78,7 +78,7 @@ export default function StyledDashboardPage() {
 
   const changeTheme = (newTheme: DashboardTheme) => {
     setTheme(newTheme);
-    localStorage.setItem('pulsehr_theme', newTheme);
+    localStorage.setItem('hestra_theme', newTheme);
     showToast(`រចនាប័ទ្មផ្ទាំងគ្រប់គ្រងត្រូវបានប្តូរទៅជា ${newTheme.toUpperCase()}`, 'info');
   };
 
@@ -324,24 +324,22 @@ export default function StyledDashboardPage() {
               <Users size={24} />
             </div>
             <div>
-              <h3 className="text-sm font-bold">Workforce Roster is Currently Empty</h3>
+              <h3 className="text-sm font-bold">
+                {language === 'km' ? 'បញ្ជីបុគ្គលិកបច្ចុប្បន្នទំនេរ' : 'Workforce Directory is Currently Empty'}
+              </h3>
               <p className={`text-xs mt-0.5 ${themeClasses.textMuted}`}>
-                You can start fresh by onboarding your first colleague, or instantly restore the 18 sample employees.
+                {language === 'km'
+                  ? 'ទិន្នន័យសាកល្បងទាំងអស់ត្រូវបានសម្អាតរួចរាល់។ លោកអ្នកអាចចាប់ផ្តើមចុះឈ្មោះបុគ្គលិកដំបូង។'
+                  : 'All demo records have been cleared. You can start fresh by onboarding your first team member.'}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2.5 w-full sm:w-auto">
             <button
               onClick={() => openModal('add-employee')}
-              className="flex-1 sm:flex-none px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+              className="flex-1 sm:flex-none px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
             >
-              <Plus size={15} /> Onboard Hire
-            </button>
-            <button
-              onClick={handleQuickSeed}
-              className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer ${themeClasses.subtleBox}`}
-            >
-              <RotateCcw size={14} /> Restore 18 Demo Staff
+              <Plus size={15} /> {language === 'km' ? 'បញ្ចូលបុគ្គលិកថ្មី' : 'Onboard Employee'}
             </button>
           </div>
         </div>

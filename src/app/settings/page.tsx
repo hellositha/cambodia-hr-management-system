@@ -23,17 +23,33 @@ export default function SettingsPage() {
   const [clearing, setClearing] = useState(false);
 
   const [companySettings, setCompanySettings] = useState({
-    name: 'PulseHR Technologies Inc.',
-    address: '500 Howard Street, Suite 400, San Francisco, CA 94105',
-    currency: 'USD ($)',
+    name: 'HESTRA HRM Technologies Inc.',
+    address: 'Exchange Square, Norodom Blvd, Phnom Penh, Cambodia',
+    currency: 'USD ($) & KHR (៛)',
     workHours: '8.0',
-    timezone: 'America/Los_Angeles (PST)',
+    timezone: 'Asia/Phnom_Penh (GMT+7)',
     fiscalYearStart: 'January 1st',
   });
 
   const handleSaveCompany = (e: React.FormEvent) => {
     e.preventDefault();
-    showToast('Company settings saved successfully!', 'success');
+    showToast('Corporate settings saved successfully!', 'success');
+  };
+
+  const handleClearAllDemo = async () => {
+    if (!confirm('Are you sure you want to clear all demo data (employees, recruitment, announcements, payroll)?')) return;
+    setClearing(true);
+    try {
+      await fetch('/api/employees', { method: 'DELETE' });
+      await fetch('/api/recruitment/jobs', { method: 'DELETE' });
+      await fetch('/api/announcements', { method: 'DELETE' });
+      showToast('All demo records have been completely cleared from HESTRA HRM!', 'success');
+      triggerRefresh();
+    } catch {
+      showToast('Error clearing demo data', 'error');
+    } finally {
+      setClearing(false);
+    }
   };
 
   const handleResetDatabase = async () => {
@@ -190,25 +206,25 @@ export default function SettingsPage() {
           <div>
             <h4 className="text-xs font-bold text-slate-900">Database Records & Controls</h4>
             <p className="text-[11px] text-slate-500">
-              Clear all employees or restore initial seed state with 18 employees and full history.
+              Clear all demo records across employees, recruitment, payroll, and announcements.
             </p>
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={handleClearEmployees}
+              onClick={handleClearAllDemo}
               disabled={clearing}
-              className="px-4 py-2 bg-rose-50 border border-rose-200 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-bold flex items-center gap-2 transition-transform active:scale-95 shadow-2xs cursor-pointer"
+              className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-transform active:scale-95 shadow-sm cursor-pointer"
             >
               <Trash2 size={14} className={clearing ? 'animate-spin' : ''} />
-              {clearing ? 'Clearing...' : 'Clear All Employees'}
+              {clearing ? 'Clearing...' : 'Clear All Demo Data'}
             </button>
             <button
               onClick={handleResetDatabase}
               disabled={resetting}
-              className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold flex items-center gap-2 transition-transform active:scale-95 shadow-sm cursor-pointer"
+              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-2 transition-transform active:scale-95 border border-slate-200 cursor-pointer"
             >
               <RefreshCw size={14} className={resetting ? 'animate-spin' : ''} />
-              {resetting ? 'Resetting...' : 'Reset to Fresh Seed'}
+              {resetting ? 'Resetting...' : 'Restore Demo Data'}
             </button>
           </div>
         </div>

@@ -3,7 +3,7 @@ export type Language = 'km' | 'en';
 export const TRANSLATIONS = {
   km: {
     // Brand
-    brand_name: 'PulseHR កម្ពុជា',
+    brand_name: 'HESTRA HRM កម្ពុជា',
     brand_tagline: 'គ្រប់គ្រងធនធានមនុស្ស',
 
     // Language
@@ -75,7 +75,7 @@ export const TRANSLATIONS = {
     ledger_payslips: 'បញ្ជីបៀវត្សរ៍ & ប័ណ្ណបើកប្រាក់',
 
     // Dashboard Hubs
-    ai_copilot_title: 'PulseHR AI - ជំនួយការឆ្លាតវៃធនធានមនុស្សកម្ពុជា',
+    ai_copilot_title: 'HESTRA AI - ជំនួយការឆ្លាតវៃធនធានមនុស្សកម្ពុជា',
     ai_copilot_sub: 'វិភាគទិន្នន័យបុគ្គលិកស្វ័យប្រវត្តិ អនុលោមភាពច្បាប់ការងារ និង ប.ស.ស',
     ai_monitoring_leave: 'តាមដានការអនុម័តច្បាប់ឈប់សម្រាក',
     ai_monitoring_ats: 'ស្ថានភាពជ្រើសរើសបុគ្គលិក (ATS)',
@@ -115,8 +115,8 @@ export const TRANSLATIONS = {
 
   en: {
     // Brand
-    brand_name: 'PulseHR Cambodia',
-    brand_tagline: 'HR & People Operations',
+    brand_name: 'HESTRA HRM',
+    brand_tagline: 'Human Resource Management',
 
     // Language
     lang_switch: 'Switch Language',
@@ -187,7 +187,7 @@ export const TRANSLATIONS = {
     ledger_payslips: 'Ledger & Digital Payslips',
 
     // Dashboard Hubs
-    ai_copilot_title: 'PulseHR AI Operations Copilot',
+    ai_copilot_title: 'HESTRA AI Operations Copilot',
     ai_copilot_sub: 'Autonomous HR intelligence & proactive Cambodian labor compliance',
     ai_monitoring_leave: 'Leave Approval Monitoring',
     ai_monitoring_ats: 'Recruitment SLA Status',

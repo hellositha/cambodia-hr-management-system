@@ -98,33 +98,8 @@ export async function GET() {
       });
     });
 
-    // 8. Upcoming Anniversaries & Celebrations
-    const celebrations: DashboardStats['upcomingBirthdaysAndAnniversaries'] = [
-      {
-        id: 'cel-1',
-        name: 'Marcus Vance',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces',
-        type: 'anniversary',
-        date: 'Oct 01',
-        subtitle: '4 Years at PulseHR',
-      },
-      {
-        id: 'cel-2',
-        name: 'Sarah Chen',
-        avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=256&h=256&fit=crop&crop=faces',
-        type: 'birthday',
-        date: 'Oct 04',
-        subtitle: 'Birthday celebration',
-      },
-      {
-        id: 'cel-3',
-        name: 'Jessica Taylor',
-        avatar: 'https://images.unsplash.com/photo-1534751516642-a171edd2521e?w=256&h=256&fit=crop&crop=faces',
-        type: 'anniversary',
-        date: 'Oct 14',
-        subtitle: '3 Years at PulseHR',
-      },
-    ];
+    // 8. Upcoming Anniversaries & Celebrations (empty when demo cleared)
+    const celebrations: DashboardStats['upcomingBirthdaysAndAnniversaries'] = [];
 
     const stats: DashboardStats = {
       totalEmployees: totalRow.count,
