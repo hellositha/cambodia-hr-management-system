@@ -95,4 +95,4 @@ npm start
 npm run dev
 ```
 
-Visit `http://localhost:3000` in your browser.
+Visit `http://38.252.151.33:3000` in your browser.
