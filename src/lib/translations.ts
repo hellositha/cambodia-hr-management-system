@@ -21,6 +21,9 @@ export const TRANSLATIONS = {
     nav_performance: 'វាយតម្លៃការងារ',
     nav_announcements: 'សេចក្តីជូនដំណឹង',
     nav_tools: 'ឧបករណ៍ & ច្បាប់ការងារ',
+    nav_staff_portal: 'ផតថលបុគ្គលិក',
+    nav_manager_portal: 'ផតថលគណៈគ្រប់គ្រង',
+    nav_users: 'គ្រប់គ្រងគណនី',
     nav_settings: 'ការកំណត់ប្រព័ន្ធ',
 
     // Tools & Calculators
@@ -148,6 +151,9 @@ export const TRANSLATIONS = {
     nav_performance: 'Performance',
     nav_announcements: 'Announcements',
     nav_tools: 'HR Tools & Legal',
+    nav_staff_portal: 'Staff Portal (ESS)',
+    nav_manager_portal: 'Manager Portal (MSS)',
+    nav_users: 'User Management',
     nav_settings: 'System Settings',
 
     // Tools & Calculators

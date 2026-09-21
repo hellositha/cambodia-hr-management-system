@@ -210,3 +210,21 @@ export interface DashboardStats {
     subtitle: string;
   }[];
 }
+
+export type UserRole = 'Admin' | 'Manager' | 'Employee';
+export type UserStatus = 'Active' | 'Suspended' | 'Pending';
+
+export interface UserAccount {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  status: UserStatus;
+  employee_id?: string;
+  department_name?: string;
+  avatar?: string;
+  two_factor_enabled: number;
+  permissions: string;
+  last_login?: string;
+  created_at: string;
+}

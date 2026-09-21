@@ -15,6 +15,9 @@ import {
   Award,
   Megaphone,
   Scale,
+  UserCheck,
+  Shield,
+  UserCog,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -36,6 +39,9 @@ export default function Sidebar() {
     { label: t('nav_performance'), href: '/performance', icon: Award },
     { label: t('nav_announcements'), href: '/announcements', icon: Megaphone },
     { label: t('nav_tools'), href: '/tools', icon: Scale, badge: language === 'km' ? 'ថ្មី' : 'Tools' },
+    { label: t('nav_staff_portal'), href: '/portal/staff', icon: UserCheck, badge: language === 'km' ? 'ផ្ទាល់ខ្លួន' : 'ESS' },
+    { label: t('nav_manager_portal'), href: '/portal/manager', icon: Shield, badge: language === 'km' ? 'ក្រុម' : 'MSS' },
+    { label: t('nav_users'), href: '/users', icon: UserCog },
     { label: t('nav_settings'), href: '/settings', icon: Settings },
   ];
 

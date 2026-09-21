@@ -167,11 +167,116 @@ function initDatabase(db: Database.Database) {
       created_at TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL UNIQUE,
+      role TEXT NOT NULL DEFAULT 'Employee',
+      status TEXT NOT NULL DEFAULT 'Active',
+      employee_id TEXT,
+      department_name TEXT,
+      avatar TEXT,
+      two_factor_enabled INTEGER DEFAULT 0,
+      permissions TEXT,
+      last_login TEXT,
+      created_at TEXT NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS system_meta (
       key TEXT PRIMARY KEY,
       value TEXT
     );
   `);
+
+  // Initialize users if none exist
+  try {
+    const userRow = db.prepare("SELECT count(*) as count FROM users").get() as { count: number } | undefined;
+    if (!userRow || userRow.count === 0) {
+      const insertUser = db.prepare(`
+        INSERT INTO users (id, name, email, role, status, employee_id, department_name, avatar, two_factor_enabled, permissions, last_login, created_at)
+        VALUES (@id, @name, @email, @role, @status, @employee_id, @department_name, @avatar, @two_factor_enabled, @permissions, @last_login, @created_at)
+      `);
+
+      const defaultUsers = [
+        {
+          id: 'usr-1',
+          name: 'សារ៉ាត់ (Sarath)',
+          email: 'sarath@hestra.kh',
+          role: 'Admin',
+          status: 'Active',
+          employee_id: 'emp-13',
+          department_name: 'ផ្នែកធនធានមនុស្ស (People & Culture)',
+          avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=256&h=256&fit=crop&crop=faces',
+          two_factor_enabled: 1,
+          permissions: 'all,manage_users,manage_payroll,approve_leaves,system_settings,export_data',
+          last_login: '2026-10-24 08:30',
+          created_at: '2024-01-01',
+        },
+        {
+          id: 'usr-2',
+          name: 'វ៉ាន់ សុភ័ក្ត្រ (Van Sopheak)',
+          email: 'van.sopheak@hestra.kh',
+          role: 'Manager',
+          status: 'Active',
+          employee_id: 'emp-1',
+          department_name: 'ផ្នែកបច្ចេកវិទ្យា (Engineering)',
+          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=256&h=256&fit=crop&crop=faces',
+          two_factor_enabled: 1,
+          permissions: 'view_team,approve_leaves,evaluate_performance,attendance_management',
+          last_login: '2026-10-24 09:12',
+          created_at: '2024-01-15',
+        },
+        {
+          id: 'usr-3',
+          name: 'ចាន់ ធីតា (Chan Thida)',
+          email: 'chan.thida@hestra.kh',
+          role: 'Employee',
+          status: 'Active',
+          employee_id: 'emp-18',
+          department_name: 'ផ្នែកបច្ចេកវិទ្យា (Engineering)',
+          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces',
+          two_factor_enabled: 0,
+          permissions: 'self_service,clock_in,request_leave,view_payslips',
+          last_login: '2026-10-24 08:45',
+          created_at: '2024-02-01',
+        },
+        {
+          id: 'usr-4',
+          name: 'ស៊ឹម កក្កដា (Sim Kakkada)',
+          email: 'sim.kakkada@hestra.kh',
+          role: 'Employee',
+          status: 'Active',
+          employee_id: 'emp-5',
+          department_name: 'ផ្នែកទីផ្សារ & ប្រព័ន្ធផ្សព្វផ្សាយ (Marketing)',
+          avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=256&h=256&fit=crop&crop=faces',
+          two_factor_enabled: 0,
+          permissions: 'self_service,clock_in,request_leave,view_payslips',
+          last_login: '2026-10-23 16:20',
+          created_at: '2024-03-10',
+        },
+        {
+          id: 'usr-5',
+          name: 'ហេង សុផល (Heng Sophal)',
+          email: 'heng.sophal@hestra.kh',
+          role: 'Manager',
+          status: 'Active',
+          employee_id: 'emp-8',
+          department_name: 'ផ្នែកគណនេយ្យ & ហិរញ្ញវត្ថុ (Finance)',
+          avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=256&h=256&fit=crop&crop=faces',
+          two_factor_enabled: 1,
+          permissions: 'view_team,approve_leaves,view_payroll,evaluate_performance',
+          last_login: '2026-10-22 11:05',
+          created_at: '2024-02-20',
+        },
+      ];
+
+      for (const u of defaultUsers) {
+        insertUser.run(u);
+      }
+    }
+  } catch (err) {
+    console.error('Error initializing default users:', err);
+  }
 
   // Check if initial seeding is needed on very first database creation
   const meta = db.prepare("SELECT value FROM system_meta WHERE key = 'initialized'").get() as { value: string } | undefined;
