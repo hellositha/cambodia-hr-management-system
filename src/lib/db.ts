@@ -191,6 +191,38 @@ export function clearAllEmployees(db: Database.Database) {
   db.prepare("DELETE FROM employees").run();
 }
 
+export function clearAllRecruitment(db: Database.Database) {
+  db.prepare("DELETE FROM job_candidates").run();
+  db.prepare("DELETE FROM job_postings").run();
+}
+
+export function restoreRecruitment(db: Database.Database) {
+  clearAllRecruitment(db);
+  const insertJob = db.prepare(`
+    INSERT INTO job_postings (
+      id, title, department_id, location, type, experience_level,
+      salary_range, description, requirements, status, posted_date, applicants_count
+    ) VALUES (
+      @id, @title, @department_id, @location, @type, @experience_level,
+      @salary_range, @description, @requirements, @status, @posted_date, @applicants_count
+    )
+  `);
+  for (const job of INITIAL_JOB_POSTINGS) {
+    insertJob.run(job);
+  }
+
+  const insertCandidate = db.prepare(`
+    INSERT INTO job_candidates (
+      id, job_id, name, email, phone, stage, rating, applied_date, notes
+    ) VALUES (
+      @id, @job_id, @name, @email, @phone, @stage, @rating, @applied_date, @notes
+    )
+  `);
+  for (const cand of INITIAL_CANDIDATES) {
+    insertCandidate.run(cand);
+  }
+}
+
 export function seedDatabase(db: Database.Database) {
   // Clear any existing data
   const tables = [

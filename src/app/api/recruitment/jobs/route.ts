@@ -92,3 +92,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export async function DELETE() {
+  try {
+    const { getDb, clearAllRecruitment } = await import('@/lib/db');
+    const db = getDb();
+    clearAllRecruitment(db);
+    return NextResponse.json({ success: true, message: 'All job postings and candidates have been cleared.' });
+  } catch (error: any) {
+    console.error('Error clearing recruitment:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
