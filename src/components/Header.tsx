@@ -19,6 +19,8 @@ import {
   AlertCircle,
   Globe,
   Check,
+  FileText,
+  Calculator,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -291,6 +293,36 @@ export default function Header() {
                   <div className="text-[10px] text-slate-500">{t('action_announcement_sub')}</div>
                 </div>
               </button>
+
+              <div className="my-1 border-t border-slate-100"></div>
+
+              <Link
+                href="/tools?tab=letters"
+                onClick={() => setQuickActionOpen(false)}
+                className="w-full text-left px-3 py-2 text-xs flex items-center gap-2.5 hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                <div className="p-1.5 rounded-md bg-violet-50 text-violet-600">
+                  <FileText size={14} />
+                </div>
+                <div>
+                  <div className="font-semibold text-slate-800">{t('action_hr_letter')}</div>
+                  <div className="text-[10px] text-slate-500">{t('action_hr_letter_sub')}</div>
+                </div>
+              </Link>
+
+              <Link
+                href="/tools?tab=calculator"
+                onClick={() => setQuickActionOpen(false)}
+                className="w-full text-left px-3 py-2 text-xs flex items-center gap-2.5 hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                <div className="p-1.5 rounded-md bg-cyan-50 text-cyan-600">
+                  <Calculator size={14} />
+                </div>
+                <div>
+                  <div className="font-semibold text-slate-800">{t('action_calculator')}</div>
+                  <div className="text-[10px] text-slate-500">{t('action_calculator_sub')}</div>
+                </div>
+              </Link>
             </div>
           )}
         </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
 import { Employee, Department } from '@/lib/types';
 import {
@@ -500,12 +501,21 @@ export default function EmployeesPage() {
                   </div>
                 </div>
               )}
-              <button
-                onClick={() => setActiveEmployeeId(null)}
-                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-              >
-                <X size={20} />
-              </button>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/tools?tab=letters"
+                  className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
+                >
+                  <FileText size={14} />
+                  <span>ចេញលិខិតផ្លូវការ</span>
+                </Link>
+                <button
+                  onClick={() => setActiveEmployeeId(null)}
+                  className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                >
+                  <X size={20} />
+                </button>
+              </div>
             </div>
 
             {/* Drawer Tabs */}

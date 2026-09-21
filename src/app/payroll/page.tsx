@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
 import { PayrollRecord } from '@/lib/types';
 import {
@@ -19,10 +20,11 @@ import {
   X,
   Plus,
   ArrowUpRight,
+  Calculator,
 } from 'lucide-react';
 
 export default function PayrollPage() {
-  const { openModal, showToast, triggerRefresh, refreshKey } = useApp();
+  const { openModal, showToast, triggerRefresh, refreshKey, language } = useApp();
 
   const [payrolls, setPayrolls] = useState<PayrollRecord[]>([]);
   const [loading, setLoading] = useState(true);
@@ -101,7 +103,14 @@ export default function PayrollPage() {
             បញ្ជីបៀវត្សរ៍ប្រចាំខែ, ការកាត់កងពន្ធ និងវិភាគទាន ប.ស.ស (NSSF), និងប័ណ្ណបើកប្រាក់បៀវត្សរ៍
           </p>
         </div>
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Link
+            href="/tools?tab=calculator"
+            className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-2 transition-colors cursor-pointer border border-slate-200 shadow-2xs"
+          >
+            <Calculator size={15} className="text-indigo-600" />
+            <span>{language === 'km' ? 'គណនា ប.ស.ស/ពន្ធ/អតីតភាព' : 'Tax & Seniority Calc'}</span>
+          </Link>
           <button
             onClick={() => openModal('run-payroll')}
             className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/30 flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"

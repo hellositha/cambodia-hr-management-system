@@ -14,6 +14,7 @@ import {
   Briefcase,
   Award,
   Megaphone,
+  Scale,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -34,6 +35,7 @@ export default function Sidebar() {
     { label: t('nav_recruitment'), href: '/recruitment', icon: Briefcase, badge: language === 'km' ? 'ការងារ' : 'Jobs' },
     { label: t('nav_performance'), href: '/performance', icon: Award },
     { label: t('nav_announcements'), href: '/announcements', icon: Megaphone },
+    { label: t('nav_tools'), href: '/tools', icon: Scale, badge: language === 'km' ? 'ថ្មី' : 'Tools' },
     { label: t('nav_settings'), href: '/settings', icon: Settings },
   ];
 

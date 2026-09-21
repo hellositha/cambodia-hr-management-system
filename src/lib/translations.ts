@@ -20,7 +20,22 @@ export const TRANSLATIONS = {
     nav_recruitment: 'ជ្រើសរើសបុគ្គលិក (ATS)',
     nav_performance: 'វាយតម្លៃការងារ',
     nav_announcements: 'សេចក្តីជូនដំណឹង',
+    nav_tools: 'ឧបករណ៍ & ច្បាប់ការងារ',
     nav_settings: 'ការកំណត់ប្រព័ន្ធ',
+
+    // Tools & Calculators
+    action_hr_letter: 'បង្កើតលិខិតផ្លូវការ',
+    action_hr_letter_sub: 'លិខិតបញ្ជាក់ការងារ, ប្រាក់ខែ, សាកល្បង',
+    action_calculator: 'គណនាច្បាប់ការងារ & ប.ស.ស',
+    action_calculator_sub: 'អតីតភាពការងារ, ពន្ធលើប្រាក់ខែ, ប.ស.ស',
+    action_holidays: 'ប្រតិទិនបុណ្យជាតិកម្ពុជា',
+    action_holidays_sub: 'កាលវិភាគឈប់សម្រាកប្រចាំឆ្នាំផ្លូវការ',
+    upcoming_holiday_badge: 'បុណ្យជាតិបន្ទាប់',
+    days_left: 'ថ្ងៃទៀត',
+    seniority_due: 'ប្រាក់បំណាច់អតីតភាព',
+    seniority_desc: 'ជុំទី ២ (ខែធ្នូ): ៧.៥ ថ្ងៃ គិតតាមច្បាប់ការងារ',
+    tax_deadline: 'កាលបរិច្ឆេទពន្ធ & ប.ស.ស',
+    tax_deadline_desc: 'ថ្ងៃទី ២៥ រៀងរាល់ខែ (អគ្គនាយកដ្ឋានពន្ធដារ GDT)',
 
     // Header
     search_placeholder: 'ស្វែងរកបុគ្គលិក, ផ្នែកការងារ...',
@@ -132,7 +147,22 @@ export const TRANSLATIONS = {
     nav_recruitment: 'Recruitment (ATS)',
     nav_performance: 'Performance',
     nav_announcements: 'Announcements',
+    nav_tools: 'HR Tools & Legal',
     nav_settings: 'System Settings',
+
+    // Tools & Calculators
+    action_hr_letter: 'Generate HR Letter',
+    action_hr_letter_sub: 'Employment, salary & probation letters',
+    action_calculator: 'Labor Law & Tax Calc',
+    action_calculator_sub: 'Seniority, salary tax & NSSF breakdown',
+    action_holidays: 'Cambodia Public Holidays',
+    action_holidays_sub: 'Official MLVT national holiday calendar',
+    upcoming_holiday_badge: 'Next Public Holiday',
+    days_left: 'days left',
+    seniority_due: 'Seniority Indemnity',
+    seniority_desc: 'Cycle 2 (Dec): 7.5 days pay under Labor Law',
+    tax_deadline: 'Tax & NSSF Deadline',
+    tax_deadline_desc: '25th of each month (GDT / MLVT e-Filing)',
 
     // Header
     search_placeholder: 'Search employees, departments, jobs...',

@@ -37,6 +37,10 @@ import {
   Flame,
   UserPlus,
   RotateCcw,
+  FileText,
+  Calculator,
+  CalendarDays,
+  Scale,
 } from 'lucide-react';
 
 type DashboardTheme = 'midnight' | 'nordic' | 'indigo';
@@ -345,6 +349,77 @@ export default function StyledDashboardPage() {
         </div>
       )}
 
+      {/* 1.5 EXECUTIVE HR LEGAL & TOOLKIT LAUNCHPAD */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Link
+          href="/tools?tab=letters"
+          className={`p-3.5 rounded-2xl border transition-all flex items-center gap-3 group cursor-pointer hover:border-indigo-400 ${themeClasses.card}`}
+        >
+          <div className="p-2.5 rounded-xl bg-violet-50 text-violet-600 group-hover:scale-110 transition-transform">
+            <FileText size={18} />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+              {language === 'km' ? 'លិខិតផ្លូវការ' : 'Official Docs'}
+            </span>
+            <span className="text-xs font-bold text-slate-900 truncate block">
+              {language === 'km' ? 'ចេញលិខិតការងារ' : 'Generate Letters'}
+            </span>
+          </div>
+        </Link>
+
+        <Link
+          href="/tools?tab=calculator"
+          className={`p-3.5 rounded-2xl border transition-all flex items-center gap-3 group cursor-pointer hover:border-indigo-400 ${themeClasses.card}`}
+        >
+          <div className="p-2.5 rounded-xl bg-cyan-50 text-cyan-600 group-hover:scale-110 transition-transform">
+            <Calculator size={18} />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+              {language === 'km' ? 'ច្បាប់ការងារ & ពន្ធ' : 'Legal & Taxes'}
+            </span>
+            <span className="text-xs font-bold text-slate-900 truncate block">
+              {language === 'km' ? 'គណនា ប.ស.ស/ពន្ធ' : 'Labor & NSSF Calc'}
+            </span>
+          </div>
+        </Link>
+
+        <Link
+          href="/tools?tab=holidays"
+          className={`p-3.5 rounded-2xl border transition-all flex items-center gap-3 group cursor-pointer hover:border-indigo-400 ${themeClasses.card}`}
+        >
+          <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600 group-hover:scale-110 transition-transform">
+            <CalendarDays size={18} />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+              {language === 'km' ? 'បុណ្យជាតិបន្ទាប់' : 'Next Holiday'}
+            </span>
+            <span className="text-xs font-bold text-slate-900 truncate block">
+              {language === 'km' ? 'បុណ្យអុំទូក (២៣ វិច្ឆិកា)' : 'Water Festival'}
+            </span>
+          </div>
+        </Link>
+
+        <Link
+          href="/tools?tab=contracts"
+          className={`p-3.5 rounded-2xl border transition-all flex items-center gap-3 group cursor-pointer hover:border-indigo-400 ${themeClasses.card}`}
+        >
+          <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 group-hover:scale-110 transition-transform">
+            <Scale size={18} />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+              {language === 'km' ? 'អនុលោមភាព' : 'Compliance'}
+            </span>
+            <span className="text-xs font-bold text-slate-900 truncate block">
+              {language === 'km' ? 'កិច្ចសន្យា & សាកល្បង' : 'Contract Tracking'}
+            </span>
+          </div>
+        </Link>
+      </div>
+
       {/* 2. BENTO METRICS GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {/* Card 1: Total Headcount */}
@@ -570,6 +645,48 @@ export default function StyledDashboardPage() {
             </Link>
           </div>
         </div>
+      </div>
+
+      {/* 3.5 CAMBODIA LABOR LAW & REGULATORY PULSE */}
+      <div className={`rounded-2xl p-4 sm:p-5 border bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-md relative overflow-hidden`}>
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-amber-400 shrink-0">
+              <Scale size={20} />
+            </div>
+            <div>
+              <span className="text-[10px] uppercase font-bold tracking-wider text-indigo-300 block">
+                {language === 'km' ? 'ប្រព័ន្ធតាមដានអនុលោមភាពច្បាប់ការងារកម្ពុជា' : 'Cambodia Labor Law Regulatory Pulse'}
+              </span>
+              <h3 className="text-xs sm:text-sm font-bold text-white font-khmer">
+                {language === 'km'
+                  ? 'ការទូទាត់ប្រាក់បំណាច់អតីតភាព ជុំទី ២ (ខែធ្នូ) & ការប្រកាសពន្ធប្រចាំខែ (GDT)'
+                  : 'Seniority Payment Cycle 2 (Dec) & Monthly Tax on Salary (GDT)'}
+              </h3>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Link
+              href="/tools?tab=calculator"
+              className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Calculator size={13} />
+              <span>{language === 'km' ? 'គណនាប្រាក់អតីតភាព' : 'Seniority Calc'}</span>
+            </Link>
+
+            <Link
+              href="/tools?tab=holidays"
+              className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <CalendarDays size={13} />
+              <span>{language === 'km' ? 'ប្រតិទិនបុណ្យជាតិ' : 'Public Holidays'}</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Ambient lighting */}
+        <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
       </div>
 
       {/* 4. DUAL-VIEW ANALYTICS BENTO */}
