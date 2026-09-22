@@ -42,9 +42,9 @@ export default function RosterPage() {
   const { currentPersona, language, showToast, refreshKey, triggerRefresh } = useApp();
   const isManagerOrAdmin = currentPersona.role === 'Manager' || currentPersona.role === 'Admin';
 
-  // Current working date (defaulting to Sept 21, 2026 - matching system working date)
-  const todayStr = '2026-09-21';
-  const [currentDate, setCurrentDate] = useState<Date>(new Date(2026, 8, 21));
+  // Current working date
+  const [currentDate, setCurrentDate] = useState<Date>(() => new Date());
+  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
 
   // Mode: 'matrix' (Weekly Team Matrix) or 'my-shifts' (Personal Schedule)
   const [viewMode, setViewMode] = useState<'matrix' | 'my-shifts'>(
@@ -98,7 +98,7 @@ export default function RosterPage() {
   };
 
   const handleThisWeek = () => {
-    setCurrentDate(new Date(2026, 8, 21));
+    setCurrentDate(new Date());
   };
 
   // Fetch departments & employees

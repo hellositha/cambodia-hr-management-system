@@ -87,6 +87,12 @@ export default function EmployeeEditModal({
     salary: '1200',
     salary_currency: 'USD ($)',
     salary_frequency: 'ប្រចាំខែ (Monthly)',
+    pay_grade: 'Level 3 - Officer',
+    transport_allowance: '0',
+    meal_allowance: '0',
+    housing_allowance: '0',
+    attendance_allowance: '0',
+    seniority_bonus: '0',
     bank_name: 'ABA Bank (ធនាគារ អេ ប៊ី អេ)',
     bank_account_name: '',
     bank_account_number: '',
@@ -151,6 +157,12 @@ export default function EmployeeEditModal({
         salary: employee.salary !== undefined ? String(employee.salary) : '1200',
         salary_currency: employee.salary_currency || 'USD ($)',
         salary_frequency: employee.salary_frequency || 'ប្រចាំខែ (Monthly)',
+        pay_grade: (employee as any).pay_grade || 'Level 3 - Officer',
+        transport_allowance: String((employee as any).transport_allowance ?? 0),
+        meal_allowance: String((employee as any).meal_allowance ?? 0),
+        housing_allowance: String((employee as any).housing_allowance ?? 0),
+        attendance_allowance: String((employee as any).attendance_allowance ?? 0),
+        seniority_bonus: String((employee as any).seniority_bonus ?? 0),
         bank_name: employee.bank_name || 'ABA Bank (ធនាគារ អេ ប៊ី អេ)',
         bank_account_name: employee.bank_account_name || `${employee.first_name} ${employee.last_name}`.trim(),
         bank_account_number: employee.bank_account_number || '',
@@ -264,6 +276,11 @@ export default function EmployeeEditModal({
         body: JSON.stringify({
           ...formData,
           salary: Number(formData.salary) || 0,
+          transport_allowance: Number(formData.transport_allowance) || 0,
+          meal_allowance: Number(formData.meal_allowance) || 0,
+          housing_allowance: Number(formData.housing_allowance) || 0,
+          attendance_allowance: Number(formData.attendance_allowance) || 0,
+          seniority_bonus: Number(formData.seniority_bonus) || 0,
         }),
       });
 
@@ -943,6 +960,118 @@ export default function EmployeeEditModal({
                     <option value="ប្រចាំខែ (Monthly)">ប្រចាំខែ (Monthly)</option>
                     <option value="ពីរសប្តាហ៍ម្តង (Bi-weekly)">ពីរសប្តាហ៍ម្តង (Bi-weekly)</option>
                   </select>
+                </div>
+              </div>
+
+              {/* Pay Grade & Allowances */}
+              <div className="p-3.5 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                    {language === 'km' ? 'កម្រិតបៀវត្សរ៍ & ប្រាក់ឧបត្ថម្ភ (Pay Grade & Allowances)' : 'Pay Grade & Allowances'}
+                  </h4>
+                  <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
+                    {language === 'km' ? 'កញ្ចប់សរុប៖ ' : 'Total Package: '}
+                    ${(
+                      Number(formData.salary || 0) +
+                      Number(formData.transport_allowance || 0) +
+                      Number(formData.meal_allowance || 0) +
+                      Number(formData.housing_allowance || 0) +
+                      Number(formData.attendance_allowance || 0) +
+                      Number(formData.seniority_bonus || 0)
+                    ).toLocaleString()}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      {language === 'km' ? 'កម្រិតតួនាទី (Pay Grade)' : 'Pay Grade'}
+                    </label>
+                    <select
+                      value={formData.pay_grade}
+                      onChange={(e) => handleInputChange('pay_grade', e.target.value)}
+                      className="w-full text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
+                    >
+                      <option value="Level 1 - Intern">Level 1 - Intern</option>
+                      <option value="Level 2 - Junior">Level 2 - Junior</option>
+                      <option value="Level 3 - Officer">Level 3 - Officer</option>
+                      <option value="Level 4 - Senior">Level 4 - Senior</option>
+                      <option value="Level 5 - Lead / Supervisor">Level 5 - Lead / Supervisor</option>
+                      <option value="Level 6 - Manager">Level 6 - Manager</option>
+                      <option value="Level 7 - Director">Level 7 - Director</option>
+                      <option value="Level 8 - Executive / C-Suite">Level 8 - Executive / C-Suite</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      {language === 'km' ? 'ថ្លៃធ្វើដំណើរ (Transport $)' : 'Transport Allowance ($)'}
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="5"
+                      value={formData.transport_allowance}
+                      onChange={(e) => handleInputChange('transport_allowance', e.target.value)}
+                      className="w-full text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      {language === 'km' ? 'ថ្លៃអាហារ (Meal $)' : 'Meal Allowance ($)'}
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="5"
+                      value={formData.meal_allowance}
+                      onChange={(e) => handleInputChange('meal_allowance', e.target.value)}
+                      className="w-full text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      {language === 'km' ? 'ថ្លៃស្នាក់នៅ (Housing $)' : 'Housing Allowance ($)'}
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="5"
+                      value={formData.housing_allowance}
+                      onChange={(e) => handleInputChange('housing_allowance', e.target.value)}
+                      className="w-full text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      {language === 'km' ? 'ប្រាក់វត្តមានការងារ (Attendance $)' : 'Attendance Bonus ($)'}
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="5"
+                      value={formData.attendance_allowance}
+                      onChange={(e) => handleInputChange('attendance_allowance', e.target.value)}
+                      className="w-full text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      {language === 'km' ? 'ប្រាក់អតីតភាព (Seniority $)' : 'Seniority Indemnity ($)'}
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="5"
+                      value={formData.seniority_bonus}
+                      onChange={(e) => handleInputChange('seniority_bonus', e.target.value)}
+                      className="w-full text-xs font-semibold px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
+                    />
+                  </div>
                 </div>
               </div>
 

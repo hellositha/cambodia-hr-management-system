@@ -109,6 +109,12 @@ export async function POST(request: Request) {
       doc_passport = '',
       doc_contract = '',
       doc_others = '',
+      transport_allowance = 0,
+      meal_allowance = 0,
+      housing_allowance = 0,
+      attendance_allowance = 0,
+      seniority_bonus = 0,
+      pay_grade = 'Level 3 - Officer',
     } = body;
 
     if (!first_name || !last_name || !role || !department_id) {
@@ -146,6 +152,8 @@ export async function POST(request: Request) {
         nssf_member, nssf_number, nssf_reg_date,
         emergency_contact_relationship, emergency_contact_address,
         doc_national_id, doc_passport, doc_contract, doc_others,
+        transport_allowance, meal_allowance, housing_allowance, attendance_allowance,
+        seniority_bonus, pay_grade,
         created_at
       ) VALUES (
         ?, ?, ?, ?, ?, ?, ?,
@@ -158,6 +166,8 @@ export async function POST(request: Request) {
         ?, ?, ?,
         ?, ?,
         ?, ?, ?, ?,
+        ?, ?, ?, ?,
+        ?, ?,
         ?
       )
     `);
@@ -209,6 +219,12 @@ export async function POST(request: Request) {
       doc_passport,
       doc_contract,
       doc_others,
+      Number(transport_allowance) || 0,
+      Number(meal_allowance) || 0,
+      Number(housing_allowance) || 0,
+      Number(attendance_allowance) || 0,
+      Number(seniority_bonus) || 0,
+      pay_grade || 'Level 3 - Officer',
       createdAt
     );
 

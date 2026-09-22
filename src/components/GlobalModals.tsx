@@ -126,6 +126,12 @@ export default function GlobalModals() {
     // 4. Salary & Payroll
     salary_currency: 'USD ($)',
     salary_frequency: 'ប្រចាំខែ (Monthly)',
+    pay_grade: 'Level 3 - Officer',
+    transport_allowance: '0',
+    meal_allowance: '0',
+    housing_allowance: '0',
+    attendance_allowance: '0',
+    seniority_bonus: '0',
     bank_name: 'ABA Bank (ធនាគារ អេ ប៊ី អេ)',
     bank_account_name: '',
     bank_account_number: '',
@@ -269,9 +275,14 @@ export default function GlobalModals() {
     pinned: false,
   });
 
-  const [payrollForm, setPayrollForm] = useState({
-    period: language === 'km' ? 'ខែតុលា ឆ្នាំ២០២៦ (October 2026)' : 'October 2026',
-    payment_date: '2026-10-31',
+  const [payrollForm, setPayrollForm] = useState(() => {
+    const now = new Date();
+    const period = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0];
+    return {
+      period,
+      payment_date: lastDay,
+    };
   });
 
   useEffect(() => {
@@ -356,6 +367,11 @@ export default function GlobalModals() {
           ...empForm,
           id: empForm.employee_id?.trim() || undefined,
           salary: Number(empForm.salary) || 0,
+          transport_allowance: Number(empForm.transport_allowance) || 0,
+          meal_allowance: Number(empForm.meal_allowance) || 0,
+          housing_allowance: Number(empForm.housing_allowance) || 0,
+          attendance_allowance: Number(empForm.attendance_allowance) || 0,
+          seniority_bonus: Number(empForm.seniority_bonus) || 0,
         }),
       });
 
@@ -1104,6 +1120,118 @@ export default function GlobalModals() {
                         <option value="កន្លះខែ (Semi-monthly)">{language === 'km' ? 'កន្លះខែ (Semi-monthly)' : 'Semi-monthly'}</option>
                         <option value="ប្រចាំសប្តាហ៍ (Weekly)">{language === 'km' ? 'ប្រចាំសប្តាហ៍ (Weekly)' : 'Weekly'}</option>
                       </select>
+                    </div>
+                  </div>
+
+                  {/* Pay Grade & Allowances */}
+                  <div className="p-3 bg-amber-50/50 rounded-xl border border-amber-200/60 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-800">
+                        {language === 'km' ? 'កម្រិតបៀវត្សរ៍ & ប្រាក់ឧបត្ថម្ភ (Pay Grade & Allowances)' : 'Pay Grade & Allowances'}
+                      </span>
+                      <span className="text-[11px] font-bold text-emerald-700 bg-white px-2 py-0.5 rounded border border-emerald-200">
+                        {language === 'km' ? 'កញ្ចប់សរុប៖ ' : 'Total: '}
+                        ${(
+                          Number(empForm.salary || 0) +
+                          Number(empForm.transport_allowance || 0) +
+                          Number(empForm.meal_allowance || 0) +
+                          Number(empForm.housing_allowance || 0) +
+                          Number(empForm.attendance_allowance || 0) +
+                          Number(empForm.seniority_bonus || 0)
+                        ).toLocaleString()}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                          {language === 'km' ? 'កម្រិតតួនាទី (Pay Grade)' : 'Pay Grade'}
+                        </label>
+                        <select
+                          value={empForm.pay_grade}
+                          onChange={(e) => setEmpForm({ ...empForm, pay_grade: e.target.value })}
+                          className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:outline-hidden"
+                        >
+                          <option value="Level 1 - Intern">Level 1 - Intern</option>
+                          <option value="Level 2 - Junior">Level 2 - Junior</option>
+                          <option value="Level 3 - Officer">Level 3 - Officer</option>
+                          <option value="Level 4 - Senior">Level 4 - Senior</option>
+                          <option value="Level 5 - Lead / Supervisor">Level 5 - Lead / Supervisor</option>
+                          <option value="Level 6 - Manager">Level 6 - Manager</option>
+                          <option value="Level 7 - Director">Level 7 - Director</option>
+                          <option value="Level 8 - Executive / C-Suite">Level 8 - Executive / C-Suite</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                          {language === 'km' ? 'ថ្លៃធ្វើដំណើរ (Transport $)' : 'Transport ($)'}
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="5"
+                          value={empForm.transport_allowance}
+                          onChange={(e) => setEmpForm({ ...empForm, transport_allowance: e.target.value })}
+                          className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:outline-hidden"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                          {language === 'km' ? 'ថ្លៃអាហារ (Meal $)' : 'Meal ($)'}
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="5"
+                          value={empForm.meal_allowance}
+                          onChange={(e) => setEmpForm({ ...empForm, meal_allowance: e.target.value })}
+                          className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:outline-hidden"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                          {language === 'km' ? 'ថ្លៃស្នាក់នៅ (Housing $)' : 'Housing ($)'}
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="5"
+                          value={empForm.housing_allowance}
+                          onChange={(e) => setEmpForm({ ...empForm, housing_allowance: e.target.value })}
+                          className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:outline-hidden"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                          {language === 'km' ? 'ប្រាក់វត្តមានការងារ (Attendance $)' : 'Attendance ($)'}
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="5"
+                          value={empForm.attendance_allowance}
+                          onChange={(e) => setEmpForm({ ...empForm, attendance_allowance: e.target.value })}
+                          className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:outline-hidden"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                          {language === 'km' ? 'ប្រាក់អតីតភាព (Seniority $)' : 'Seniority ($)'}
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="5"
+                          value={empForm.seniority_bonus}
+                          onChange={(e) => setEmpForm({ ...empForm, seniority_bonus: e.target.value })}
+                          className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold focus:outline-hidden"
+                        />
+                      </div>
                     </div>
                   </div>
 

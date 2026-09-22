@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
 import { formatLocalizedText } from '@/lib/translations';
@@ -27,11 +27,31 @@ import {
 export default function PayrollPage() {
   const { openModal, showToast, triggerRefresh, refreshKey, language } = useApp();
 
+  const currentMonthPeriod = useMemo(() => {
+    return new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  }, []);
+
   const [payrolls, setPayrolls] = useState<PayrollRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPeriod, setSelectedPeriod] = useState('September 2026');
+  const [selectedPeriod, setSelectedPeriod] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const availablePeriods = useMemo(() => {
+    const list: string[] = [];
+    const now = new Date();
+    for (let i = 0; i < 6; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const str = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      if (!list.includes(str)) list.push(str);
+    }
+    payrolls.forEach((p) => {
+      if (p.pay_period && !list.includes(p.pay_period)) {
+        list.push(p.pay_period);
+      }
+    });
+    return list;
+  }, [payrolls]);
 
   // Selected payslip for modal
   const [activePayslip, setActivePayslip] = useState<PayrollRecord | null>(null);
@@ -183,12 +203,14 @@ export default function PayrollPage() {
             <select
               value={selectedPeriod}
               onChange={(e) => setSelectedPeriod(e.target.value)}
-              className="bg-transparent text-slate-900 font-bold focus:outline-hidden"
+              className="bg-transparent text-slate-900 font-bold focus:outline-hidden cursor-pointer"
             >
               <option value="all">All Periods</option>
-              <option value="September 2026">September 2026</option>
-              <option value="August 2026">August 2026</option>
-              <option value="July 2026">July 2026</option>
+              {availablePeriods.map((period: string) => (
+                <option key={period} value={period}>
+                  {period}
+                </option>
+              ))}
             </select>
           </div>
 

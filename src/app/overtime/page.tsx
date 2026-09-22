@@ -45,7 +45,7 @@ export default function OvertimePage() {
   const [loading, setLoading] = useState(true);
 
   const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'approved' | 'my'>('all');
-  const [selectedMonth, setSelectedMonth] = useState('2026-09');
+  const [selectedMonth, setSelectedMonth] = useState(() => new Date().toISOString().substring(0, 7));
   const [selectedDepartment, setSelectedDepartment] = useState('all');
   const [selectedRateType, setSelectedRateType] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');

@@ -7,7 +7,9 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     const db = getDb();
-    const today = '2026-09-21';
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
     // 1. Employee headcount stats
     const totalRow = db.prepare('SELECT count(*) as count FROM employees').get() as { count: number };
@@ -15,7 +17,7 @@ export async function GET() {
     const leaveRow = db.prepare("SELECT count(*) as count FROM employees WHERE status = 'On Leave'").get() as { count: number };
 
     // New hires in last 60 days
-    const newHiresRow = db.prepare("SELECT count(*) as count FROM employees WHERE join_date >= '2026-01-01'").get() as { count: number };
+    const newHiresRow = db.prepare("SELECT count(*) as count FROM employees WHERE join_date >= ?").get(sixtyDaysAgo) as { count: number };
 
     // 2. Attendance today
     const attendanceRecords = db.prepare(`
@@ -46,8 +48,20 @@ export async function GET() {
     // 4. Open positions
     const openJobs = db.prepare("SELECT count(*) as count FROM job_postings WHERE status = 'Active'").get() as { count: number };
 
-    // 5. Monthly payroll total (September 2026)
-    const payrollSum = db.prepare("SELECT sum(net_salary) as total FROM payrolls WHERE pay_period = 'September 2026'").get() as { total: number | null };
+    // 5. Monthly payroll total (latest pay period or active base salary budget)
+    let monthlyPayroll = 0;
+    const latestPayroll = db.prepare(`
+      SELECT sum(net_salary) as total 
+      FROM payrolls 
+      WHERE pay_period = (SELECT pay_period FROM payrolls ORDER BY payment_date DESC LIMIT 1)
+    `).get() as { total: number | null } | undefined;
+
+    if (latestPayroll && latestPayroll.total) {
+      monthlyPayroll = latestPayroll.total;
+    } else {
+      const activeSalarySum = db.prepare("SELECT sum(salary) as total FROM employees WHERE status != 'Terminated'").get() as { total: number | null } | undefined;
+      monthlyPayroll = activeSalarySum?.total || 0;
+    }
 
     // 6. Department distribution
     const deptDistribution = db.prepare(`
@@ -101,8 +115,49 @@ export async function GET() {
       });
     });
 
-    // 8. Upcoming Anniversaries & Celebrations (empty when demo cleared)
+    // 8. Upcoming Anniversaries & Celebrations (computed from real staff records)
     const celebrations: DashboardStats['upcomingBirthdaysAndAnniversaries'] = [];
+    try {
+      const staffWithDates = db.prepare(`
+        SELECT id, first_name, last_name, avatar, dob, join_date 
+        FROM employees 
+        WHERE status != 'Terminated'
+      `).all() as any[];
+
+      const currentMonthNum = new Date().getMonth() + 1;
+
+      staffWithDates.forEach((emp) => {
+        if (emp.dob) {
+          const parts = emp.dob.split('-').map(Number);
+          if (parts.length >= 3 && parts[1] === currentMonthNum) {
+            celebrations.push({
+              id: `bday-${emp.id}`,
+              name: `${emp.first_name} ${emp.last_name}`,
+              avatar: emp.avatar || '/avatars/khmer_male_1.jpg',
+              type: 'birthday',
+              date: `Day ${parts[2]}`,
+              subtitle: 'Birthday celebration this month 🎂',
+            });
+          }
+        }
+        if (emp.join_date) {
+          const parts = emp.join_date.split('-').map(Number);
+          if (parts.length >= 3) {
+            const years = new Date().getFullYear() - parts[0];
+            if (parts[1] === currentMonthNum && years > 0) {
+              celebrations.push({
+                id: `anniv-${emp.id}`,
+                name: `${emp.first_name} ${emp.last_name}`,
+                avatar: emp.avatar || '/avatars/khmer_male_1.jpg',
+                type: 'anniversary',
+                date: `${years} Year${years > 1 ? 's' : ''}`,
+                subtitle: `Work Anniversary on Day ${parts[2]} 🎖️`,
+              });
+            }
+          }
+        }
+      });
+    } catch (e) {}
 
     const stats: DashboardStats = {
       totalEmployees: totalRow.count,
@@ -118,7 +173,7 @@ export async function GET() {
       },
       pendingLeavesCount: pendingLeaves.count,
       openPositionsCount: openJobs.count,
-      monthlyPayrollTotal: payrollSum.total || 0,
+      monthlyPayrollTotal: monthlyPayroll,
       departmentDistribution: deptDistribution,
       recentActivities: activities,
       upcomingBirthdaysAndAnniversaries: totalRow.count > 0 ? celebrations : [],

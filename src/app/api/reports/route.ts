@@ -7,7 +7,8 @@ export async function GET(request: Request) {
   try {
     const db = getDb();
     const url = new URL(request.url);
-    const month = url.searchParams.get('month') || '2026-09';
+    const defaultMonth = new Date().toISOString().substring(0, 7);
+    const month = url.searchParams.get('month') || defaultMonth;
     const deptId = url.searchParams.get('department_id') || 'all';
 
     // 1. All departments
@@ -23,72 +24,55 @@ export async function GET(request: Request) {
       LEFT JOIN departments d ON d.id = e.department_id
     `;
     if (deptId !== 'all') {
-      empQuery += ` WHERE e.department_id = '${deptId.replace(/'/g, "''")}'`;
+      empQuery += ` WHERE e.department_id = ?`;
     }
-    empQuery += ' ORDER BY e.first_name ASC';
+    const employees = deptId === 'all' 
+      ? (db.prepare(empQuery).all() as any[])
+      : (db.prepare(empQuery).all(deptId) as any[]);
 
-    const employees = db.prepare(empQuery).all() as any[];
-
-    // 3. Attendance Aggregates for the requested month
-    const attendanceRecords = db.prepare(`
+    // 3. Attendance Summary for Month
+    const attendanceRows = db.prepare(`
       SELECT 
         a.*,
-        e.first_name,
-        e.last_name,
-        e.role,
-        e.department_id,
-        d.name as department_name
+        e.department_id
       FROM attendance a
       JOIN employees e ON e.id = a.employee_id
-      LEFT JOIN departments d ON d.id = e.department_id
       WHERE a.date LIKE ?
-      ORDER BY a.date DESC
     `).all(`${month}%`) as any[];
 
-    // Compute attendance metrics per employee
-    const empAttendanceMap: { [empId: string]: {
-      id: string;
-      name: string;
-      role: string;
-      department: string;
-      department_id: string;
-      present: number;
-      remote: number;
-      late: number;
-      absent: number;
-      totalHours: number;
-      overtimeHours: number;
-    } } = {};
-
+    const empAttendanceMap: Record<string, any> = {};
     employees.forEach((emp) => {
       empAttendanceMap[emp.id] = {
         id: emp.id,
+        employee_id: emp.id,
         name: `${emp.first_name} ${emp.last_name}`,
-        role: emp.role,
+        role: emp.role || 'Staff',
         department: emp.department_name || 'General',
         department_id: emp.department_id,
         present: 0,
-        remote: 0,
         late: 0,
         absent: 0,
+        remote: 0,
         totalHours: 0,
+        total_hours: 0,
         overtimeHours: 0,
+        overtime_hours: 0,
       };
     });
 
-    attendanceRecords.forEach((att) => {
-      if (empAttendanceMap[att.employee_id]) {
-        const item = empAttendanceMap[att.employee_id];
-        if (att.status === 'Present') item.present += 1;
-        else if (att.status === 'Remote') item.remote += 1;
-        else if (att.status === 'Late') item.late += 1;
-        else if (att.status === 'Absent') item.absent += 1;
+    attendanceRows.forEach((row) => {
+      if (empAttendanceMap[row.employee_id]) {
+        if (row.status === 'Present') empAttendanceMap[row.employee_id].present += 1;
+        else if (row.status === 'Late') empAttendanceMap[row.employee_id].late += 1;
+        else if (row.status === 'Absent') empAttendanceMap[row.employee_id].absent += 1;
+        else if (row.status === 'Remote') empAttendanceMap[row.employee_id].remote += 1;
 
-        const hours = att.work_hours || 0;
-        item.totalHours += hours;
-        if (hours > 8) {
-          item.overtimeHours += Math.round((hours - 8) * 10) / 10;
-        }
+        const hours = Number(row.work_hours || 0);
+        const otHours = Number(row.overtime_hours || 0);
+        empAttendanceMap[row.employee_id].totalHours += hours;
+        empAttendanceMap[row.employee_id].total_hours += hours;
+        empAttendanceMap[row.employee_id].overtimeHours += otHours;
+        empAttendanceMap[row.employee_id].overtime_hours += otHours;
       }
     });
 
@@ -96,9 +80,12 @@ export async function GET(request: Request) {
       (item) => deptId === 'all' || item.department_id === deptId
     );
 
-    // 4. Payroll & Banking Disbursement Report (September 2026 or latest period)
-    const latestPayrollPeriod = 'September 2026';
-    const payrollRecords = db.prepare(`
+    // 4. Payroll & Banking Disbursement Report (Latest period or current month)
+    const latestPeriodRow = db.prepare('SELECT pay_period FROM payrolls ORDER BY id DESC LIMIT 1').get() as { pay_period: string } | undefined;
+    const currentMonthName = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const latestPayrollPeriod = latestPeriodRow?.pay_period || currentMonthName;
+
+    let payrollRecords = db.prepare(`
       SELECT 
         p.*,
         e.first_name,
@@ -116,6 +103,35 @@ export async function GET(request: Request) {
       LEFT JOIN departments d ON d.id = e.department_id
       WHERE p.pay_period = ?
     `).all(latestPayrollPeriod) as any[];
+
+    if (payrollRecords.length === 0) {
+      // Fallback: Provide active employee payroll projection
+      payrollRecords = db.prepare(`
+        SELECT 
+          0 as id,
+          e.id as employee_id,
+          e.first_name,
+          e.last_name,
+          e.role,
+          e.email,
+          e.phone,
+          e.salary as base_salary,
+          (COALESCE(e.transport_allowance, 0) + COALESCE(e.meal_allowance, 0) + COALESCE(e.housing_allowance, 0) + COALESCE(e.attendance_allowance, 0)) as allowances,
+          0 as bonuses,
+          0 as tax_deduction,
+          (e.salary + COALESCE(e.transport_allowance, 0) + COALESCE(e.meal_allowance, 0) + COALESCE(e.housing_allowance, 0) + COALESCE(e.attendance_allowance, 0)) as net_salary,
+          'Active Schedule' as status,
+          'ABA Bank Transfer' as payment_method,
+          e.department_id,
+          e.bank_account_number,
+          e.bank_name,
+          e.nssf_number,
+          d.name as department_name
+        FROM employees e
+        LEFT JOIN departments d ON d.id = e.department_id
+        WHERE e.status = 'Active'
+      `).all() as any[];
+    }
 
     // Calculate NSSF and Cambodia Banking Data
     const NSSF_CEILING_KHR = 1200000; // 1,200,000 KHR (~$300 USD)

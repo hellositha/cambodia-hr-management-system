@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
 import { AttendanceRecord } from '@/lib/types';
 import { formatLocalizedText } from '@/lib/translations';
@@ -38,17 +38,44 @@ export default function AttendancePage() {
 
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState('2026-09-21');
-  const [selectedMonth, setSelectedMonth] = useState('2026-09');
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [selectedMonth, setSelectedMonth] = useState(() => new Date().toISOString().substring(0, 7));
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+
+  const recentMonths = useMemo(() => {
+    const list = [];
+    const now = new Date();
+    for (let i = 0; i < 3; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      list.push({
+        val: d.toISOString().substring(0, 7),
+        label: i === 0 ? (language === 'km' ? 'ខែនេះ (Current)' : 'This Month') : d.toLocaleDateString('en-US', { month: 'short' }),
+      });
+    }
+    return list;
+  }, [language]);
+
+  const recentDays = useMemo(() => {
+    const list = [];
+    const now = new Date();
+    for (let i = 0; i < 3; i++) {
+      const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+      const val = d.toISOString().split('T')[0];
+      list.push({
+        val,
+        label: i === 0 ? (language === 'km' ? 'ថ្ងៃនេះ (Today)' : 'Today') : i === 1 ? (language === 'km' ? 'ម្សិលមិញ' : 'Yesterday') : val.slice(5),
+      });
+    }
+    return list;
+  }, [language]);
 
   // Live timer for the clock banner
   const [currentTime, setCurrentTime] = useState<string>('');
   const [manualModalOpen, setManualModalOpen] = useState(false);
   const [manualForm, setManualForm] = useState({
     employee_id: currentPersona.id,
-    date: selectedDate,
+    date: new Date().toISOString().split('T')[0],
     clock_in: '09:00:00',
     clock_out: '17:30:00',
     status: 'Present',
@@ -443,29 +470,29 @@ export default function AttendancePage() {
           {/* Preset Month / Date shortcuts */}
           {viewMode === 'my-report' ? (
             <div className="flex items-center gap-1">
-              {['2026-09', '2026-08', '2026-07'].map((m) => (
+              {recentMonths.map((m: { val: string; label: string }) => (
                 <button
-                  key={m}
-                  onClick={() => setSelectedMonth(m)}
+                  key={m.val}
+                  onClick={() => setSelectedMonth(m.val)}
                   className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer ${
-                    selectedMonth === m ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:bg-slate-100'
+                    selectedMonth === m.val ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:bg-slate-100'
                   }`}
                 >
-                  {m === '2026-09' ? (language === 'km' ? 'ខែកញ្ញា (Current)' : 'Sep (Current)') : m}
+                  {m.label}
                 </button>
               ))}
             </div>
           ) : (
             <div className="flex items-center gap-1">
-              {['2026-09-21', '2026-09-20', '2026-09-19'].map((d) => (
+              {recentDays.map((d: { val: string; label: string }) => (
                 <button
-                  key={d}
-                  onClick={() => setSelectedDate(d)}
+                  key={d.val}
+                  onClick={() => setSelectedDate(d.val)}
                   className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer ${
-                    selectedDate === d ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:bg-slate-100'
+                    selectedDate === d.val ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:bg-slate-100'
                   }`}
                 >
-                  {d === '2026-09-21' ? 'Today' : d.slice(5)}
+                  {d.label}
                 </button>
               ))}
             </div>

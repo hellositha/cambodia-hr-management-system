@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
 import { formatLocalizedText } from '@/lib/translations';
@@ -115,8 +115,20 @@ interface ReportData {
 export default function ReportsPage() {
   const { language, t, showToast } = useApp();
 
+  const monthOptions = useMemo(() => {
+    const options = [];
+    const now = new Date();
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const val = d.toISOString().substring(0, 7);
+      const labelEn = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      options.push({ value: val, labelEn });
+    }
+    return options;
+  }, []);
+
   const [activeTab, setActiveTab] = useState<'attendance' | 'payroll' | 'nssf' | 'workforce' | 'leaves'>('attendance');
-  const [selectedMonth, setSelectedMonth] = useState('2026-09');
+  const [selectedMonth, setSelectedMonth] = useState(() => new Date().toISOString().substring(0, 7));
   const [selectedDept, setSelectedDept] = useState('all');
   const [bankFormat, setBankFormat] = useState<'aba' | 'acleda' | 'master'>('aba');
   const [searchQuery, setSearchQuery] = useState('');
@@ -350,10 +362,11 @@ export default function ReportsPage() {
                 onChange={(e) => setSelectedMonth(e.target.value)}
                 className="appearance-none pl-8 pr-8 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
               >
-                <option value="2026-09">{language === 'km' ? 'ខែកញ្ញា ២០២៦ (Sep 2026)' : 'September 2026'}</option>
-                <option value="2026-08">{language === 'km' ? 'ខែសីហា ២០២៦ (Aug 2026)' : 'August 2026'}</option>
-                <option value="2026-07">{language === 'km' ? 'ខែកក្កដា ២០២៦ (Jul 2026)' : 'July 2026'}</option>
-                <option value="2026-06">{language === 'km' ? 'ខែមិថុនា ២០២៦ (Jun 2026)' : 'June 2026'}</option>
+                {monthOptions.map((opt: { value: string; labelEn: string }) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.labelEn}
+                  </option>
+                ))}
               </select>
               <Calendar size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             </div>

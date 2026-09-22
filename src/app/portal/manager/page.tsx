@@ -98,7 +98,7 @@ export default function ManagementPortalPage() {
           filtered = employees.filter((e: any) => e.department_id === 'dept-1' && e.id !== currentPersona.id);
         }
 
-        const todayStr = '2026-09-21';
+        const todayStr = new Date().toISOString().split('T')[0];
         const mapped = filtered.map((emp: any) => {
           const att = Array.isArray(attendance)
             ? attendance.find((a: any) => a.employee_id === emp.id && a.date === todayStr)

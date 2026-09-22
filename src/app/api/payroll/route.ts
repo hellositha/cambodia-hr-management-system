@@ -84,14 +84,50 @@ export async function POST(request: Request) {
 
       for (const emp of activeEmployees) {
         const id = `pay-${payPeriod.replace(' ', '-').toLowerCase()}-${emp.id}`;
-        const monthlyBase = Math.round(emp.salary / 12);
-        const allowances = 500;
-        const bonuses = emp.role.includes('VP') || emp.role.includes('Head') ? 1500 : 350;
+        const monthlyBase = Number(emp.salary || 0);
+        const allowances =
+          Number(emp.transport_allowance || 0) +
+          Number(emp.meal_allowance || 0) +
+          Number(emp.housing_allowance || 0) +
+          Number(emp.attendance_allowance || 0);
+
+        // Fetch approved overtime pay for this employee
+        let otEarnings = 0;
+        try {
+          const otRow = db.prepare(`
+            SELECT COALESCE(SUM(estimated_pay), 0) as total_ot
+            FROM overtime_requests
+            WHERE employee_id = ? AND status = 'Approved'
+          `).get(emp.id) as { total_ot: number } | undefined;
+          otEarnings = otRow ? Number(otRow.total_ot || 0) : 0;
+        } catch (e) {}
+
+        const bonuses = Number(emp.seniority_bonus || 0) + otEarnings;
         const gross = monthlyBase + allowances + bonuses;
-        const tax = Math.round(gross * 0.22);
-        const insurance = 320;
-        const retirement = Math.round(gross * 0.05);
-        const net = gross - tax - insurance - retirement;
+
+        // Cambodia NSSF Pension deduction (2% employee, capped at 1.2M KHR / ~$292.68 USD base -> max ~$5.85 USD)
+        const nssfCapUsd = 1200000 / 4100;
+        const nssfBase = Math.min(monthlyBase, nssfCapUsd);
+        const insurance = Math.round(nssfBase * 0.02 * 100) / 100;
+
+        // Cambodia GDT Progressive Tax on Salary (0%, 5%, 10%, 15%, 20%)
+        const grossKhr = gross * 4100;
+        let taxKhr = 0;
+        if (grossKhr <= 1500000) {
+          taxKhr = 0;
+        } else if (grossKhr <= 2000000) {
+          taxKhr = (grossKhr - 1500000) * 0.05;
+        } else if (grossKhr <= 8500000) {
+          taxKhr = 500000 * 0.05 + (grossKhr - 2000000) * 0.10;
+        } else if (grossKhr <= 12500000) {
+          taxKhr = 500000 * 0.05 + 6500000 * 0.10 + (grossKhr - 8500000) * 0.15;
+        } else {
+          taxKhr = 500000 * 0.05 + 6500000 * 0.10 + 4000000 * 0.15 + (grossKhr - 12500000) * 0.20;
+        }
+        const tax = Math.round((taxKhr / 4100) * 100) / 100;
+
+        const otherDeductions = 0;
+        const net = Math.round((gross - tax - insurance - otherDeductions) * 100) / 100;
 
         insertStmt.run(
           id,
@@ -103,7 +139,7 @@ export async function POST(request: Request) {
           bonuses,
           tax,
           insurance,
-          retirement,
+          otherDeductions,
           net,
           now
         );

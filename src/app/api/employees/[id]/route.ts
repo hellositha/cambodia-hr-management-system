@@ -142,6 +142,12 @@ export async function PUT(
       doc_passport,
       doc_contract,
       doc_others,
+      transport_allowance,
+      meal_allowance,
+      housing_allowance,
+      attendance_allowance,
+      seniority_bonus,
+      pay_grade,
     } = body;
 
     const hasEmail = email !== undefined;
@@ -214,7 +220,13 @@ export async function PUT(
         doc_national_id = COALESCE(?, doc_national_id),
         doc_passport = COALESCE(?, doc_passport),
         doc_contract = COALESCE(?, doc_contract),
-        doc_others = COALESCE(?, doc_others)
+        doc_others = COALESCE(?, doc_others),
+        transport_allowance = COALESCE(?, transport_allowance),
+        meal_allowance = COALESCE(?, meal_allowance),
+        housing_allowance = COALESCE(?, housing_allowance),
+        attendance_allowance = COALESCE(?, attendance_allowance),
+        seniority_bonus = COALESCE(?, seniority_bonus),
+        pay_grade = COALESCE(?, pay_grade)
       WHERE id = ?
     `).run(
       first_name !== undefined ? first_name : null,
@@ -264,6 +276,12 @@ export async function PUT(
       doc_passport !== undefined ? doc_passport : null,
       doc_contract !== undefined ? doc_contract : null,
       doc_others !== undefined ? doc_others : null,
+      transport_allowance !== undefined ? Number(transport_allowance) : null,
+      meal_allowance !== undefined ? Number(meal_allowance) : null,
+      housing_allowance !== undefined ? Number(housing_allowance) : null,
+      attendance_allowance !== undefined ? Number(attendance_allowance) : null,
+      seniority_bonus !== undefined ? Number(seniority_bonus) : null,
+      pay_grade !== undefined ? pay_grade : null,
       id
     );
 

@@ -24,7 +24,7 @@ export default function OvertimeRequestModal({
   const isManagerOrAdmin = currentPersona.role === 'Manager' || currentPersona.role === 'Admin';
 
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(currentPersona.id || '');
-  const [date, setDate] = useState('2026-09-22');
+  const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [startTime, setStartTime] = useState('18:00');
   const [endTime, setEndTime] = useState('20:00');
   const [hours, setHours] = useState('2.0');
