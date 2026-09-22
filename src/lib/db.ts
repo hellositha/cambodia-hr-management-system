@@ -484,64 +484,19 @@ function initDatabase(db: Database.Database) {
 
       const defaultUsers = [
         {
-          id: 'usr-1',
-          username: 'sarath',
-          name: 'សារ៉ាត់ ចាន់ថា (Sarath Chantha)',
-          email: 'sarath@hestra.kh',
+          id: 'usr-admin',
+          username: 'admin',
+          name: 'Administrator',
+          email: 'admin@hestra.kh',
           role: 'Admin',
           status: 'Active',
-          employee_id: 'emp-13',
-          department_name: 'ផ្នែកធនធានមនុស្ស (People & Culture)',
+          employee_id: null,
+          department_name: 'ថ្នាក់ដឹកនាំជាន់ខ្ពស់ (Top Management)',
           avatar: '/avatars/khmer_female_1.jpg',
           two_factor_enabled: 0,
           permissions: 'all,manage_users,manage_payroll,approve_leaves,system_settings,export_data',
-          last_login: '2026-10-24 08:30',
-          created_at: '2024-01-01',
-        },
-        {
-          id: 'usr-3',
-          username: 'thida',
-          name: 'ចាន់ ធីតា (Chan Thida)',
-          email: 'chan.thida@hestra.kh',
-          role: 'Employee',
-          status: 'Active',
-          employee_id: 'emp-18',
-          department_name: 'ផ្នែកបច្ចេកវិទ្យា (Engineering)',
-          avatar: '/avatars/khmer_female_2.jpg',
-          two_factor_enabled: 0,
-          permissions: 'self_service,clock_in,request_leave,view_payslips',
-          last_login: '2026-10-24 08:45',
-          created_at: '2024-02-01',
-        },
-        {
-          id: 'usr-4',
-          username: 'kakkada',
-          name: 'ស៊ឹម កក្កដា (Sim Kakkada)',
-          email: 'sim.kakkada@hestra.kh',
-          role: 'Employee',
-          status: 'Active',
-          employee_id: 'emp-5',
-          department_name: 'ផ្នែកទីផ្សារ & ប្រព័ន្ធផ្សព្វផ្សាយ (Marketing)',
-          avatar: '/avatars/khmer_male_2.jpg',
-          two_factor_enabled: 0,
-          permissions: 'self_service,clock_in,request_leave,view_payslips',
-          last_login: '2026-10-23 16:20',
-          created_at: '2024-03-10',
-        },
-        {
-          id: 'usr-5',
-          username: 'sophal',
-          name: 'ហេង សុផល (Heng Sophal)',
-          email: 'heng.sophal@hestra.kh',
-          role: 'Manager',
-          status: 'Active',
-          employee_id: 'emp-8',
-          department_name: 'ផ្នែកគណនេយ្យ & ហិរញ្ញវត្ថុ (Finance)',
-          avatar: '/avatars/khmer_male_3.jpg',
-          two_factor_enabled: 0,
-          permissions: 'view_team,approve_leaves,view_payroll,evaluate_performance',
-          last_login: '2026-10-22 11:05',
-          created_at: '2024-02-20',
+          last_login: null,
+          created_at: new Date().toISOString(),
         },
       ];
 
@@ -553,28 +508,11 @@ function initDatabase(db: Database.Database) {
     console.error('Error initializing default users:', err);
   }
 
-  // Check if initial seeding is needed on very first database creation
+  // Ensure system is marked initialized without loading demo data
   const meta = db.prepare("SELECT value FROM system_meta WHERE key = 'initialized'").get() as { value: string } | undefined;
   if (!meta) {
-    seedDatabase(db);
     db.prepare("INSERT OR REPLACE INTO system_meta (key, value) VALUES ('initialized', 'true')").run();
   }
-
-  // Ensure duty_roster has seed data if empty
-  try {
-    const rosterCount = db.prepare("SELECT count(*) as count FROM duty_roster").get() as { count: number } | undefined;
-    if (!rosterCount || rosterCount.count === 0) {
-      seedDutyRoster(db);
-    }
-  } catch (e) {}
-
-  // Ensure overtime_requests has seed data if empty
-  try {
-    const otCount = db.prepare("SELECT count(*) as count FROM overtime_requests").get() as { count: number } | undefined;
-    if (!otCount || otCount.count === 0) {
-      seedOvertimeRequests(db);
-    }
-  } catch (e) {}
 }
 
 export function clearAllEmployees(db: Database.Database) {
@@ -922,316 +860,12 @@ export function seedDatabase(db: Database.Database) {
     insertRev.run(rev);
   }
 
-  // 10. Insert Initial Duty Roster Shifts
-  seedDutyRoster(db);
-
-  // 11. Insert Initial Overtime Requests
-  seedOvertimeRequests(db);
 }
 
-export function seedDutyRoster(db: Database.Database) {
-  try {
-    const employees = db.prepare("SELECT id, department_id FROM employees").all() as { id: string; department_id: string }[];
-    if (!employees || employees.length === 0) return;
-
-    const insertRoster = db.prepare(`
-      INSERT OR REPLACE INTO duty_roster (id, employee_id, date, shift_type, start_time, end_time, hours, location, notes, created_at)
-      VALUES (@id, @employee_id, @date, @shift_type, @start_time, @end_time, @hours, @location, @notes, @created_at)
-    `);
-
-    // Target 4 weeks around working dates in Sept-Oct 2026
-    const mondayDates = ['2026-09-07', '2026-09-14', '2026-09-21', '2026-09-28', '2026-10-05'];
-
-    const runSeed = db.transaction(() => {
-      for (const weekStartStr of mondayDates) {
-        const [y, m, d] = weekStartStr.split('-').map(Number);
-        const startMon = new Date(y, m - 1, d);
-
-        for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
-          const current = new Date(startMon);
-          current.setDate(startMon.getDate() + dayIdx);
-          const cYear = current.getFullYear();
-          const cMonth = String(current.getMonth() + 1).padStart(2, '0');
-          const cDay = String(current.getDate()).padStart(2, '0');
-          const dateStr = `${cYear}-${cMonth}-${cDay}`;
-          const isWeekend = dayIdx >= 5; // 5 = Saturday, 6 = Sunday
-
-          employees.forEach((emp, index) => {
-            let shiftType = 'office';
-            let startTime = '08:30';
-            let endTime = '17:30';
-            let hours = 8.0;
-            let notes = '';
-
-            // Realistic assignment pattern based on department
-            if (emp.department_id === 'dept-1') {
-              // Tech & Infrastructure team has operational rota
-              if (index % 4 === 1) {
-                // Morning specialist with Saturday duty
-                if (dayIdx < 5) {
-                  shiftType = 'morning';
-                  startTime = '07:00';
-                  endTime = '15:30';
-                  hours = 8.0;
-                  notes = 'Morning Core Systems';
-                } else if (dayIdx === 5) {
-                  shiftType = 'weekend_duty';
-                  startTime = '08:30';
-                  endTime = '17:30';
-                  hours = 8.0;
-                  notes = 'Saturday Tech Coverage';
-                } else {
-                  shiftType = 'off';
-                  startTime = '';
-                  endTime = '';
-                  hours = 0;
-                  notes = 'Weekly Rest (Art. 147)';
-                }
-              } else if (index % 4 === 2) {
-                // Afternoon & Night rotation
-                if (dayIdx >= 1 && dayIdx <= 5) {
-                  shiftType = dayIdx % 2 === 0 ? 'night' : 'evening';
-                  startTime = shiftType === 'night' ? '22:00' : '14:00';
-                  endTime = shiftType === 'night' ? '06:30' : '22:30';
-                  hours = 8.0;
-                  notes = shiftType === 'night' ? 'Night Server Monitoring' : 'Evening Incident Support';
-                } else {
-                  shiftType = 'off';
-                  startTime = '';
-                  endTime = '';
-                  hours = 0;
-                  notes = 'Weekly Rest';
-                }
-              } else if (index % 4 === 3) {
-                // Sunday On-call standby
-                if (dayIdx < 5) {
-                  shiftType = 'office';
-                  startTime = '08:30';
-                  endTime = '17:30';
-                  hours = 8.0;
-                } else if (dayIdx === 6) {
-                  shiftType = 'on_call';
-                  startTime = '08:00';
-                  endTime = '20:00';
-                  hours = 4.0;
-                  notes = 'Cloud Infrastructure Standby';
-                } else {
-                  shiftType = 'off';
-                  startTime = '';
-                  endTime = '';
-                  hours = 0;
-                }
-              } else {
-                if (isWeekend) {
-                  shiftType = 'off';
-                  startTime = '';
-                  endTime = '';
-                  hours = 0;
-                }
-              }
-            } else {
-              // General standard 5-day office week (Mon-Fri 08:30-17:30, Sat/Sun OFF)
-              if (isWeekend) {
-                shiftType = 'off';
-                startTime = '';
-                endTime = '';
-                hours = 0;
-              } else {
-                shiftType = 'office';
-                startTime = '08:30';
-                endTime = '17:30';
-                hours = 8.0;
-              }
-            }
-
-            insertRoster.run({
-              id: `rst-${emp.id}-${dateStr}`,
-              employee_id: emp.id,
-              date: dateStr,
-              shift_type: shiftType,
-              start_time: startTime,
-              end_time: endTime,
-              hours,
-              location: 'Head Office',
-              notes,
-              created_at: new Date().toISOString(),
-            });
-          });
-        }
-      }
-    });
-
-    runSeed();
-  } catch (err) {
-    console.error('Error seeding duty roster:', err);
-  }
+export function seedDutyRoster(_db: Database.Database) {
+  // Demo auto-seeding removed for production
 }
 
-export function seedOvertimeRequests(db: Database.Database) {
-  try {
-    const employees = db.prepare("SELECT id, salary, department_id FROM employees WHERE status != 'Terminated'").all() as { id: string; salary: number; department_id: string }[];
-    if (!employees || employees.length === 0) return;
-
-    const insertOt = db.prepare(`
-      INSERT OR REPLACE INTO overtime_requests (
-        id, employee_id, date, start_time, end_time, hours, ot_rate_type, multiplier,
-        hourly_rate, estimated_pay, reason, project_name, status,
-        line_manager_id, line_manager_reviewed_at, line_manager_comments,
-        admin_reviewer_id, admin_reviewed_at, admin_comments, created_at
-      ) VALUES (
-        @id, @employee_id, @date, @start_time, @end_time, @hours, @ot_rate_type, @multiplier,
-        @hourly_rate, @estimated_pay, @reason, @project_name, @status,
-        @line_manager_id, @line_manager_reviewed_at, @line_manager_comments,
-        @admin_reviewer_id, @admin_reviewed_at, @admin_comments, @created_at
-      )
-    `);
-
-    const sampleRequests = [
-      {
-        empIdx: 0,
-        date: '2026-09-18',
-        start_time: '18:00',
-        end_time: '20:30',
-        hours: 2.5,
-        ot_rate_type: 'normal_day_150',
-        multiplier: 1.5,
-        reason: 'ការដំឡើងប្រព័ន្ធ Core Banking API ប្រចាំត្រីមាស',
-        project_name: 'Core Banking API v3.2',
-        status: 'Approved',
-        line_manager_id: 'emp-1',
-        line_manager_reviewed_at: '2026-09-19T09:00:00Z',
-        line_manager_comments: 'Approved. Critical deployment.',
-        admin_reviewer_id: 'usr-1',
-        admin_reviewed_at: '2026-09-19T11:00:00Z',
-        admin_comments: 'Verified with IT infrastructure SLA.',
-      },
-      {
-        empIdx: 1,
-        date: '2026-09-20',
-        start_time: '09:00',
-        end_time: '14:00',
-        hours: 5.0,
-        ot_rate_type: 'weekend_200',
-        multiplier: 2.0,
-        reason: 'ការធ្វើចំណាកស្រុក Cloud Kubernetes Cluster និងទិន្នន័យ Disaster Recovery',
-        project_name: 'Cloud Infrastructure Upgrade',
-        status: 'Approved',
-        line_manager_id: 'emp-1',
-        line_manager_reviewed_at: '2026-09-20T15:00:00Z',
-        line_manager_comments: 'Weekend maintenance completed successfully.',
-        admin_reviewer_id: 'usr-1',
-        admin_reviewed_at: '2026-09-21T08:30:00Z',
-        admin_comments: 'Payroll allowance verified for weekend rate.',
-      },
-      {
-        empIdx: 2,
-        date: '2026-09-21',
-        start_time: '18:00',
-        end_time: '20:00',
-        hours: 2.0,
-        ot_rate_type: 'normal_day_150',
-        multiplier: 1.5,
-        reason: 'រៀបចំឯកសារប្រព័ន្ធ UI/UX Design System សម្រាប់គម្រោងអតិថិជនសហគ្រាស',
-        project_name: 'Enterprise Mobile Portal',
-        status: 'Pending Manager',
-        line_manager_id: null,
-        line_manager_reviewed_at: null,
-        line_manager_comments: null,
-        admin_reviewer_id: null,
-        admin_reviewed_at: null,
-        admin_comments: null,
-      },
-      {
-        empIdx: 3,
-        date: '2026-09-22',
-        start_time: '22:00',
-        end_time: '01:00',
-        hours: 3.0,
-        ot_rate_type: 'night_200',
-        multiplier: 2.0,
-        reason: 'ដោះស្រាយឧប្បត្តិហេតុបណ្តាញទូទាត់ប្រាក់អន្តរជាតិ (Cross-Border Gateway)',
-        project_name: 'Payment Switch Integration',
-        status: 'Pending Admin',
-        line_manager_id: 'emp-4',
-        line_manager_reviewed_at: '2026-09-22T08:00:00Z',
-        line_manager_comments: 'Manager approved. Awaiting final HR/Admin sign-off.',
-        admin_reviewer_id: null,
-        admin_reviewed_at: null,
-        admin_comments: null,
-      },
-      {
-        empIdx: 4,
-        date: '2026-09-19',
-        start_time: '08:30',
-        end_time: '12:30',
-        hours: 4.0,
-        ot_rate_type: 'weekend_200',
-        multiplier: 2.0,
-        reason: 'ការផ្លាស់ប្តូរ និងរៀបចំហេដ្ឋារចនាសម្ព័ន្ធបណ្តាញខ្សែកាបការិយាល័យថ្មី',
-        project_name: 'HQ Network Infrastructure',
-        status: 'Approved',
-        line_manager_id: 'emp-1',
-        line_manager_reviewed_at: '2026-09-19T13:00:00Z',
-        line_manager_comments: 'Downtime cabling completed.',
-        admin_reviewer_id: 'usr-1',
-        admin_reviewed_at: '2026-09-20T09:00:00Z',
-        admin_comments: 'Approved.',
-      },
-      {
-        empIdx: 5,
-        date: '2026-09-23',
-        start_time: '18:00',
-        end_time: '19:30',
-        hours: 1.5,
-        ot_rate_type: 'normal_day_150',
-        multiplier: 1.5,
-        reason: 'ការរៀបចំសំណើសុំដេញថ្លៃ (Tender RFP) ជូនក្រសួងសាធារណការ',
-        project_name: 'GovTech Enterprise Bid',
-        status: 'Pending Manager',
-        line_manager_id: null,
-        line_manager_reviewed_at: null,
-        line_manager_comments: null,
-        admin_reviewer_id: null,
-        admin_reviewed_at: null,
-        admin_comments: null,
-      },
-    ];
-
-    const runSeed = db.transaction(() => {
-      sampleRequests.forEach((req, idx) => {
-        const emp = employees[req.empIdx % employees.length];
-        const hourlyRate = Number(((emp.salary || 1000) / 208).toFixed(4));
-        const estimatedPay = Number((req.hours * hourlyRate * req.multiplier).toFixed(2));
-
-        insertOt.run({
-          id: `ot-seed-${idx + 1}`,
-          employee_id: emp.id,
-          date: req.date,
-          start_time: req.start_time,
-          end_time: req.end_time,
-          hours: req.hours,
-          ot_rate_type: req.ot_rate_type,
-          multiplier: req.multiplier,
-          hourly_rate: hourlyRate,
-          estimated_pay: estimatedPay,
-          reason: req.reason,
-          project_name: req.project_name,
-          status: req.status,
-          line_manager_id: req.line_manager_id,
-          line_manager_reviewed_at: req.line_manager_reviewed_at,
-          line_manager_comments: req.line_manager_comments,
-          admin_reviewer_id: req.admin_reviewer_id,
-          admin_reviewed_at: req.admin_reviewed_at,
-          admin_comments: req.admin_comments,
-          created_at: `${req.date}T17:00:00Z`,
-        });
-      });
-    });
-
-    runSeed();
-  } catch (err) {
-    console.error('Error seeding overtime requests:', err);
-  }
+export function seedOvertimeRequests(_db: Database.Database) {
+  // Demo auto-seeding removed for production
 }
-
-

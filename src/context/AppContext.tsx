@@ -15,28 +15,12 @@ export interface Persona {
 
 export const PERSONAS: Persona[] = [
   {
-    id: 'emp-13',
-    name: 'Admin',
+    id: 'usr-881815',
+    name: 'admin HR',
     role: 'Admin',
     title: 'System Administrator',
     email: 'admin@hestra.kh',
     avatar: '/avatars/khmer_female_1.jpg',
-  },
-  {
-    id: 'emp-1',
-    name: 'Van Sopheak',
-    role: 'Manager',
-    title: 'VP of Engineering',
-    email: 'van.sopheak@hestra.kh',
-    avatar: '/avatars/khmer_male_1.jpg',
-  },
-  {
-    id: 'emp-18',
-    name: 'Chan Thida',
-    role: 'Employee',
-    title: 'Senior Software Engineer',
-    email: 'chan.thida@hestra.kh',
-    avatar: '/avatars/khmer_female_2.jpg',
   },
 ];
 

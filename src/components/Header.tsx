@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useApp, PERSONAS } from '@/context/AppContext';
+import { useApp } from '@/context/AppContext';
 import {
   Search,
   Bell,
@@ -497,58 +497,53 @@ export default function Header() {
             />
             <div className="hidden sm:block text-left text-xs leading-tight pr-1">
               <div className="font-semibold text-slate-800">{formatLocalizedText(currentPersona.name, language)}</div>
-              <div className="text-[10px] text-slate-500 font-medium">{currentPersona.role} View</div>
+              <div className="text-[10px] text-slate-500 font-medium">
+                {language === 'km'
+                  ? (currentPersona.role === 'Admin' ? 'អ្នកគ្រប់គ្រង' : currentPersona.role === 'Manager' ? 'ប្រធានផ្នែក' : 'បុគ្គលិក')
+                  : currentPersona.role}
+              </div>
             </div>
             <ChevronDown size={14} className="text-slate-400" />
           </button>
 
           {personaOpen && (
-            <div className="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-xl shadow-xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-              <div className="px-2 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                {language === 'km' ? 'ប្តូរតួនាទី / Switch Persona' : 'Switch Persona'}
-              </div>
-              <div className="space-y-1">
-                {PERSONAS.map((p) => {
-                  const isSelected = p.id === currentPersona.id;
-                  return (
-                    <button
-                      key={p.id}
-                      onClick={() => {
-                        switchPersona(p.id);
-                        setPersonaOpen(false);
-                      }}
-                      className={`w-full flex items-center gap-3 p-2 rounded-lg text-left transition-colors ${
-                        isSelected ? 'bg-indigo-50 border border-indigo-200' : 'hover:bg-slate-50'
+            <div className="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl p-3 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+              {/* Active Authenticated User Details */}
+              <div className="flex items-center gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+                <img
+                  src={currentPersona.avatar}
+                  alt={currentPersona.name}
+                  className="w-10 h-10 rounded-full object-cover ring-2 ring-indigo-500/20 shrink-0"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-1">
+                    <p className="text-xs font-bold text-slate-900 truncate">
+                      {formatLocalizedText(currentPersona.name, language)}
+                    </p>
+                    <span
+                      className={`text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
+                        currentPersona.role === 'Admin'
+                          ? 'bg-purple-100 text-purple-700'
+                          : currentPersona.role === 'Manager'
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-emerald-100 text-emerald-700'
                       }`}
                     >
-                      <img
-                        src={p.avatar}
-                        alt={p.name}
-                        className="w-9 h-9 rounded-full object-cover shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs font-bold text-slate-900 truncate">{formatLocalizedText(p.name, language)}</p>
-                          <span
-                            className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                              p.role === 'Admin'
-                                ? 'bg-purple-100 text-purple-700'
-                                : p.role === 'Manager'
-                                ? 'bg-blue-100 text-blue-700'
-                                : 'bg-emerald-100 text-emerald-700'
-                            }`}
-                          >
-                            {p.role}
-                          </span>
-                        </div>
-                        <p className="text-[11px] text-slate-500 truncate">{formatLocalizedText(p.title, language)}</p>
-                      </div>
-                    </button>
-                  );
-                })}
+                      {currentPersona.role}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 truncate mt-0.5">
+                    {formatLocalizedText(currentPersona.title || '', language)}
+                  </p>
+                  {currentPersona.email && (
+                    <p className="text-[10px] text-slate-400 truncate">
+                      {currentPersona.email}
+                    </p>
+                  )}
+                </div>
               </div>
 
-              <div className="my-1.5 border-t border-slate-100"></div>
+              <div className="my-2 border-t border-slate-100"></div>
 
               <div className="space-y-1">
                 <button

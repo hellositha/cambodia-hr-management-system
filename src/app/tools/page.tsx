@@ -1418,7 +1418,7 @@ HESTRA HRM Cambodia Co., Ltd.
                   {language === 'km' ? 'ពុំទាន់មានបុគ្គលិកក្នុងបញ្ជីនៅឡើយ' : 'No staff members recorded'}
                 </h4>
                 <p className="text-[11px] text-slate-400 mt-1">
-                  {language === 'km' ? 'សូមបញ្ចូលបុគ្គលិកថ្មី ឬទាញទិន្នន័យគំរូដើម្បីតាមដានកិច្ចសន្យាការងារ។' : 'Please register staff or load seed data to track contracts.'}
+                  {language === 'km' ? 'សូមបញ្ចូលបុគ្គលិកថ្មីដើម្បីតាមដានកិច្ចសន្យាការងារ។' : 'Please register staff to track employment contracts.'}
                 </p>
               </div>
             ) : (

@@ -107,6 +107,9 @@ export async function GET(request: Request) {
         e.email,
         e.phone,
         e.department_id,
+        e.bank_account_number,
+        e.bank_name,
+        e.nssf_number,
         d.name as department_name
       FROM payrolls p
       JOIN employees e ON e.id = p.employee_id
@@ -119,7 +122,7 @@ export async function GET(request: Request) {
     const EXCHANGE_RATE = 4100; // 4,100 KHR per USD
     const NSSF_CEILING_USD = NSSF_CEILING_KHR / EXCHANGE_RATE; // ~$292.68 USD
 
-    const bankDisbursement = payrollRecords.map((p, idx) => {
+    const bankDisbursement = payrollRecords.map((p) => {
       const monthlyBase = p.base_salary || 0;
       const allowances = p.allowances || 0;
       const bonuses = p.bonuses || 0;
@@ -142,10 +145,8 @@ export async function GET(request: Request) {
       const totalNssfEmployerUsd = pensionEmployerUsd + healthEmployerUsd + riskEmployerUsd;
       const totalNssfPayableUsd = pensionEmployeeUsd + totalNssfEmployerUsd;
 
-      // Synthetic bank accounts for Cambodian banking demonstration
-      const bankAccountNumber = `001${String(100000 + idx * 837).padStart(6, '0')}`;
-      const acledaAccountNumber = `0100${String(200000 + idx * 451).padStart(7, '0')}`;
-      const nssfMemberId = `NSSF-KH-${String(880000 + idx * 123)}`;
+      const bankAccountNumber = p.bank_account_number || '-';
+      const nssfMemberId = p.nssf_number || '-';
 
       return {
         id: p.id,
@@ -156,7 +157,7 @@ export async function GET(request: Request) {
         email: p.email,
         phone: p.phone,
         bank_account_aba: bankAccountNumber,
-        bank_account_acleda: acledaAccountNumber,
+        bank_account_acleda: bankAccountNumber,
         nssf_member_id: nssfMemberId,
         base_salary: monthlyBase,
         allowances,

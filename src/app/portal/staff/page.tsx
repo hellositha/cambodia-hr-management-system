@@ -57,69 +57,27 @@ export default function StaffPortalPage() {
 
   const [staffData, setStaffData] = useState({
     name: currentPersona.name,
-    role: currentPersona.title,
+    role: currentPersona.title || (currentPersona.role === 'Admin' ? 'System Administrator' : 'Staff Member'),
     empId: currentPersona.id.toUpperCase(),
-    email: currentPersona.email,
-    department: 'Engineering & Tech',
+    email: currentPersona.email || '',
+    department: 'General Department',
     location: 'Phnom Penh Office',
-    joinDate: '2023-03-15',
-    phone: '+855 12 778 990',
-    managerName: 'Van Sopheak',
-    managerRole: 'VP of Engineering',
-    managerEmail: 'van.sopheak@hestra.kh',
+    joinDate: '-',
+    phone: '-',
+    managerName: '-',
+    managerRole: '-',
+    managerEmail: '-',
   });
 
   const [leaveBalances, setLeaveBalances] = useState({
-    annual: { total: 20, used: 4, remaining: 16 },
-    sick: { total: 10, used: 2, remaining: 8 },
-    casual: { total: 5, used: 0, remaining: 5 },
+    annual: { total: 0, used: 0, remaining: 0 },
+    sick: { total: 0, used: 0, remaining: 0 },
+    casual: { total: 0, used: 0, remaining: 0 },
   });
 
-  const [myLeaveHistory, setMyLeaveHistory] = useState<any[]>([
-    {
-      id: 'l-01',
-      type: 'Annual Leave',
-      startDate: '2026-10-12',
-      endDate: '2026-10-14',
-      days: 3,
-      reason: 'Family event in Siem Reap',
-      status: 'Approved',
-      reviewer: 'Van Sopheak',
-    },
-    {
-      id: 'l-02',
-      type: 'Sick Leave',
-      startDate: '2026-09-04',
-      endDate: '2026-09-05',
-      days: 2,
-      reason: 'Flu with clinic medical certificate',
-      status: 'Approved',
-      reviewer: 'Van Sopheak',
-    },
-  ]);
+  const [myLeaveHistory, setMyLeaveHistory] = useState<any[]>([]);
 
-  const [myPayslips, setMyPayslips] = useState<StaffPayslip[]>([
-    {
-      id: 'PAY-2026-09-018',
-      period: 'September 2026',
-      payment_date: '2026-09-30',
-      base_salary: 2200,
-      allowances: 150,
-      nssf_deduction: 5.85,
-      tax_deduction: 145.2,
-      net_salary: 2198.95,
-    },
-    {
-      id: 'PAY-2026-08-018',
-      period: 'August 2026',
-      payment_date: '2026-08-31',
-      base_salary: 2200,
-      allowances: 150,
-      nssf_deduction: 5.85,
-      tax_deduction: 145.2,
-      net_salary: 2198.95,
-    },
-  ]);
+  const [myPayslips, setMyPayslips] = useState<StaffPayslip[]>([]);
 
   useEffect(() => {
     async function loadEmployeeProfile() {
@@ -147,13 +105,15 @@ export default function StaffPortalPage() {
               role: emp.role || currentPersona.title,
               empId: emp.id.toUpperCase(),
               email: emp.email,
-              department: emp.department_name || 'General Department',
-              location: emp.location || (language === 'km' ? 'រាជធានីភ្នំពេញ (Phnom Penh Office)' : 'Phnom Penh Office'),
-              joinDate: emp.join_date || '2024-01-01',
-              phone: emp.phone || '+855 12 778 990',
-              managerName: emp.manager_name || (language === 'km' ? 'វ៉ាន់ សុភ័ក្ត្រ (Van Sopheak)' : 'Van Sopheak'),
-              managerRole: language === 'km' ? 'ប្រធានផ្នែក (Department Head)' : 'Department Head',
-              managerEmail: 'van.sopheak@hestra.kh',
+              department: emp.department_name || (language === 'km' ? 'ផ្នែកទូទៅ' : 'General Department'),
+              location: emp.location || (language === 'km' ? 'រាជធានីភ្នំពេញ' : 'Phnom Penh Office'),
+              joinDate: emp.join_date || '-',
+              phone: emp.phone || '-',
+              managerName: emp.manager_name || (language === 'km' ? 'គ្មានប្រធានផ្ទាល់' : 'None / Executive'),
+              managerRole: emp.manager_name
+                ? (language === 'km' ? 'ប្រធានផ្នែក (Department Head)' : 'Department Head')
+                : (language === 'km' ? 'ថ្នាក់ដឹកនាំ' : 'Executive'),
+              managerEmail: emp.manager_email || '-',
             });
           }
 
@@ -177,35 +137,35 @@ export default function StaffPortalPage() {
             });
           }
 
-          if (Array.isArray(data.leaves) && data.leaves.length > 0) {
-            setMyLeaveHistory(
-              data.leaves.map((l: any) => ({
-                id: l.id,
-                type: language === 'km' ? `${l.leave_type} Leave (ច្បាប់${l.leave_type === 'Annual' ? 'ប្រចាំឆ្នាំ' : l.leave_type === 'Sick' ? 'ឈឺ' : 'ធុរៈ'})` : `${l.leave_type} Leave`,
-                startDate: l.start_date,
-                endDate: l.end_date,
-                days: l.days_count,
-                reason: l.reason,
-                status: l.status,
-                reviewer: l.reviewer_name || (language === 'km' ? 'ប្រធានផ្នែក' : 'Line Manager'),
-              }))
-            );
-          }
+          setMyLeaveHistory(
+            Array.isArray(data.leaves)
+              ? data.leaves.map((l: any) => ({
+                  id: l.id,
+                  type: language === 'km' ? `${l.leave_type} Leave (ច្បាប់${l.leave_type === 'Annual' ? 'ប្រចាំឆ្នាំ' : l.leave_type === 'Sick' ? 'ឈឺ' : 'ធុរៈ'})` : `${l.leave_type} Leave`,
+                  startDate: l.start_date,
+                  endDate: l.end_date,
+                  days: l.days_count,
+                  reason: l.reason,
+                  status: l.status,
+                  reviewer: l.reviewer_name || (language === 'km' ? 'ប្រធានផ្នែក' : 'Line Manager'),
+                }))
+              : []
+          );
 
-          if (Array.isArray(data.payrolls) && data.payrolls.length > 0) {
-            setMyPayslips(
-              data.payrolls.map((p: any) => ({
-                id: p.id,
-                period: p.pay_period,
-                payment_date: p.payment_date,
-                base_salary: p.base_salary,
-                allowances: p.allowances,
-                nssf_deduction: p.insurance_deduction || 5.85,
-                tax_deduction: p.tax_deduction,
-                net_salary: p.net_salary,
-              }))
-            );
-          }
+          setMyPayslips(
+            Array.isArray(data.payrolls)
+              ? data.payrolls.map((p: any) => ({
+                  id: p.id,
+                  period: p.pay_period,
+                  payment_date: p.payment_date,
+                  base_salary: p.base_salary,
+                  allowances: p.allowances,
+                  nssf_deduction: p.insurance_deduction || 5.85,
+                  tax_deduction: p.tax_deduction,
+                  net_salary: p.net_salary,
+                }))
+              : []
+          );
         }
       } catch (err) {
         console.error('Error loading employee profile in portal:', err);

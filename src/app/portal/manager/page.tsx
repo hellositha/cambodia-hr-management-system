@@ -436,12 +436,20 @@ export default function ManagementPortalPage() {
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3 text-xs">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-slate-700">{language === 'km' ? 'ចន្ទ - សុក្រ (សប្តាហ៍នេះ)' : 'Mon - Fri (This Week)'}</span>
-                <span className="text-emerald-600 font-bold">{language === 'km' ? '✓ កម្លាំងការងារគ្រប់គ្រាន់' : '✓ Full Coverage'}</span>
+                <span className="text-emerald-600 font-bold">
+                  {pendingLeaves.length === 0
+                    ? (language === 'km' ? '✓ កម្លាំងការងារពេញលេញ' : '✓ Full Coverage')
+                    : (language === 'km' ? `⚠️ សំណើសុំច្បាប់ ${pendingLeaves.length}` : `⚠️ ${pendingLeaves.length} Pending Leaves`)}
+                </span>
               </div>
               <p className="text-[11px] text-slate-500 leading-relaxed font-khmer">
-                {language === 'km'
-                  ? 'មានសមាជិក ១ នាក់ (អ៊ុំ ម៉ាលីស) កំពុងឈប់សម្រាកច្បាប់ប្រចាំឆ្នាំ។ ការងាររចនា UI ត្រូវបានប្រគល់បណ្តោះអាសន្នជូន ចាន់ ធីតា។'
-                  : '1 team member (Oum Malis) is currently on annual leave. UI design tasks are temporarily handed over to Chan Thida.'}
+                {pendingLeaves.length === 0
+                  ? (language === 'km'
+                      ? `សមាជិកក្រុមទាំងអស់កំពុងបំពេញការងារយ៉ាងពេញលេញក្នុងផ្នែក ${departmentName}។ គ្មានការស្នើសុំច្បាប់ដែលត្រូវអនុម័តឡើយ។`
+                      : `All active team members in ${departmentName} are present. No pending leave requests or schedule gaps this week.`)
+                  : (language === 'km'
+                      ? `មានសំណើសុំច្បាប់ចំនួន ${pendingLeaves.length} កំពុងរង់ចាំការពិនិត្យ និងអនុម័តពីលោកអ្នកដើម្បីធានាកម្លាំងការងារ។`
+                      : `There are ${pendingLeaves.length} pending leave request(s) awaiting your review to maintain operational coverage.`)}
               </p>
             </div>
           </div>

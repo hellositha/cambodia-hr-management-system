@@ -97,23 +97,6 @@ export default function StyledDashboardPage() {
     );
   };
 
-  const handleQuickSeed = async () => {
-    try {
-      const res = await fetch('/api/seed', { method: 'POST' });
-      if (res.ok) {
-        showToast(
-          language === 'km'
-            ? 'ទិន្នន័យគំរូកម្ពុជាត្រូវបានបញ្ចូលដោយជោគជ័យ!'
-            : 'Cambodia sample workforce data seeded successfully!',
-          'success'
-        );
-        triggerRefresh();
-      }
-    } catch {
-      showToast(language === 'km' ? 'បរាជ័យក្នុងការបញ្ចូលទិន្នន័យគំរូ' : 'Failed to seed sample workforce data', 'error');
-    }
-  };
-
   if (loading || !stats) {
     return (
       <div className="flex items-center justify-center min-h-[65vh]">
@@ -205,7 +188,7 @@ export default function StyledDashboardPage() {
                   {stats.totalEmployees > 0 ? (
                     <> បុគ្គលិកសរុបមានចំនួន <strong className="text-current">{stats.totalEmployees} នាក់</strong> ជាមួយនឹង <span className="text-emerald-600 font-bold">អត្រាវត្តមាន {stats.attendanceToday.percentage}%</span> ថ្ងៃនេះ។</>
                   ) : (
-                    <> បញ្ជីបុគ្គលិកបច្ចុប្បន្នទំនេរ។ លោកអ្នកអាចបញ្ចូលបុគ្គលិកថ្មី ឬទាញយកទិន្នន័យគំរូកម្ពុជាដោយចុច ១ ដង។</>
+                    <> បញ្ជីបុគ្គលិកបច្ចុប្បន្នទំនេរ។ លោកអ្នកអាចចាប់ផ្តើមចុះឈ្មោះបុគ្គលិកដំបូង។</>
                   )}
                 </>
               ) : (
@@ -214,7 +197,7 @@ export default function StyledDashboardPage() {
                   {stats.totalEmployees > 0 ? (
                     <> Total active workforce of <strong className="text-current">{stats.totalEmployees} colleagues</strong> with <span className="text-emerald-600 font-bold">{stats.attendanceToday.percentage}% attendance</span> today.</>
                   ) : (
-                    <> Workforce roster is currently empty. You can onboard new staff or seed sample Cambodia data with 1 click.</>
+                    <> Workforce directory is currently empty. You can start by onboarding your team members.</>
                   )}
                 </>
               )}
@@ -250,7 +233,7 @@ export default function StyledDashboardPage() {
         <div className="absolute -bottom-16 -right-16 w-80 h-80 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none"></div>
       </div>
 
-      {/* ZERO EMPLOYEES ONBOARDING PROMPT (If cleared) */}
+      {/* ZERO EMPLOYEES ONBOARDING PROMPT (If empty) */}
       {stats.totalEmployees === 0 && (
         <div className={`p-6 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-4 ${themeClasses.cardHighlight}`}>
           <div className="flex items-center gap-4">
@@ -263,8 +246,8 @@ export default function StyledDashboardPage() {
               </h3>
               <p className={`text-xs mt-0.5 ${themeClasses.textMuted}`}>
                 {language === 'km'
-                  ? 'ទិន្នន័យសាកល្បងទាំងអស់ត្រូវបានសម្អាតរួចរាល់។ លោកអ្នកអាចចាប់ផ្តើមចុះឈ្មោះបុគ្គលិកដំបូង។'
-                  : 'All demo records have been cleared. You can start fresh by onboarding your first team member.'}
+                  ? 'ពុំទាន់មានបុគ្គលិកនៅក្នុងបញ្ជីនៅឡើយ។ លោកអ្នកអាចចាប់ផ្តើមចុះឈ្មោះបុគ្គលិកដំបូង។'
+                  : 'No employee records found. You can start fresh by onboarding your first team member.'}
               </p>
             </div>
           </div>
