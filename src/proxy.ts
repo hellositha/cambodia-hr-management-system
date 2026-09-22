@@ -32,7 +32,8 @@ export function proxy(request: NextRequest) {
         (pathname.startsWith('/api/employees') && ['POST', 'PUT', 'DELETE'].includes(request.method)) ||
         (pathname.startsWith('/api/departments') && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)) ||
         (pathname.startsWith('/api/announcements') && ['POST', 'PUT', 'DELETE'].includes(request.method)) ||
-        (pathname.startsWith('/api/leaves') && ['PATCH', 'PUT', 'DELETE'].includes(request.method))
+        (pathname.startsWith('/api/leaves') && ['PATCH', 'PUT', 'DELETE'].includes(request.method)) ||
+        (pathname.startsWith('/api/requests') && ['PATCH', 'PUT', 'DELETE'].includes(request.method))
       ) {
         return NextResponse.json(
           {
@@ -79,6 +80,8 @@ export function proxy(request: NextRequest) {
       pathname.startsWith('/leaves') ||
       pathname === '/announcements' ||
       pathname.startsWith('/announcements') ||
+      pathname === '/requests' ||
+      pathname.startsWith('/requests') ||
       pathname === '/departments' ||
       pathname.startsWith('/departments');
 

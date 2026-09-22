@@ -275,6 +275,43 @@ function initDatabase(db: Database.Database) {
       approved_by TEXT,
       created_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS approval_requests (
+      id TEXT PRIMARY KEY,
+      request_number TEXT NOT NULL,
+      employee_id TEXT NOT NULL,
+      request_type TEXT NOT NULL,
+      item_name TEXT NOT NULL,
+      item_category TEXT NOT NULL,
+      requires_top_management INTEGER NOT NULL DEFAULT 0,
+      current_salary REAL DEFAULT 0,
+      proposed_salary REAL DEFAULT 0,
+      estimated_cost REAL DEFAULT 0,
+      quantity INTEGER DEFAULT 1,
+      urgency TEXT DEFAULT 'Medium',
+      reason TEXT NOT NULL,
+      specifications TEXT,
+      status TEXT NOT NULL DEFAULT 'Pending Line Manager',
+      line_manager_id TEXT,
+      line_manager_name TEXT,
+      line_manager_status TEXT DEFAULT 'Pending',
+      line_manager_reviewed_at TEXT,
+      line_manager_comments TEXT,
+      hr_reviewer_id TEXT,
+      hr_reviewer_name TEXT,
+      hr_status TEXT DEFAULT 'Pending',
+      hr_reviewed_at TEXT,
+      hr_comments TEXT,
+      top_management_id TEXT,
+      top_management_name TEXT,
+      top_management_status TEXT DEFAULT 'Pending',
+      top_management_reviewed_at TEXT,
+      top_management_comments TEXT,
+      rejected_by_stage TEXT,
+      rejection_reason TEXT,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
   `);
 
   // Ensure password and username columns exist if table was created previously

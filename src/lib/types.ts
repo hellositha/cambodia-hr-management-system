@@ -383,3 +383,52 @@ export interface SalaryOverview {
   minWageStandard: number;
 }
 
+export type ApprovalRequestStatus =
+  | 'Pending Line Manager'
+  | 'Pending HR'
+  | 'Pending Top Management'
+  | 'Approved'
+  | 'Rejected';
+
+export interface ApprovalRequest {
+  id: string;
+  request_number: string;
+  employee_id: string;
+  employee_name?: string;
+  employee_role?: string;
+  employee_avatar?: string;
+  department_name?: string;
+  department_id?: string;
+  request_type: string;
+  item_name: string;
+  item_category: 'standard_material' | 'high_value_asset' | 'salary_increase';
+  requires_top_management: number; // 0 or 1
+  current_salary: number;
+  proposed_salary: number;
+  estimated_cost: number;
+  quantity: number;
+  urgency: 'Low' | 'Medium' | 'High' | 'Urgent';
+  reason: string;
+  specifications?: string;
+  status: ApprovalRequestStatus;
+  line_manager_id?: string;
+  line_manager_name?: string;
+  line_manager_status: 'Pending' | 'Approved' | 'Rejected';
+  line_manager_reviewed_at?: string;
+  line_manager_comments?: string;
+  hr_reviewer_id?: string;
+  hr_reviewer_name?: string;
+  hr_status: 'Pending' | 'Approved' | 'Rejected';
+  hr_reviewed_at?: string;
+  hr_comments?: string;
+  top_management_id?: string;
+  top_management_name?: string;
+  top_management_status: 'Pending' | 'Approved' | 'Rejected' | 'N/A';
+  top_management_reviewed_at?: string;
+  top_management_comments?: string;
+  rejected_by_stage?: string;
+  rejection_reason?: string;
+  created_at: string;
+  updated_at: string;
+}
+

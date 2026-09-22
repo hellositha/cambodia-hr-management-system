@@ -20,7 +20,17 @@ import {
   FileText,
   Mail,
   Filter,
+  FileCheck2,
+  Laptop,
+  DollarSign,
+  Package,
+  ArrowRight,
+  ExternalLink,
+  ChevronRight,
+  Layers,
 } from 'lucide-react';
+import { ApprovalRequest } from '@/lib/types';
+import RequestApprovalModal from '@/components/RequestApprovalModal';
 
 interface PendingLeaveItem {
   id: string;
@@ -42,6 +52,14 @@ export default function ManagementPortalPage() {
   const [pendingLeaves, setPendingLeaves] = useState<PendingLeaveItem[]>([]);
   const [loadingLeaves, setLoadingLeaves] = useState(true);
   const [approvingId, setApprovingId] = useState<string | null>(null);
+
+  // Team Material & Salary requests (3-tier approval system)
+  const [teamRequests, setTeamRequests] = useState<ApprovalRequest[]>([]);
+  const [loadingRequests, setLoadingRequests] = useState(true);
+  const [selectedRequest, setSelectedRequest] = useState<ApprovalRequest | null>(null);
+  const [isApprovalModalOpen, setIsApprovalModalOpen] = useState(false);
+  const [approvingReqId, setApprovingReqId] = useState<string | null>(null);
+  const [requestTab, setRequestTab] = useState<'pending' | 'all'>('pending');
 
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [loadingTeam, setLoadingTeam] = useState(true);
@@ -181,9 +199,75 @@ export default function ManagementPortalPage() {
     }
   };
 
+  const fetchRequests = async () => {
+    setLoadingRequests(true);
+    try {
+      // First try fetching direct reports for this manager
+      const res = await fetch(`/api/requests?line_manager_id=${encodeURIComponent(currentPersona.id)}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          setTeamRequests(data);
+          setLoadingRequests(false);
+          return;
+        }
+      }
+      // If no direct records with that exact manager ID, fetch all requests so manager has visibility
+      const allRes = await fetch('/api/requests');
+      if (allRes.ok) {
+        const allData = await allRes.json();
+        if (Array.isArray(allData)) {
+          setTeamRequests(allData);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load team requests:', err);
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
+  const handleQuickApproveRequest = async (req: ApprovalRequest) => {
+    setApprovingReqId(req.id);
+    try {
+      const res = await fetch(`/api/requests/${req.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'approve',
+          stage: 'line_manager',
+          reviewer_id: currentPersona.id,
+          reviewer_name: currentPersona.name,
+          comments:
+            language === 'km'
+              ? `អនុម័តជំហានទី១ ដោយប្រធានផ្នែក ${currentPersona.name}។ បញ្ជូនបន្តទៅ HR (Approved Step 1 by Line Manager. Forwarded to HR).`
+              : `Approved Step 1 by Line Manager ${formatLocalizedText(currentPersona.name, language)}. Forwarded to HR.`,
+        }),
+      });
+
+      if (res.ok) {
+        showToast(
+          language === 'km'
+            ? 'បានអនុម័តជំហានទី១ និងបញ្ជូនសំណើទៅ HR រួចរាល់! ✓'
+            : 'Step 1 approved and forwarded to HR Admin! ✓',
+          'success'
+        );
+        fetchRequests();
+      } else {
+        const errData = await res.json();
+        showToast(errData.error || (language === 'km' ? 'បរាជ័យក្នុងការអនុម័ត' : 'Approval failed'), 'error');
+      }
+    } catch (err) {
+      showToast(language === 'km' ? 'កំហុសប្រព័ន្ធ' : 'System error', 'error');
+    } finally {
+      setApprovingReqId(null);
+    }
+  };
+
   useEffect(() => {
     fetchLeaves();
     fetchTeam();
+    fetchRequests();
   }, [currentPersona]);
 
   return (
@@ -255,16 +339,19 @@ export default function ManagementPortalPage() {
           </span>
         </div>
 
-        {/* Metric 4 */}
+        {/* Metric 4: Material & Salary Requisitions */}
         <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs">
           <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-            {language === 'km' ? 'ថវិកាផ្នែកប្រចាំឆ្នាំ' : 'Department Budget'}
+            {language === 'km' ? 'សំណើសម្ភារៈ & បៀវត្សរ៍រង់ចាំ' : 'Pending Requisitions'}
           </span>
           <div className="text-2xl font-black text-indigo-700 my-1 font-mono">
-            $380,000
+            {teamRequests.filter((r) => r.status === 'Pending Line Manager').length}{' '}
+            <span className="text-xs font-sans text-slate-500 font-semibold">{language === 'km' ? 'សំណើ' : 'pending'}</span>
           </div>
           <span className="text-[11px] text-slate-500">
-            {language === 'km' ? 'អត្រាប្រើប្រាស់ ៧២%' : '72% Utilized'}
+            {teamRequests.filter((r) => r.status === 'Pending Line Manager').length > 0
+              ? (language === 'km' ? 'ត្រូវការអនុម័តជំហានទី១' : 'Requires Step 1 Review')
+              : (language === 'km' ? 'ពុំមានសំណើរង់ចាំឡើយ' : 'No pending requests')}
           </span>
         </div>
       </div>
@@ -355,6 +442,239 @@ export default function ManagementPortalPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+      </div>
+
+      {/* 3.5 PENDING MATERIAL & SALARY REQUISITIONS (STAGE 1 APPROVAL QUEUE) */}
+      <div className="bg-white border border-slate-200/90 rounded-2xl shadow-xs p-5 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <div>
+            <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+              <FileCheck2 size={18} className="text-indigo-600" />
+              <span>
+                {language === 'km'
+                  ? 'ការអនុម័តសំណើសម្ភារៈ & ដំឡើងបៀវត្សរ៍ក្រុមការងារ (Team Requisitions & Approvals)'
+                  : 'Direct Report Material & Salary Requisitions (Stage 1)'}
+              </span>
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5 font-khmer">
+              {language === 'km'
+                ? 'ជំហានទី១៖ ពិនិត្យ និងអនុម័តសំណើរបស់បុគ្គលិក មុននឹងបញ្ជូនទៅ HR (សម្ភារៈទូទៅ) ឬបញ្ជូនបន្តរហូតដល់ CEO (កុំព្យូទ័រ Laptop & ដំឡើងប្រាក់ខែ)'
+                : 'Stage 1 Line Manager Review: Forward approved requests to HR (Standard Material) or Top Management CEO (Laptop, Computer, Salary Increase)'}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="inline-flex rounded-xl bg-slate-100 p-0.5 text-xs font-semibold">
+              <button
+                type="button"
+                onClick={() => setRequestTab('pending')}
+                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                  requestTab === 'pending'
+                    ? 'bg-white text-indigo-700 shadow-xs font-bold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {language === 'km' ? 'រង់ចាំអនុម័ត' : 'Pending Review'} (
+                {teamRequests.filter((r) => r.status === 'Pending Line Manager').length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setRequestTab('all')}
+                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                  requestTab === 'all'
+                    ? 'bg-white text-indigo-700 shadow-xs font-bold'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {language === 'km' ? 'ទាំងអស់' : 'All'} ({teamRequests.length})
+              </button>
+            </div>
+
+            <Link
+              href="/requests"
+              className="px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-1 transition-colors"
+            >
+              <span>{language === 'km' ? 'ផ្ទាំងធំ' : 'Full Hub'}</span>
+              <ExternalLink size={12} />
+            </Link>
+          </div>
+        </div>
+
+        {loadingRequests ? (
+          <div className="py-12 text-center text-xs text-slate-400">
+            {language === 'km' ? 'កំពុងដំណើរការទិន្នន័យសំណើ...' : 'Loading requisitions...'}
+          </div>
+        ) : (requestTab === 'pending'
+            ? teamRequests.filter((r) => r.status === 'Pending Line Manager')
+            : teamRequests
+          ).length === 0 ? (
+          <div className="py-10 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200">
+            <div className="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-2.5">
+              <CheckCircle2 size={22} />
+            </div>
+            <h4 className="text-xs font-bold text-slate-700">
+              {language === 'km'
+                ? 'ពុំមានសំណើសម្ភារៈ ឬបៀវត្សរ៍ដែលរង់ចាំការអនុម័តឡើយ!'
+                : 'No pending team requisitions!'}
+            </h4>
+            <p className="text-[11px] text-slate-400 mt-0.5">
+              {language === 'km'
+                ? 'សំណើទាំងអស់របស់សមាជិកក្រុមត្រូវបានដំណើរការរួចរាល់។'
+                : 'All material and salary requests from your team have been reviewed.'}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3 font-khmer">
+            {(requestTab === 'pending'
+              ? teamRequests.filter((r) => r.status === 'Pending Line Manager')
+              : teamRequests
+            ).map((req) => {
+              const isSalary = req.request_type === 'Salary Increase';
+              const isLaptopOrPc =
+                req.item_name.toLowerCase().includes('laptop') ||
+                req.item_name.toLowerCase().includes('computer') ||
+                req.item_name.toLowerCase().includes('desktop');
+
+              return (
+                <div
+                  key={req.id}
+                  className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all"
+                >
+                  <div className="flex items-start gap-3">
+                    <img
+                      src={req.employee_avatar || '/avatars/khmer_female_1.jpg'}
+                      alt={req.employee_name || 'Staff'}
+                      className="w-10 h-10 rounded-xl object-cover ring-2 ring-indigo-100 shrink-0"
+                    />
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="font-bold text-xs text-slate-900">
+                          {formatLocalizedText(req.employee_name || 'Staff', language)}
+                        </h4>
+                        <span className="text-[10px] font-mono font-bold text-slate-400">
+                          ({req.request_number})
+                        </span>
+                        <span className="text-[10px] text-slate-400">
+                          {req.created_at ? req.created_at.slice(0, 10) : ''}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500">
+                        {formatLocalizedText(req.employee_role || '', language)} • {formatLocalizedText(req.department_name || '', language)}
+                      </p>
+
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                        <span className="font-bold text-slate-800 flex items-center gap-1.5 bg-white px-2 py-0.5 rounded-md border border-slate-200">
+                          {isSalary ? (
+                            <DollarSign size={13} className="text-emerald-600" />
+                          ) : isLaptopOrPc ? (
+                            <Laptop size={13} className="text-indigo-600" />
+                          ) : (
+                            <Package size={13} className="text-sky-600" />
+                          )}
+                          <span>{req.item_name}</span>
+                          {!isSalary && req.quantity > 1 && (
+                            <span className="text-[10px] text-slate-400 font-mono">x{req.quantity}</span>
+                          )}
+                        </span>
+
+                        {isSalary ? (
+                          <span className="text-emerald-700 font-mono font-bold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                            ${req.current_salary?.toLocaleString()} ➔ ${req.proposed_salary?.toLocaleString()} (+${((req.proposed_salary || 0) - (req.current_salary || 0)).toLocaleString()})
+                          </span>
+                        ) : (
+                          req.estimated_cost ? (
+                            <span className="text-slate-600 font-mono bg-white px-2 py-0.5 rounded border border-slate-200">
+                              Est. ${req.estimated_cost.toLocaleString()}
+                            </span>
+                          ) : null
+                        )}
+
+                        {req.requires_top_management === 1 ? (
+                          <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200 flex items-center gap-1">
+                            <Sparkles size={11} />
+                            <span>{language === 'km' ? '៣ ដំណាក់កាល (អ្នក ➔ HR ➔ CEO)' : '3 Stages (You ➔ HR ➔ CEO)'}</span>
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 flex items-center gap-1">
+                            <CheckCircle2 size={11} />
+                            <span>{language === 'km' ? '២ ដំណាក់កាល (អ្នក ➔ HR ចុងក្រោយ)' : '2 Stages (You ➔ HR Final)'}</span>
+                          </span>
+                        )}
+
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${
+                            req.status === 'Approved'
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              : req.status === 'Rejected'
+                              ? 'bg-rose-50 text-rose-700 border-rose-200'
+                              : req.status === 'Pending Line Manager'
+                              ? 'bg-amber-50 text-amber-700 border-amber-200'
+                              : req.status === 'Pending HR'
+                              ? 'bg-blue-50 text-blue-700 border-blue-200'
+                              : 'bg-purple-50 text-purple-700 border-purple-200'
+                          }`}
+                        >
+                          {req.status}
+                        </span>
+                      </div>
+
+                      {req.reason && (
+                        <p className="text-[11px] text-slate-600 mt-1 italic">
+                          &ldquo;{req.reason}&rdquo;
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
+                    {req.status === 'Pending Line Manager' ? (
+                      <>
+                        <button
+                          type="button"
+                          disabled={approvingReqId === req.id}
+                          onClick={() => handleQuickApproveRequest(req)}
+                          className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-transform active:scale-95 cursor-pointer disabled:opacity-50"
+                        >
+                          <Check size={14} />
+                          <span>
+                            {approvingReqId === req.id
+                              ? (language === 'km' ? 'កំពុងបញ្ជូន...' : 'Forwarding...')
+                              : (language === 'km' ? 'អនុម័តជំហាន១ ➔ បញ្ជូនទៅ HR' : 'Approve Step 1 ➔ Forward HR')}
+                          </span>
+                          <ArrowRight size={13} />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedRequest(req);
+                            setIsApprovalModalOpen(true);
+                          }}
+                          className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-700 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                        >
+                          <X size={14} />
+                          <span>{language === 'km' ? 'ពិនិត្យ / បដិសេធ' : 'Review / Reject'}</span>
+                        </button>
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedRequest(req);
+                          setIsApprovalModalOpen(true);
+                        }}
+                        className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1 cursor-pointer"
+                      >
+                        <span>{language === 'km' ? 'មើលលម្អិត & ដំណាក់កាល' : 'View Pipeline Details'}</span>
+                        <ChevronRight size={14} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
@@ -478,6 +798,19 @@ export default function ManagementPortalPage() {
           </div>
         </div>
       </div>
+
+      {/* REQUEST APPROVAL MODAL */}
+      <RequestApprovalModal
+        isOpen={isApprovalModalOpen}
+        onClose={() => {
+          setIsApprovalModalOpen(false);
+          setSelectedRequest(null);
+        }}
+        requestItem={selectedRequest}
+        onSuccess={() => {
+          fetchRequests();
+        }}
+      />
     </div>
   );
 }

@@ -27,7 +27,12 @@ import {
   TrendingUp,
   ShieldAlert,
   KeyRound,
+  Package,
+  FileCheck2,
+  Laptop,
+  ShieldCheck,
 } from 'lucide-react';
+import NewStaffRequestModal from '@/components/NewStaffRequestModal';
 
 interface StaffPayslip {
   id: string;
@@ -78,6 +83,8 @@ export default function StaffPortalPage() {
   const [myLeaveHistory, setMyLeaveHistory] = useState<any[]>([]);
 
   const [myPayslips, setMyPayslips] = useState<StaffPayslip[]>([]);
+  const [myRequests, setMyRequests] = useState<any[]>([]);
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
 
   useEffect(() => {
     async function loadEmployeeProfile() {
@@ -167,6 +174,15 @@ export default function StaffPortalPage() {
               : []
           );
         }
+
+        // Also load staff member's approval requests
+        try {
+          const reqRes = await fetch(`/api/requests?employee_id=${empId}`);
+          if (reqRes.ok) {
+            const reqData = await reqRes.json();
+            if (Array.isArray(reqData)) setMyRequests(reqData);
+          }
+        } catch {}
       } catch (err) {
         console.error('Error loading employee profile in portal:', err);
       }
@@ -221,6 +237,14 @@ export default function StaffPortalPage() {
 
         {/* Quick actions dock */}
         <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            onClick={() => setIsRequestModalOpen(true)}
+            className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-sm shadow-purple-600/30 flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
+          >
+            <Package size={15} />
+            <span>{language === 'km' ? 'ស្នើសុំសម្ភារៈ/បៀវត្សរ៍' : 'Request Material/Salary'}</span>
+          </button>
+
           <button
             onClick={() => openModal('request-leave')}
             className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm shadow-indigo-600/30 flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
@@ -581,7 +605,161 @@ export default function StaffPortalPage() {
         </div>
       </div>
 
-      {/* 5. LINE MANAGER & TEAM POD */}
+      {/* 5. MY REQUISITIONS & MULTI-TIER APPROVALS */}
+      <div className="bg-white rounded-3xl border border-slate-200/90 p-6 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+          <div>
+            <div className="flex items-center gap-2 text-indigo-600 font-bold text-xs uppercase tracking-wider mb-0.5">
+              <FileCheck2 size={15} />
+              <span>{language === 'km' ? 'សំណើសម្ភារៈ & បៀវត្សរ៍ (Requisitions)' : 'Equipment & Salary Requisitions'}</span>
+            </div>
+            <h3 className="text-base font-black text-slate-900">
+              {language === 'km' ? 'សំណើ & ការអនុម័តពហុថ្នាក់របស់ខ្ញុំ' : 'My Requisitions & Approval Pipeline'}
+            </h3>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsRequestModalOpen(true)}
+              className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-xs transition-transform active:scale-95 cursor-pointer"
+            >
+              <Package size={14} />
+              <span>{language === 'km' ? '+ ស្នើសុំថ្មី' : '+ New Request'}</span>
+            </button>
+
+            <Link
+              href="/requests"
+              className="px-3.5 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl font-bold text-xs flex items-center gap-1 transition-colors"
+            >
+              <span>{language === 'km' ? 'មើលទាំងអស់' : 'View All'}</span>
+              <ChevronRight size={13} />
+            </Link>
+          </div>
+        </div>
+
+        {myRequests.length === 0 ? (
+          <div className="p-8 text-center bg-slate-50/70 rounded-2xl border border-dashed border-slate-200 space-y-2">
+            <Package className="w-8 h-8 text-slate-400 mx-auto" />
+            <p className="text-xs font-bold text-slate-700">
+              {language === 'km' ? 'មិនទាន់មានសំណើសម្ភារៈ ឬបៀវត្សរ៍ទេ' : 'No material or salary requests submitted yet'}
+            </p>
+            <p className="text-[11px] text-slate-500 font-khmer max-w-sm mx-auto">
+              {language === 'km'
+                ? 'អ្នកអាចស្នើសុំកុំព្យូទ័រ Laptop បរិក្ខារការិយាល័យ ឬស្នើសុំដំឡើងបៀវត្សរ៍ដោយផ្ទាល់ពីទីនេះ។'
+                : 'You can submit requests for laptops, desktop workstations, office supplies, or salary adjustment directly.'}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {myRequests.map((req: any) => {
+              const isHighValue = req.requires_top_management === 1;
+              const isSalary = req.request_type === 'Salary Increase' || req.item_category === 'salary_increase';
+
+              return (
+                <div
+                  key={req.id}
+                  className="p-4 rounded-2xl border border-slate-200/80 hover:border-indigo-200 hover:bg-slate-50/50 transition-all space-y-3"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 shrink-0">
+                        {isSalary ? (
+                          <DollarSign size={16} />
+                        ) : req.item_name.toLowerCase().includes('laptop') ? (
+                          <Laptop size={16} />
+                        ) : (
+                          <Package size={16} />
+                        )}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs font-bold text-indigo-700">
+                            {req.request_number}
+                          </span>
+                          <h4 className="text-xs font-black text-slate-900">{req.item_name}</h4>
+                          {isHighValue ? (
+                            <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-amber-100 text-amber-800">
+                              Top Mgmt Required
+                            </span>
+                          ) : (
+                            <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-purple-100 text-purple-800">
+                              HR Final
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-500 mt-0.5 font-khmer line-clamp-1">
+                          {req.reason}
+                        </p>
+                      </div>
+                    </div>
+
+                    <span
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                        req.status === 'Approved'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : req.status === 'Rejected'
+                          ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                          : req.status === 'Pending Top Management'
+                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                          : req.status === 'Pending HR'
+                          ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                          : 'bg-blue-50 text-blue-700 border border-blue-200'
+                      }`}
+                    >
+                      {req.status}
+                    </span>
+                  </div>
+
+                  {/* Multi-Tier Timeline Badges */}
+                  <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center text-[10px]">
+                    <div
+                      className={`p-1.5 rounded-lg border ${
+                        req.line_manager_status === 'Approved'
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200 font-bold'
+                          : req.line_manager_status === 'Rejected'
+                          ? 'bg-rose-50 text-rose-800 border-rose-200 font-bold'
+                          : 'bg-blue-50 text-blue-800 border-blue-200 font-bold'
+                      }`}
+                    >
+                      <span>1. Manager: {req.line_manager_status}</span>
+                    </div>
+
+                    <div
+                      className={`p-1.5 rounded-lg border ${
+                        req.hr_status === 'Approved'
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200 font-bold'
+                          : req.hr_status === 'Rejected'
+                          ? 'bg-rose-50 text-rose-800 border-rose-200 font-bold'
+                          : 'bg-purple-50 text-purple-800 border-purple-200 font-bold'
+                      }`}
+                    >
+                      <span>2. HR: {req.hr_status} {!isHighValue && '(Final)'}</span>
+                    </div>
+
+                    <div
+                      className={`p-1.5 rounded-lg border ${
+                        !isHighValue
+                          ? 'bg-slate-100 text-slate-400 border-slate-200'
+                          : req.top_management_status === 'Approved'
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200 font-bold'
+                          : req.top_management_status === 'Rejected'
+                          ? 'bg-rose-50 text-rose-800 border-rose-200 font-bold'
+                          : 'bg-amber-50 text-amber-800 border-amber-200 font-bold'
+                      }`}
+                    >
+                      <span>
+                        {!isHighValue ? '3. CEO: N/A' : `3. CEO: ${req.top_management_status}`}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* 6. LINE MANAGER & TEAM POD */}
       <div className="p-5 rounded-2xl bg-indigo-50/50 border border-indigo-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shrink-0">
@@ -703,6 +881,24 @@ export default function StaffPortalPage() {
           </div>
         </div>
       )}
+
+      {/* MODAL: NEW REQUISITION */}
+      <NewStaffRequestModal
+        isOpen={isRequestModalOpen}
+        onClose={() => setIsRequestModalOpen(false)}
+        onSuccess={() => {
+          const empId = currentPersona.id;
+          fetch(`/api/requests?employee_id=${empId}`)
+            .then((r) => r.json())
+            .then((data) => {
+              if (Array.isArray(data)) setMyRequests(data);
+            })
+            .catch(() => {});
+        }}
+        defaultEmployeeId={currentPersona.id}
+        defaultEmployeeName={staffData.name}
+        defaultDepartment={staffData.department}
+      />
     </div>
   );
 }
