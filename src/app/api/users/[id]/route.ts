@@ -59,6 +59,13 @@ export async function PATCH(
       db.prepare(`UPDATE users SET ${updates.join(', ')} WHERE id = ?`).run(...values);
     }
 
+    if (department_name !== undefined && (user as any).employee_id) {
+      const dept = db.prepare('SELECT id FROM departments WHERE name = ? OR id = ?').get(department_name, department_name) as any;
+      if (dept) {
+        db.prepare('UPDATE employees SET department_id = ? WHERE id = ?').run(dept.id, (user as any).employee_id);
+      }
+    }
+
     const updatedUser = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
     return NextResponse.json(updatedUser);
   } catch (error) {

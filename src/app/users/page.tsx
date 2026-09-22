@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
-import { UserAccount, UserRole, UserStatus, Employee } from '@/lib/types';
+import { UserAccount, UserRole, UserStatus, Employee, Department } from '@/lib/types';
 import { formatLocalizedText } from '@/lib/translations';
 import {
   Shield,
@@ -64,6 +64,7 @@ export default function UserManagementPage() {
   const [activeTab, setActiveTab] = useState<'users' | 'matrix'>('users');
   const [users, setUsers] = useState<UserAccount[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Filters
@@ -82,7 +83,7 @@ export default function UserManagementPage() {
     email: '',
     role: 'Employee' as UserRole,
     status: 'Active' as UserStatus,
-    department_name: language === 'km' ? 'បច្ចេកវិទ្យា (Engineering)' : 'Engineering',
+    department_name: '',
     employee_id: '',
     avatar: '/avatars/khmer_female_1.jpg',
     two_factor_enabled: false,
@@ -91,19 +92,22 @@ export default function UserManagementPage() {
 
   const [submitting, setSubmitting] = useState(false);
 
-  // Fetch users & employees
+  // Fetch users, employees & departments
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [usersRes, empsRes] = await Promise.all([
+      const [usersRes, empsRes, deptsRes] = await Promise.all([
         fetch('/api/users'),
         fetch('/api/employees'),
+        fetch('/api/departments'),
       ]);
       const usersData = await usersRes.json();
       const empsData = await empsRes.json();
+      const deptsData = await deptsRes.json();
 
       if (Array.isArray(usersData)) setUsers(usersData);
       if (Array.isArray(empsData)) setEmployees(empsData);
+      if (Array.isArray(deptsData)) setDepartments(deptsData);
     } catch (err) {
       console.error('Failed to load user management data:', err);
       showToast(language === 'km' ? 'បរាជ័យក្នុងការទាញយកទិន្នន័យ' : 'Failed to fetch user data', 'error');
@@ -151,9 +155,9 @@ export default function UserManagementPage() {
       email: '',
       role: 'Employee',
       status: 'Active',
-      department_name: language === 'km' ? 'បច្ចេកវិទ្យា (Engineering)' : 'Engineering',
+      department_name: departments[0]?.name || '',
       employee_id: '',
-      avatar: '/avatars/khmer_female_1.jpg',
+      avatar: '',
       two_factor_enabled: false,
       permissions: ['self_service', 'clock_in', 'request_leave', 'view_payslips'],
     });
@@ -164,12 +168,13 @@ export default function UserManagementPage() {
   const handleOpenEditModal = (user: UserAccount) => {
     setEditingUser(user);
     const userPerms = user.permissions ? user.permissions.split(',').map((p) => p.trim()) : [];
+    const linkedEmp = employees.find((e) => e.id === user.employee_id);
     setFormData({
-      name: language === 'km' ? user.name : formatLocalizedText(user.name, 'en'),
+      name: user.name,
       email: user.email,
       role: user.role,
       status: user.status,
-      department_name: language === 'km' ? (user.department_name || '') : formatLocalizedText(user.department_name || '', 'en'),
+      department_name: user.department_name || linkedEmp?.department_name || '',
       employee_id: user.employee_id || '',
       avatar: user.avatar || '',
       two_factor_enabled: user.two_factor_enabled === 1,
@@ -191,9 +196,9 @@ export default function UserManagementPage() {
 
     setFormData((prev) => ({
       ...prev,
-      name: language === 'km' ? `${emp.first_name} ${emp.last_name}` : formatLocalizedText(`${emp.first_name} ${emp.last_name}`, 'en'),
+      name: `${emp.first_name} ${emp.last_name}`.trim(),
       email: emp.email,
-      department_name: language === 'km' ? (emp.department_name || prev.department_name) : formatLocalizedText(emp.department_name || prev.department_name, 'en'),
+      department_name: emp.department_name || prev.department_name,
       employee_id: emp.id,
       avatar: emp.avatar || prev.avatar,
       role: detectedRole,
@@ -1164,16 +1169,27 @@ export default function UserManagementPage() {
               {/* Department & Role Preset */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">
-                    {language === 'km' ? 'ផ្នែក / នាយកដ្ឋាន' : 'Department'}
+                  <label className="block font-semibold text-gray-700 mb-1 flex items-center justify-between">
+                    <span>{language === 'km' ? 'ផ្នែក / នាយកដ្ឋាន' : 'Department'}</span>
+                    <Building2 className="w-3.5 h-3.5 text-indigo-500" />
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={formData.department_name}
                     onChange={(e) => setFormData({ ...formData, department_name: e.target.value })}
-                    placeholder={language === 'km' ? 'e.g. បច្ចេកវិទ្យា (Engineering)' : 'e.g. Engineering'}
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
-                  />
+                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs font-semibold focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer"
+                  >
+                    <option value="">{language === 'km' ? '-- ជ្រើសរើសនាយកដ្ឋាន --' : '-- Select Department --'}</option>
+                    {departments.map((dept) => (
+                      <option key={dept.id} value={dept.name}>
+                        {formatLocalizedText(dept.name, language)}
+                      </option>
+                    ))}
+                    {formData.department_name && !departments.some((d) => d.name === formData.department_name) && (
+                      <option value={formData.department_name}>
+                        {formatLocalizedText(formData.department_name, language)}
+                      </option>
+                    )}
+                  </select>
                 </div>
                 <div>
                   <label className="block font-semibold text-gray-700 mb-1">
@@ -1333,15 +1349,27 @@ export default function UserManagementPage() {
                   />
                 </div>
                 <div>
-                  <label className="block font-semibold text-gray-700 mb-1">
-                    {language === 'km' ? 'ផ្នែក / នាយកដ្ឋាន' : 'Department'}
+                  <label className="block font-semibold text-gray-700 mb-1 flex items-center justify-between">
+                    <span>{language === 'km' ? 'ផ្នែក / នាយកដ្ឋាន' : 'Department'}</span>
+                    <Building2 className="w-3.5 h-3.5 text-indigo-500" />
                   </label>
-                  <input
-                    type="text"
+                  <select
                     value={formData.department_name}
                     onChange={(e) => setFormData({ ...formData, department_name: e.target.value })}
-                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20"
-                  />
+                    className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs font-semibold focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer"
+                  >
+                    <option value="">{language === 'km' ? '-- ជ្រើសរើសនាយកដ្ឋាន --' : '-- Select Department --'}</option>
+                    {departments.map((dept) => (
+                      <option key={dept.id} value={dept.name}>
+                        {formatLocalizedText(dept.name, language)}
+                      </option>
+                    ))}
+                    {formData.department_name && !departments.some((d) => d.name === formData.department_name) && (
+                      <option value={formData.department_name}>
+                        {formatLocalizedText(formData.department_name, language)}
+                      </option>
+                    )}
+                  </select>
                 </div>
               </div>
 
