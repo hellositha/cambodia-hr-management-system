@@ -6,6 +6,7 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import ToastContainer from './Toast';
 import GlobalModals from './GlobalModals';
+import ChangePasswordModal from './ChangePasswordModal';
 import { useApp } from '@/context/AppContext';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
@@ -47,6 +48,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </footer>
       <ToastContainer />
       <GlobalModals />
+      <ChangePasswordModal />
     </div>
   );
 }

@@ -7,10 +7,12 @@ import {
   Database,
   Building,
   Code,
+  ShieldCheck,
+  KeyRound,
 } from 'lucide-react';
 
 export default function SettingsPage() {
-  const { showToast, language } = useApp();
+  const { showToast, language, openModal, currentPersona } = useApp();
 
   const [companySettings, setCompanySettings] = useState({
     name: 'HESTRA HRM Technologies Inc.',
@@ -73,6 +75,49 @@ export default function SettingsPage() {
             <span className="text-[10px] text-slate-400 block font-bold uppercase">Foreign Keys</span>
             <span className="font-semibold text-slate-800">ON (Enforced)</span>
           </div>
+        </div>
+      </div>
+
+      {/* Account Security & Password */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            <div className="p-3 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100 shrink-0">
+              <ShieldCheck size={22} />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                {language === 'km' ? 'សុវត្ថិភាពគណនី & ពាក្យសម្ងាត់' : 'Account Security & Password'}
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {language === 'km'
+                  ? 'គ្រប់គ្រងពាក្យសម្ងាត់ផ្ទាល់ខ្លួនរបស់អ្នក ដើម្បីការពារគណនីក្នុងប្រព័ន្ធ HESTRA HRM'
+                  : 'Manage your credentials and change your password to keep your account secure'}
+              </p>
+              <div className="flex flex-wrap items-center gap-2 mt-2.5">
+                <img
+                  src={currentPersona.avatar}
+                  alt={currentPersona.name}
+                  className="w-5 h-5 rounded-full object-cover ring-1 ring-slate-300"
+                />
+                <span className="text-xs font-semibold text-slate-700">{currentPersona.name}</span>
+                <span className="text-slate-300">•</span>
+                <span className="text-xs text-slate-500 font-mono">{currentPersona.email || currentPersona.id}</span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                  {currentPersona.role}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => openModal('change-password')}
+            className="px-4 py-2.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-sm shadow-indigo-600/20 flex items-center gap-2 transition-all active:scale-95 cursor-pointer shrink-0"
+          >
+            <KeyRound size={15} />
+            <span>{language === 'km' ? 'ប្តូរពាក្យសម្ងាត់ (Change Password)' : 'Change Password'}</span>
+          </button>
         </div>
       </div>
 

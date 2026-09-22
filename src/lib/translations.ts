@@ -88,6 +88,10 @@ export const TRANSLATIONS = {
     notifications: 'ការជូនដំណឹង',
     mark_all_read: 'សម្គាល់ថាបានអានទាំងអស់',
     switch_persona: 'ប្តូរតួនាទី / ទិដ្ឋភាព',
+    change_password: 'ប្តូរពាក្យសម្ងាត់',
+    current_password: 'ពាក្យសម្ងាត់បច្ចុប្បន្ន',
+    new_password: 'ពាក្យសម្ងាត់ថ្មី',
+    confirm_new_password: 'បញ្ជាក់ពាក្យសម្ងាត់ថ្មី',
 
     // Dashboard
     good_morning: 'សួស្តីពេលព្រឹក',
@@ -274,6 +278,10 @@ export const TRANSLATIONS = {
     notifications: 'Notifications',
     mark_all_read: 'Mark all as read',
     switch_persona: 'Switch Persona View',
+    change_password: 'Change Password',
+    current_password: 'Current Password',
+    new_password: 'New Password',
+    confirm_new_password: 'Confirm New Password',
 
     // Dashboard
     good_morning: 'Good morning',

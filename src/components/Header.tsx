@@ -27,6 +27,7 @@ import {
   Calculator,
   LogIn,
   LogOut,
+  KeyRound,
 } from 'lucide-react';
 import Link from 'next/link';
 import { formatLocalizedText } from '@/lib/translations';
@@ -550,6 +551,17 @@ export default function Header() {
               <div className="my-1.5 border-t border-slate-100"></div>
 
               <div className="space-y-1">
+                <button
+                  onClick={() => {
+                    setPersonaOpen(false);
+                    openModal('change-password');
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-slate-700 hover:text-indigo-600 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer"
+                >
+                  <KeyRound size={15} className="text-indigo-600" />
+                  <span>{language === 'km' ? 'ប្តូរពាក្យសម្ងាត់ (Change Password)' : 'Change Password'}</span>
+                </button>
+
                 <Link
                   href="/login"
                   onClick={() => setPersonaOpen(false)}

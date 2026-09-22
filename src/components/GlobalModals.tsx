@@ -305,7 +305,8 @@ export default function GlobalModals() {
     setLeaveForm((prev) => ({ ...prev, employee_id: currentPersona.id }));
   }, [currentPersona.id]);
 
-  if (!activeModal) return null;
+  const SUPPORTED_MODALS = ['add-employee', 'request-leave', 'post-job', 'post-announcement', 'run-payroll'];
+  if (!activeModal || !SUPPORTED_MODALS.includes(activeModal)) return null;
 
   // Handlers
   const handleAddEmployee = async (e?: React.FormEvent) => {

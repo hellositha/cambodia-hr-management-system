@@ -170,7 +170,12 @@ export async function POST(request: Request) {
     }
 
     const userPassword = user.password || 'hestra123';
-    if (password !== userPassword && password !== 'hestra123' && password !== 'admin123') {
+    const isCustomPassword = Boolean(user.password && user.password !== 'hestra123');
+    const isPasswordValid = isCustomPassword
+      ? password === userPassword
+      : (password === userPassword || password === 'hestra123' || (user.role === 'Admin' && password === 'admin123'));
+
+    if (!isPasswordValid) {
       return NextResponse.json(
         { error: 'ពាក្យសម្ងាត់មិនត្រឹមត្រូវទេ សូមសាកល្បងម្តងទៀត (Invalid password)' },
         { status: 401 }

@@ -26,6 +26,7 @@ import {
   ChevronRight,
   TrendingUp,
   ShieldAlert,
+  KeyRound,
 } from 'lucide-react';
 
 interface StaffPayslip {
@@ -315,6 +316,15 @@ export default function StaffPortalPage() {
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                   {currentPersona.role}
                 </span>
+                <button
+                  type="button"
+                  onClick={() => openModal('change-password')}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 text-[10px] font-semibold border border-slate-200 transition-colors cursor-pointer"
+                  title={language === 'km' ? 'ប្តូរពាក្យសម្ងាត់' : 'Change Password'}
+                >
+                  <KeyRound size={11} className="text-indigo-600" />
+                  <span>{language === 'km' ? 'ប្តូរពាក្យសម្ងាត់' : 'Change Password'}</span>
+                </button>
               </div>
               <p className="text-xs font-semibold text-slate-600 font-khmer">{formatLocalizedText(staffData.role, language)}</p>
               <p className="text-[11px] text-slate-400 font-khmer">{formatLocalizedText(staffData.department, language)}</p>
