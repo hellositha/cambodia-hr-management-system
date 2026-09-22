@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { JobPosting, JobCandidate, CandidateStage } from '@/lib/types';
+import { formatLocalizedText } from '@/lib/translations';
 import {
   Briefcase,
   Users,
@@ -21,7 +22,6 @@ import {
   Mail,
   Building,
   Trash2,
-  RotateCcw,
 } from 'lucide-react';
 
 const PIPELINE_STAGES: CandidateStage[] = ['Applied', 'Screening', 'Interview', 'Offer', 'Hired'];
@@ -130,25 +130,6 @@ export default function RecruitmentPage() {
     }
   };
 
-  const handleRestoreRecruitment = async () => {
-    try {
-      const res = await fetch('/api/recruitment/seed', { method: 'POST' });
-      if (res.ok) {
-        showToast(
-          language === 'km'
-            ? 'ទិន្នន័យជ្រើសរើសគំរូត្រូវបានដាក់បញ្ចូលឡើងវិញជោគជ័យ!'
-            : 'Sample recruitment jobs and candidates restored successfully!',
-          'success'
-        );
-        triggerRefresh();
-      } else {
-        showToast('Failed to restore recruitment data', 'error');
-      }
-    } catch {
-      showToast('Network error restoring recruitment', 'error');
-    }
-  };
-
   const filteredCandidates = candidates.filter((c) => {
     if (selectedJobId === 'all') return true;
     return c.job_id === selectedJobId;
@@ -214,8 +195,8 @@ export default function RecruitmentPage() {
               </h3>
               <p className="text-xs text-slate-600 mt-0.5">
                 {language === 'km'
-                  ? 'ពុំទាន់មានមុខតំណែងការងារ ឬបេក្ខជនណាមួយនៅក្នុងប្រព័ន្ធទេ។ លោកអ្នកអាចប្រកាសការងារថ្មី ឬទាញយកទិន្នន័យគំរូឡើងវិញ។'
-                  : 'All job postings and candidate records have been cleared. You can post a new requisition or restore 4 sample Cambodia positions.'}
+                  ? 'ពុំទាន់មានមុខតំណែងការងារ ឬបេក្ខជនណាមួយនៅក្នុងប្រព័ន្ធទេ។ លោកអ្នកអាចចាប់ផ្ដើមដោយប្រកាសការងារថ្មី។'
+                  : 'No active job postings or candidate records in the pipeline. Post a new job requisition to get started.'}
               </p>
             </div>
           </div>
@@ -225,12 +206,6 @@ export default function RecruitmentPage() {
               className="flex-1 sm:flex-none px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
             >
               <Plus size={15} /> {language === 'km' ? 'ប្រកាសការងារថ្មី' : 'Post Job Opening'}
-            </button>
-            <button
-              onClick={handleRestoreRecruitment}
-              className="flex-1 sm:flex-none px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
-            >
-              <RotateCcw size={14} /> {language === 'km' ? 'ដាក់ទិន្នន័យគំរូឡើងវិញ' : 'Restore Demo Jobs'}
             </button>
           </div>
         </div>
@@ -261,18 +236,18 @@ export default function RecruitmentPage() {
               >
                 <div>
                   <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 mb-2">
-                    <span className="uppercase">{job.department_name}</span>
+                    <span className="uppercase">{formatLocalizedText(job.department_name, language)}</span>
                     <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                      {job.status}
+                      {formatLocalizedText(job.status, language)}
                     </span>
                   </div>
-                  <h3 className="font-extrabold text-slate-900 text-xs leading-snug">{job.title}</h3>
+                  <h3 className="font-extrabold text-slate-900 text-xs leading-snug">{formatLocalizedText(job.title, language)}</h3>
                   <div className="mt-2 space-y-1 text-[11px] text-slate-500">
                     <div className="flex items-center gap-1.5">
                       <MapPin size={12} className="shrink-0" />
-                      <span>{job.location}</span>
+                      <span>{formatLocalizedText(job.location, language)}</span>
                     </div>
-                    <div className="font-semibold text-slate-700">{job.salary_range}</div>
+                    <div className="font-semibold text-slate-700">{formatLocalizedText(job.salary_range, language)}</div>
                   </div>
                 </div>
 
@@ -302,7 +277,7 @@ export default function RecruitmentPage() {
             </h2>
             {selectedJobId !== 'all' && (
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 font-bold">
-                {language === 'km' ? 'បានច្រោះ:' : 'Filtered:'} {jobs.find((j) => j.id === selectedJobId)?.title}
+                {language === 'km' ? 'បានច្រោះ:' : 'Filtered:'} {formatLocalizedText(jobs.find((j) => j.id === selectedJobId)?.title || '', language)}
               </span>
             )}
           </div>
@@ -357,7 +332,7 @@ export default function RecruitmentPage() {
                       >
                         <div className="flex items-start justify-between gap-2">
                           <h4 className="font-bold text-xs text-slate-900 leading-tight">
-                            {cand.name}
+                            {formatLocalizedText(cand.name, language)}
                           </h4>
                           <div className="flex items-center text-amber-500">
                             <Star size={12} className="fill-amber-400 text-amber-400 mr-0.5" />
@@ -366,7 +341,7 @@ export default function RecruitmentPage() {
                         </div>
 
                         <p className="text-[11px] text-purple-700 font-semibold truncate">
-                          {cand.job_title}
+                          {formatLocalizedText(cand.job_title, language)}
                         </p>
 
                         <div className="text-[10px] text-slate-500 space-y-0.5">
@@ -382,7 +357,7 @@ export default function RecruitmentPage() {
 
                         {cand.notes && (
                           <div className="p-2 bg-slate-50 rounded-lg text-[10px] text-slate-600 italic border border-slate-100">
-                            &ldquo;{cand.notes}&rdquo;
+                            &ldquo;{formatLocalizedText(cand.notes, language)}&rdquo;
                           </div>
                         )}
 
@@ -434,7 +409,7 @@ export default function RecruitmentPage() {
                 >
                   {jobs.map((j) => (
                     <option key={j.id} value={j.id}>
-                      {j.title} ({j.department_name})
+                      {formatLocalizedText(j.title, language)} ({formatLocalizedText(j.department_name, language)})
                     </option>
                   ))}
                 </select>

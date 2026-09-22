@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="km" className="h-full lang-km">
+    <html lang="en" className="h-full">
       <body className="min-h-full antialiased font-sans text-slate-900 bg-slate-50">
         <AppProvider>
           <AppShell>{children}</AppShell>

@@ -9,7 +9,7 @@ import GlobalModals from './GlobalModals';
 import { useApp } from '@/context/AppContext';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
-  const { sidebarCollapsed } = useApp();
+  const { sidebarCollapsed, language } = useApp();
   const pathname = usePathname();
 
   const isAuthPage = pathname === '/login';
@@ -24,7 +24,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-slate-50 flex flex-col justify-between">
       <Sidebar />
       <Header />
       <main
@@ -34,6 +34,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       >
         <div className="max-w-7xl mx-auto">{children}</div>
       </main>
+      <footer
+        className={`no-print py-4 px-6 text-center text-xs text-slate-400 border-t border-slate-200/80 bg-white/50 backdrop-blur-xs transition-all duration-300 ${
+          sidebarCollapsed ? 'ml-20' : 'ml-64'
+        }`}
+      >
+        <p className="font-medium">
+          {language === 'km'
+            ? 'រក្សាសិទ្ធិគ្រប់យ៉ាង © 2026 - Sim Sitha'
+            : 'Copyright 2026 - All rights reserved. Sim Sitha'}
+        </p>
+      </footer>
       <ToastContainer />
       <GlobalModals />
     </div>

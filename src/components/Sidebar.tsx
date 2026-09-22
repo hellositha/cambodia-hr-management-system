@@ -5,10 +5,14 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import HestraLogo from '@/components/HestraLogo';
+import { formatLocalizedText } from '@/lib/translations';
 import {
   LayoutDashboard,
   Users,
+  Building2,
   Clock,
+  CalendarDays,
+  Timer,
   CalendarCheck,
   CreditCard,
   Briefcase,
@@ -33,17 +37,20 @@ export default function Sidebar() {
 
   const allNavItems = [
     { label: t('nav_dashboard'), href: '/', icon: LayoutDashboard, roles: ['Manager', 'Admin'] },
-    { label: t('nav_staff_portal'), href: '/portal/staff', icon: UserCheck, badge: language === 'km' ? 'ផ្ទាល់ខ្លួន' : 'ESS', roles: ['Employee', 'Manager', 'Admin'] },
-    { label: t('nav_manager_portal'), href: '/portal/manager', icon: Shield, badge: language === 'km' ? 'ក្រុម' : 'MSS', roles: ['Manager', 'Admin'] },
-    { label: t('nav_employees'), href: '/employees', icon: Users, badge: language === 'km' ? 'បុគ្គលិក' : 'Staff', roles: ['Manager', 'Admin'] },
-    { label: t('nav_attendance'), href: '/attendance', icon: Clock, badge: language === 'km' ? 'វត្តមាន' : 'Time', roles: ['Employee', 'Manager', 'Admin'] },
-    { label: t('nav_leaves'), href: '/leaves', icon: CalendarCheck, badge: language === 'km' ? 'ច្បាប់' : 'Leaves', roles: ['Employee', 'Manager', 'Admin'] },
+    { label: t('nav_staff_portal'), href: '/portal/staff', icon: UserCheck, roles: ['Employee', 'Manager', 'Admin'] },
+    { label: t('nav_manager_portal'), href: '/portal/manager', icon: Shield, roles: ['Manager', 'Admin'] },
+    { label: t('nav_employees'), href: '/employees', icon: Users, roles: ['Manager', 'Admin'] },
+    { label: t('nav_departments'), href: '/departments', icon: Building2, roles: ['Employee', 'Manager', 'Admin'] },
+    { label: t('nav_attendance'), href: '/attendance', icon: Clock, roles: ['Employee', 'Manager', 'Admin'] },
+    { label: t('nav_roster'), href: '/roster', icon: CalendarDays, roles: ['Employee', 'Manager', 'Admin'] },
+    { label: t('nav_overtime'), href: '/overtime', icon: Timer, roles: ['Employee', 'Manager', 'Admin'] },
+    { label: t('nav_leaves'), href: '/leaves', icon: CalendarCheck, roles: ['Employee', 'Manager', 'Admin'] },
     { label: t('nav_payroll'), href: '/payroll', icon: CreditCard, roles: ['Admin'] },
-    { label: t('nav_recruitment'), href: '/recruitment', icon: Briefcase, badge: language === 'km' ? 'ការងារ' : 'Jobs', roles: ['Admin'] },
+    { label: t('nav_recruitment'), href: '/recruitment', icon: Briefcase, roles: ['Admin'] },
     { label: t('nav_performance'), href: '/performance', icon: Award, roles: ['Manager', 'Admin'] },
     { label: t('nav_announcements'), href: '/announcements', icon: Megaphone, roles: ['Employee', 'Manager', 'Admin'] },
-    { label: t('nav_tools'), href: '/tools', icon: Scale, badge: language === 'km' ? 'ថ្មី' : 'Tools', roles: ['Admin'] },
-    { label: t('nav_reports'), href: '/reports', icon: BarChart3, badge: language === 'km' ? 'របាយការណ៍' : 'BI', roles: ['Admin'] },
+    { label: t('nav_tools'), href: '/tools', icon: Scale, roles: ['Admin'] },
+    { label: t('nav_reports'), href: '/reports', icon: BarChart3, roles: ['Admin'] },
     { label: t('nav_users'), href: '/users', icon: UserCog, roles: ['Admin'] },
     { label: t('nav_settings'), href: '/settings', icon: Settings, roles: ['Admin'] },
   ];
@@ -100,20 +107,7 @@ export default function Sidebar() {
                 }`}
               />
               {!sidebarCollapsed && (
-                <div className="flex items-center justify-between flex-1 truncate">
-                  <span className="truncate">{item.label}</span>
-                  {item.badge && (
-                    <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        isActive
-                          ? 'bg-indigo-100 text-indigo-700'
-                          : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200/60'
-                      }`}
-                    >
-                      {item.badge}
-                    </span>
-                  )}
-                </div>
+                <span className="truncate">{item.label}</span>
               )}
             </Link>
           );
@@ -126,7 +120,7 @@ export default function Sidebar() {
           <button
             onClick={toggleLanguage}
             className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 hover:bg-indigo-50/70 border border-slate-200/80 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 text-xs font-bold transition-all cursor-pointer group shadow-2xs"
-            title={language === 'km' ? 'ប្តូរទៅ English' : 'Switch to ភាសាខ្មែរ'}
+            title={language === 'km' ? 'ប្តូរទៅ English' : 'Switch to Khmer'}
           >
             <div className="flex items-center gap-2">
               <span className="text-base">{language === 'km' ? '🇰🇭' : '🇬🇧'}</span>
@@ -141,7 +135,7 @@ export default function Sidebar() {
             <button
               onClick={toggleLanguage}
               className="p-2 rounded-xl bg-slate-50 hover:bg-indigo-50 border border-slate-200 text-base shadow-2xs transition-transform active:scale-95 cursor-pointer"
-              title={language === 'km' ? 'ប្តូរទៅ English' : 'Switch to ភាសាខ្មែរ'}
+              title={language === 'km' ? 'ប្តូរទៅ English' : 'Switch to Khmer'}
             >
               {language === 'km' ? '🇰🇭' : '🇬🇧'}
             </button>
@@ -160,7 +154,7 @@ export default function Sidebar() {
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-bold text-slate-900 truncate">{currentPersona.name}</p>
+                <p className="text-xs font-bold text-slate-900 truncate">{formatLocalizedText(currentPersona.name, language)}</p>
                 <button
                   onClick={() => {
                     logout();
@@ -173,7 +167,7 @@ export default function Sidebar() {
                 </button>
               </div>
               <div className="flex items-center justify-between mt-0.5">
-                <p className="text-[11px] text-slate-500 truncate">{currentPersona.title}</p>
+                <p className="text-[11px] text-slate-500 truncate">{formatLocalizedText(currentPersona.title, language)}</p>
                 <span
                   className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded ${
                     currentPersona.role === 'Admin'
@@ -192,7 +186,6 @@ export default function Sidebar() {
                     <ShieldAlert size={12} className="text-amber-500 shrink-0" />
                     <span>{language === 'km' ? 'សិទ្ធិកម្រិតកំណត់' : 'Limited Role'}</span>
                   </div>
-                  <span className="text-[9px] text-slate-400 font-mono">ESS Only</span>
                 </div>
               )}
             </div>

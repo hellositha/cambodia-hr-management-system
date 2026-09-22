@@ -45,7 +45,7 @@ function initDatabase(db: Database.Database) {
       id TEXT PRIMARY KEY,
       first_name TEXT NOT NULL,
       last_name TEXT NOT NULL,
-      email TEXT NOT NULL UNIQUE,
+      email TEXT UNIQUE,
       phone TEXT,
       role TEXT NOT NULL,
       department_id TEXT NOT NULL,
@@ -101,6 +101,43 @@ function initDatabase(db: Database.Database) {
       work_hours REAL DEFAULT 0,
       notes TEXT,
       UNIQUE(employee_id, date)
+    );
+
+    CREATE TABLE IF NOT EXISTS duty_roster (
+      id TEXT PRIMARY KEY,
+      employee_id TEXT NOT NULL,
+      date TEXT NOT NULL,
+      shift_type TEXT NOT NULL,
+      start_time TEXT,
+      end_time TEXT,
+      hours REAL DEFAULT 8.0,
+      location TEXT,
+      notes TEXT,
+      created_at TEXT NOT NULL,
+      UNIQUE(employee_id, date)
+    );
+
+    CREATE TABLE IF NOT EXISTS overtime_requests (
+      id TEXT PRIMARY KEY,
+      employee_id TEXT NOT NULL,
+      date TEXT NOT NULL,
+      start_time TEXT NOT NULL,
+      end_time TEXT NOT NULL,
+      hours REAL NOT NULL,
+      ot_rate_type TEXT NOT NULL,
+      multiplier REAL NOT NULL DEFAULT 1.5,
+      hourly_rate REAL DEFAULT 0,
+      estimated_pay REAL DEFAULT 0,
+      reason TEXT NOT NULL,
+      project_name TEXT,
+      status TEXT NOT NULL DEFAULT 'Pending Manager',
+      line_manager_id TEXT,
+      line_manager_reviewed_at TEXT,
+      line_manager_comments TEXT,
+      admin_reviewer_id TEXT,
+      admin_reviewed_at TEXT,
+      admin_comments TEXT,
+      created_at TEXT NOT NULL
     );
 
     CREATE TABLE IF NOT EXISTS leave_requests (
@@ -206,7 +243,7 @@ function initDatabase(db: Database.Database) {
       id TEXT PRIMARY KEY,
       username TEXT,
       name TEXT NOT NULL,
-      email TEXT NOT NULL UNIQUE,
+      email TEXT UNIQUE,
       role TEXT NOT NULL DEFAULT 'Employee',
       status TEXT NOT NULL DEFAULT 'Active',
       employee_id TEXT,
@@ -251,6 +288,117 @@ function initDatabase(db: Database.Database) {
       )
       WHERE username IS NULL OR username = ''
     `).run();
+  } catch (e) {}
+
+  // Migrate employees and users table if email is NOT NULL to make it optional
+  try {
+    const empCols = db.prepare("PRAGMA table_info(employees)").all() as any[];
+    const emailCol = empCols.find((c) => c.name === 'email');
+    if (emailCol && emailCol.notnull === 1) {
+      db.prepare("PRAGMA foreign_keys = OFF").run();
+      db.prepare(`
+        CREATE TABLE employees_migrated (
+          id TEXT PRIMARY KEY,
+          first_name TEXT NOT NULL,
+          last_name TEXT NOT NULL,
+          email TEXT UNIQUE,
+          phone TEXT,
+          role TEXT NOT NULL,
+          department_id TEXT NOT NULL,
+          employment_type TEXT NOT NULL,
+          employee_type TEXT DEFAULT 'បុគ្គលិកពេញសិទ្ធិ (Regular / Permanent)',
+          status TEXT NOT NULL,
+          salary REAL NOT NULL,
+          join_date TEXT NOT NULL,
+          manager_id TEXT,
+          avatar TEXT,
+          location TEXT,
+          bio TEXT,
+          emergency_contact_name TEXT,
+          emergency_contact_phone TEXT,
+          gender TEXT DEFAULT 'ប្រុស (Male)',
+          dob TEXT,
+          nationality TEXT DEFAULT 'កម្ពុជា (Cambodian)',
+          marital_status TEXT DEFAULT 'នៅលីវ (Single)',
+          national_id TEXT,
+          current_address TEXT,
+          province_city TEXT DEFAULT 'រាជធានីភ្នំពេញ (Phnom Penh)',
+          district TEXT,
+          commune_sangkat TEXT,
+          village TEXT,
+          contract_type TEXT DEFAULT 'UDC (មិនកំណត់ថិរវេលា)',
+          contract_start TEXT,
+          contract_end TEXT,
+          work_location TEXT DEFAULT 'ការិយាល័យកណ្តាល (Head Office)',
+          salary_currency TEXT DEFAULT 'USD ($)',
+          salary_frequency TEXT DEFAULT 'ប្រចាំខែ (Monthly)',
+          bank_name TEXT DEFAULT 'ABA Bank',
+          bank_account_name TEXT,
+          bank_account_number TEXT,
+          nssf_member TEXT DEFAULT 'មាន (Yes)',
+          nssf_number TEXT,
+          nssf_reg_date TEXT,
+          emergency_contact_relationship TEXT,
+          emergency_contact_address TEXT,
+          doc_national_id TEXT,
+          doc_passport TEXT,
+          doc_contract TEXT,
+          doc_others TEXT,
+          created_at TEXT NOT NULL
+        )
+      `).run();
+      db.prepare(`
+        INSERT INTO employees_migrated SELECT 
+          id, first_name, last_name, email, phone, role, department_id,
+          employment_type, employee_type, status, salary, join_date, manager_id, avatar,
+          location, bio, emergency_contact_name, emergency_contact_phone,
+          gender, dob, nationality, marital_status, national_id,
+          current_address, province_city, district, commune_sangkat, village,
+          contract_type, contract_start, contract_end, work_location,
+          salary_currency, salary_frequency, bank_name, bank_account_name, bank_account_number,
+          nssf_member, nssf_number, nssf_reg_date,
+          emergency_contact_relationship, emergency_contact_address,
+          doc_national_id, doc_passport, doc_contract, doc_others,
+          created_at
+        FROM employees
+      `).run();
+      db.prepare("DROP TABLE employees").run();
+      db.prepare("ALTER TABLE employees_migrated RENAME TO employees").run();
+    }
+  } catch (e) {}
+
+  try {
+    const userCols = db.prepare("PRAGMA table_info(users)").all() as any[];
+    const uEmailCol = userCols.find((c) => c.name === 'email');
+    if (uEmailCol && uEmailCol.notnull === 1) {
+      db.prepare("PRAGMA foreign_keys = OFF").run();
+      db.prepare(`
+        CREATE TABLE users_migrated (
+          id TEXT PRIMARY KEY,
+          username TEXT,
+          name TEXT NOT NULL,
+          email TEXT UNIQUE,
+          role TEXT NOT NULL DEFAULT 'Employee',
+          status TEXT NOT NULL DEFAULT 'Active',
+          employee_id TEXT,
+          department_name TEXT,
+          avatar TEXT,
+          two_factor_enabled INTEGER DEFAULT 0,
+          permissions TEXT,
+          password TEXT DEFAULT 'hestra123',
+          last_login TEXT,
+          created_at TEXT NOT NULL
+        )
+      `).run();
+      db.prepare(`
+        INSERT INTO users_migrated SELECT 
+          id, username, name, email, role, status, employee_id, department_name, avatar,
+          two_factor_enabled, permissions, password, last_login, created_at
+        FROM users
+      `).run();
+      db.prepare("DROP TABLE users").run();
+      db.prepare("ALTER TABLE users_migrated RENAME TO users").run();
+    }
   } catch (e) {}
 
   // Migrate leave_requests to support two-stage approval workflow (Line Manager -> Administrator)
@@ -344,26 +492,11 @@ function initDatabase(db: Database.Database) {
           status: 'Active',
           employee_id: 'emp-13',
           department_name: 'ផ្នែកធនធានមនុស្ស (People & Culture)',
-          avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=256&h=256&fit=crop&crop=faces',
+          avatar: '/avatars/khmer_female_1.jpg',
           two_factor_enabled: 0,
           permissions: 'all,manage_users,manage_payroll,approve_leaves,system_settings,export_data',
           last_login: '2026-10-24 08:30',
           created_at: '2024-01-01',
-        },
-        {
-          id: 'usr-2',
-          username: 'sopheak',
-          name: 'វ៉ាន់ សុភ័ក្ត្រ (Van Sopheak)',
-          email: 'van.sopheak@hestra.kh',
-          role: 'Manager',
-          status: 'Active',
-          employee_id: 'emp-1',
-          department_name: 'ផ្នែកបច្ចេកវិទ្យា (Engineering)',
-          avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=256&h=256&fit=crop&crop=faces',
-          two_factor_enabled: 0,
-          permissions: 'view_team,approve_leaves,evaluate_performance,attendance_management',
-          last_login: '2026-10-24 09:12',
-          created_at: '2024-01-15',
         },
         {
           id: 'usr-3',
@@ -374,7 +507,7 @@ function initDatabase(db: Database.Database) {
           status: 'Active',
           employee_id: 'emp-18',
           department_name: 'ផ្នែកបច្ចេកវិទ្យា (Engineering)',
-          avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces',
+          avatar: '/avatars/khmer_female_2.jpg',
           two_factor_enabled: 0,
           permissions: 'self_service,clock_in,request_leave,view_payslips',
           last_login: '2026-10-24 08:45',
@@ -389,7 +522,7 @@ function initDatabase(db: Database.Database) {
           status: 'Active',
           employee_id: 'emp-5',
           department_name: 'ផ្នែកទីផ្សារ & ប្រព័ន្ធផ្សព្វផ្សាយ (Marketing)',
-          avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=256&h=256&fit=crop&crop=faces',
+          avatar: '/avatars/khmer_male_2.jpg',
           two_factor_enabled: 0,
           permissions: 'self_service,clock_in,request_leave,view_payslips',
           last_login: '2026-10-23 16:20',
@@ -404,7 +537,7 @@ function initDatabase(db: Database.Database) {
           status: 'Active',
           employee_id: 'emp-8',
           department_name: 'ផ្នែកគណនេយ្យ & ហិរញ្ញវត្ថុ (Finance)',
-          avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=256&h=256&fit=crop&crop=faces',
+          avatar: '/avatars/khmer_male_3.jpg',
           two_factor_enabled: 0,
           permissions: 'view_team,approve_leaves,view_payroll,evaluate_performance',
           last_login: '2026-10-22 11:05',
@@ -426,11 +559,29 @@ function initDatabase(db: Database.Database) {
     seedDatabase(db);
     db.prepare("INSERT OR REPLACE INTO system_meta (key, value) VALUES ('initialized', 'true')").run();
   }
+
+  // Ensure duty_roster has seed data if empty
+  try {
+    const rosterCount = db.prepare("SELECT count(*) as count FROM duty_roster").get() as { count: number } | undefined;
+    if (!rosterCount || rosterCount.count === 0) {
+      seedDutyRoster(db);
+    }
+  } catch (e) {}
+
+  // Ensure overtime_requests has seed data if empty
+  try {
+    const otCount = db.prepare("SELECT count(*) as count FROM overtime_requests").get() as { count: number } | undefined;
+    if (!otCount || otCount.count === 0) {
+      seedOvertimeRequests(db);
+    }
+  } catch (e) {}
 }
 
 export function clearAllEmployees(db: Database.Database) {
   db.prepare("UPDATE departments SET manager_id = NULL").run();
   db.prepare("DELETE FROM attendance").run();
+  db.prepare("DELETE FROM duty_roster").run();
+  db.prepare("DELETE FROM overtime_requests").run();
   db.prepare("DELETE FROM leave_requests").run();
   db.prepare("DELETE FROM leave_balances").run();
   db.prepare("DELETE FROM payrolls").run();
@@ -474,6 +625,8 @@ export function seedDatabase(db: Database.Database) {
   // Clear any existing data
   const tables = [
     'attendance',
+    'duty_roster',
+    'overtime_requests',
     'leave_requests',
     'leave_balances',
     'payrolls',
@@ -768,4 +921,317 @@ export function seedDatabase(db: Database.Database) {
   for (const rev of INITIAL_PERFORMANCE_REVIEWS) {
     insertRev.run(rev);
   }
+
+  // 10. Insert Initial Duty Roster Shifts
+  seedDutyRoster(db);
+
+  // 11. Insert Initial Overtime Requests
+  seedOvertimeRequests(db);
 }
+
+export function seedDutyRoster(db: Database.Database) {
+  try {
+    const employees = db.prepare("SELECT id, department_id FROM employees").all() as { id: string; department_id: string }[];
+    if (!employees || employees.length === 0) return;
+
+    const insertRoster = db.prepare(`
+      INSERT OR REPLACE INTO duty_roster (id, employee_id, date, shift_type, start_time, end_time, hours, location, notes, created_at)
+      VALUES (@id, @employee_id, @date, @shift_type, @start_time, @end_time, @hours, @location, @notes, @created_at)
+    `);
+
+    // Target 4 weeks around working dates in Sept-Oct 2026
+    const mondayDates = ['2026-09-07', '2026-09-14', '2026-09-21', '2026-09-28', '2026-10-05'];
+
+    const runSeed = db.transaction(() => {
+      for (const weekStartStr of mondayDates) {
+        const [y, m, d] = weekStartStr.split('-').map(Number);
+        const startMon = new Date(y, m - 1, d);
+
+        for (let dayIdx = 0; dayIdx < 7; dayIdx++) {
+          const current = new Date(startMon);
+          current.setDate(startMon.getDate() + dayIdx);
+          const cYear = current.getFullYear();
+          const cMonth = String(current.getMonth() + 1).padStart(2, '0');
+          const cDay = String(current.getDate()).padStart(2, '0');
+          const dateStr = `${cYear}-${cMonth}-${cDay}`;
+          const isWeekend = dayIdx >= 5; // 5 = Saturday, 6 = Sunday
+
+          employees.forEach((emp, index) => {
+            let shiftType = 'office';
+            let startTime = '08:30';
+            let endTime = '17:30';
+            let hours = 8.0;
+            let notes = '';
+
+            // Realistic assignment pattern based on department
+            if (emp.department_id === 'dept-1') {
+              // Tech & Infrastructure team has operational rota
+              if (index % 4 === 1) {
+                // Morning specialist with Saturday duty
+                if (dayIdx < 5) {
+                  shiftType = 'morning';
+                  startTime = '07:00';
+                  endTime = '15:30';
+                  hours = 8.0;
+                  notes = 'Morning Core Systems';
+                } else if (dayIdx === 5) {
+                  shiftType = 'weekend_duty';
+                  startTime = '08:30';
+                  endTime = '17:30';
+                  hours = 8.0;
+                  notes = 'Saturday Tech Coverage';
+                } else {
+                  shiftType = 'off';
+                  startTime = '';
+                  endTime = '';
+                  hours = 0;
+                  notes = 'Weekly Rest (Art. 147)';
+                }
+              } else if (index % 4 === 2) {
+                // Afternoon & Night rotation
+                if (dayIdx >= 1 && dayIdx <= 5) {
+                  shiftType = dayIdx % 2 === 0 ? 'night' : 'evening';
+                  startTime = shiftType === 'night' ? '22:00' : '14:00';
+                  endTime = shiftType === 'night' ? '06:30' : '22:30';
+                  hours = 8.0;
+                  notes = shiftType === 'night' ? 'Night Server Monitoring' : 'Evening Incident Support';
+                } else {
+                  shiftType = 'off';
+                  startTime = '';
+                  endTime = '';
+                  hours = 0;
+                  notes = 'Weekly Rest';
+                }
+              } else if (index % 4 === 3) {
+                // Sunday On-call standby
+                if (dayIdx < 5) {
+                  shiftType = 'office';
+                  startTime = '08:30';
+                  endTime = '17:30';
+                  hours = 8.0;
+                } else if (dayIdx === 6) {
+                  shiftType = 'on_call';
+                  startTime = '08:00';
+                  endTime = '20:00';
+                  hours = 4.0;
+                  notes = 'Cloud Infrastructure Standby';
+                } else {
+                  shiftType = 'off';
+                  startTime = '';
+                  endTime = '';
+                  hours = 0;
+                }
+              } else {
+                if (isWeekend) {
+                  shiftType = 'off';
+                  startTime = '';
+                  endTime = '';
+                  hours = 0;
+                }
+              }
+            } else {
+              // General standard 5-day office week (Mon-Fri 08:30-17:30, Sat/Sun OFF)
+              if (isWeekend) {
+                shiftType = 'off';
+                startTime = '';
+                endTime = '';
+                hours = 0;
+              } else {
+                shiftType = 'office';
+                startTime = '08:30';
+                endTime = '17:30';
+                hours = 8.0;
+              }
+            }
+
+            insertRoster.run({
+              id: `rst-${emp.id}-${dateStr}`,
+              employee_id: emp.id,
+              date: dateStr,
+              shift_type: shiftType,
+              start_time: startTime,
+              end_time: endTime,
+              hours,
+              location: 'Head Office',
+              notes,
+              created_at: new Date().toISOString(),
+            });
+          });
+        }
+      }
+    });
+
+    runSeed();
+  } catch (err) {
+    console.error('Error seeding duty roster:', err);
+  }
+}
+
+export function seedOvertimeRequests(db: Database.Database) {
+  try {
+    const employees = db.prepare("SELECT id, salary, department_id FROM employees WHERE status != 'Terminated'").all() as { id: string; salary: number; department_id: string }[];
+    if (!employees || employees.length === 0) return;
+
+    const insertOt = db.prepare(`
+      INSERT OR REPLACE INTO overtime_requests (
+        id, employee_id, date, start_time, end_time, hours, ot_rate_type, multiplier,
+        hourly_rate, estimated_pay, reason, project_name, status,
+        line_manager_id, line_manager_reviewed_at, line_manager_comments,
+        admin_reviewer_id, admin_reviewed_at, admin_comments, created_at
+      ) VALUES (
+        @id, @employee_id, @date, @start_time, @end_time, @hours, @ot_rate_type, @multiplier,
+        @hourly_rate, @estimated_pay, @reason, @project_name, @status,
+        @line_manager_id, @line_manager_reviewed_at, @line_manager_comments,
+        @admin_reviewer_id, @admin_reviewed_at, @admin_comments, @created_at
+      )
+    `);
+
+    const sampleRequests = [
+      {
+        empIdx: 0,
+        date: '2026-09-18',
+        start_time: '18:00',
+        end_time: '20:30',
+        hours: 2.5,
+        ot_rate_type: 'normal_day_150',
+        multiplier: 1.5,
+        reason: 'ការដំឡើងប្រព័ន្ធ Core Banking API ប្រចាំត្រីមាស',
+        project_name: 'Core Banking API v3.2',
+        status: 'Approved',
+        line_manager_id: 'emp-1',
+        line_manager_reviewed_at: '2026-09-19T09:00:00Z',
+        line_manager_comments: 'Approved. Critical deployment.',
+        admin_reviewer_id: 'usr-1',
+        admin_reviewed_at: '2026-09-19T11:00:00Z',
+        admin_comments: 'Verified with IT infrastructure SLA.',
+      },
+      {
+        empIdx: 1,
+        date: '2026-09-20',
+        start_time: '09:00',
+        end_time: '14:00',
+        hours: 5.0,
+        ot_rate_type: 'weekend_200',
+        multiplier: 2.0,
+        reason: 'ការធ្វើចំណាកស្រុក Cloud Kubernetes Cluster និងទិន្នន័យ Disaster Recovery',
+        project_name: 'Cloud Infrastructure Upgrade',
+        status: 'Approved',
+        line_manager_id: 'emp-1',
+        line_manager_reviewed_at: '2026-09-20T15:00:00Z',
+        line_manager_comments: 'Weekend maintenance completed successfully.',
+        admin_reviewer_id: 'usr-1',
+        admin_reviewed_at: '2026-09-21T08:30:00Z',
+        admin_comments: 'Payroll allowance verified for weekend rate.',
+      },
+      {
+        empIdx: 2,
+        date: '2026-09-21',
+        start_time: '18:00',
+        end_time: '20:00',
+        hours: 2.0,
+        ot_rate_type: 'normal_day_150',
+        multiplier: 1.5,
+        reason: 'រៀបចំឯកសារប្រព័ន្ធ UI/UX Design System សម្រាប់គម្រោងអតិថិជនសហគ្រាស',
+        project_name: 'Enterprise Mobile Portal',
+        status: 'Pending Manager',
+        line_manager_id: null,
+        line_manager_reviewed_at: null,
+        line_manager_comments: null,
+        admin_reviewer_id: null,
+        admin_reviewed_at: null,
+        admin_comments: null,
+      },
+      {
+        empIdx: 3,
+        date: '2026-09-22',
+        start_time: '22:00',
+        end_time: '01:00',
+        hours: 3.0,
+        ot_rate_type: 'night_200',
+        multiplier: 2.0,
+        reason: 'ដោះស្រាយឧប្បត្តិហេតុបណ្តាញទូទាត់ប្រាក់អន្តរជាតិ (Cross-Border Gateway)',
+        project_name: 'Payment Switch Integration',
+        status: 'Pending Admin',
+        line_manager_id: 'emp-4',
+        line_manager_reviewed_at: '2026-09-22T08:00:00Z',
+        line_manager_comments: 'Manager approved. Awaiting final HR/Admin sign-off.',
+        admin_reviewer_id: null,
+        admin_reviewed_at: null,
+        admin_comments: null,
+      },
+      {
+        empIdx: 4,
+        date: '2026-09-19',
+        start_time: '08:30',
+        end_time: '12:30',
+        hours: 4.0,
+        ot_rate_type: 'weekend_200',
+        multiplier: 2.0,
+        reason: 'ការផ្លាស់ប្តូរ និងរៀបចំហេដ្ឋារចនាសម្ព័ន្ធបណ្តាញខ្សែកាបការិយាល័យថ្មី',
+        project_name: 'HQ Network Infrastructure',
+        status: 'Approved',
+        line_manager_id: 'emp-1',
+        line_manager_reviewed_at: '2026-09-19T13:00:00Z',
+        line_manager_comments: 'Downtime cabling completed.',
+        admin_reviewer_id: 'usr-1',
+        admin_reviewed_at: '2026-09-20T09:00:00Z',
+        admin_comments: 'Approved.',
+      },
+      {
+        empIdx: 5,
+        date: '2026-09-23',
+        start_time: '18:00',
+        end_time: '19:30',
+        hours: 1.5,
+        ot_rate_type: 'normal_day_150',
+        multiplier: 1.5,
+        reason: 'ការរៀបចំសំណើសុំដេញថ្លៃ (Tender RFP) ជូនក្រសួងសាធារណការ',
+        project_name: 'GovTech Enterprise Bid',
+        status: 'Pending Manager',
+        line_manager_id: null,
+        line_manager_reviewed_at: null,
+        line_manager_comments: null,
+        admin_reviewer_id: null,
+        admin_reviewed_at: null,
+        admin_comments: null,
+      },
+    ];
+
+    const runSeed = db.transaction(() => {
+      sampleRequests.forEach((req, idx) => {
+        const emp = employees[req.empIdx % employees.length];
+        const hourlyRate = Number(((emp.salary || 1000) / 208).toFixed(4));
+        const estimatedPay = Number((req.hours * hourlyRate * req.multiplier).toFixed(2));
+
+        insertOt.run({
+          id: `ot-seed-${idx + 1}`,
+          employee_id: emp.id,
+          date: req.date,
+          start_time: req.start_time,
+          end_time: req.end_time,
+          hours: req.hours,
+          ot_rate_type: req.ot_rate_type,
+          multiplier: req.multiplier,
+          hourly_rate: hourlyRate,
+          estimated_pay: estimatedPay,
+          reason: req.reason,
+          project_name: req.project_name,
+          status: req.status,
+          line_manager_id: req.line_manager_id,
+          line_manager_reviewed_at: req.line_manager_reviewed_at,
+          line_manager_comments: req.line_manager_comments,
+          admin_reviewer_id: req.admin_reviewer_id,
+          admin_reviewed_at: req.admin_reviewed_at,
+          admin_comments: req.admin_comments,
+          created_at: `${req.date}T17:00:00Z`,
+        });
+      });
+    });
+
+    runSeed();
+  } catch (err) {
+    console.error('Error seeding overtime requests:', err);
+  }
+}
+
+

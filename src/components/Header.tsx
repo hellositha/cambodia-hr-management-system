@@ -17,7 +17,11 @@ import {
   Sparkles,
   CheckCircle,
   AlertCircle,
+  Building2,
   Globe,
+  Sun,
+  Moon,
+  Flame,
   Check,
   FileText,
   Calculator,
@@ -25,6 +29,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import Link from 'next/link';
+import { formatLocalizedText } from '@/lib/translations';
 
 export default function Header() {
   const {
@@ -38,6 +43,8 @@ export default function Header() {
     language,
     setLanguage,
     toggleLanguage,
+    theme,
+    setTheme,
     logout,
     t,
   } = useApp();
@@ -46,12 +53,14 @@ export default function Header() {
   const [quickActionOpen, setQuickActionOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
+  const [themeOpen, setThemeOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const personaRef = useRef<HTMLDivElement>(null);
   const actionRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
   const langRef = useRef<HTMLDivElement>(null);
+  const themeRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns on outside click
   useEffect(() => {
@@ -68,6 +77,9 @@ export default function Header() {
       if (langRef.current && !langRef.current.contains(event.target as Node)) {
         setLangOpen(false);
       }
+      if (themeRef.current && !themeRef.current.contains(event.target as Node)) {
+        setThemeOpen(false);
+      }
     }
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -76,8 +88,8 @@ export default function Header() {
   const notifications = [
     {
       id: 1,
-      title: 'សំណើសុំច្បាប់ ៣ កំពុងរង់ចាំ (3 Leave Requests Pending)',
-      time: '10m មុន',
+      title: language === 'km' ? 'សំណើសុំច្បាប់ ៣ កំពុងរង់ចាំ (3 Leave Requests Pending)' : '3 Leave Requests Pending',
+      time: language === 'km' ? '10m មុន' : '10m ago',
       unread: true,
       href: '/leaves',
       icon: CalendarPlus,
@@ -85,8 +97,8 @@ export default function Header() {
     },
     {
       id: 2,
-      title: 'បេក្ខជនដល់វគ្គផ្តល់ការងារ: ឌី វុទ្ធី (Offer Stage Reached)',
-      time: '1h មុន',
+      title: language === 'km' ? 'បេក្ខជនដល់វគ្គផ្តល់ការងារ: ឌី វុទ្ធី (Offer Stage Reached)' : 'Candidate reached Offer stage: Dy Vuthey',
+      time: language === 'km' ? '1h មុន' : '1h ago',
       unread: true,
       href: '/recruitment',
       icon: Briefcase,
@@ -94,8 +106,8 @@ export default function Header() {
     },
     {
       id: 3,
-      title: 'ព្រាងបញ្ជីប្រាក់បៀវត្សរ៍ខែនេះរួចរាល់ (Payroll Draft Ready)',
-      time: '3h មុន',
+      title: language === 'km' ? 'ព្រាងបញ្ជីប្រាក់បៀវត្សរ៍ខែនេះរួចរាល់ (Payroll Draft Ready)' : 'Monthly payroll draft is ready',
+      time: language === 'km' ? '3h មុន' : '3h ago',
       unread: false,
       href: '/payroll',
       icon: DollarSign,
@@ -130,7 +142,7 @@ export default function Header() {
           <button
             onClick={() => setLangOpen(!langOpen)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
-            title={language === 'km' ? 'ប្តូរភាសា / Switch Language' : 'Switch Language / ប្តូរភាសា'}
+            title={language === 'km' ? 'ប្តូរភាសា' : 'Switch Language'}
           >
             <Globe size={15} className="text-indigo-600" />
             <span>{language === 'km' ? '🇰🇭 ភាសាខ្មែរ' : '🇬🇧 English'}</span>
@@ -153,7 +165,7 @@ export default function Header() {
               >
                 <div className="flex items-center gap-2">
                   <span className="text-base">🇰🇭</span>
-                  <span>ភាសាខ្មែរ (Khmer)</span>
+                  <span>{language === 'km' ? 'ភាសាខ្មែរ (Khmer)' : 'Khmer (KM)'}</span>
                 </div>
                 {language === 'km' && <Check size={14} className="text-indigo-600" />}
               </button>
@@ -172,6 +184,87 @@ export default function Header() {
                   <span>English</span>
                 </div>
                 {language === 'en' && <Check size={14} className="text-indigo-600" />}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Global Website Theme Switcher Button */}
+        <div className="relative" ref={themeRef}>
+          <button
+            onClick={() => setThemeOpen(!themeOpen)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+            title={language === 'km' ? 'ប្តូររចនាប័ទ្មផ្ទាំងប្រព័ន្ធ (System Theme)' : 'Switch System Theme'}
+          >
+            {theme === 'midnight' ? (
+              <Moon size={15} className="text-indigo-400" />
+            ) : theme === 'indigo' ? (
+              <Flame size={15} className="text-cyan-400" />
+            ) : (
+              <Sun size={15} className="text-amber-500" />
+            )}
+            <span className="hidden md:inline">
+              {theme === 'midnight'
+                ? (language === 'km' ? 'ងងឹត (Dark)' : 'Midnight')
+                : theme === 'indigo'
+                ? (language === 'km' ? 'ខៀវចាស់ (Indigo)' : 'Indigo')
+                : (language === 'km' ? 'ពន្លឺ (Light)' : 'Nordic')}
+            </span>
+            <ChevronDown size={13} className={`text-slate-400 ${themeOpen ? 'rotate-180 transition-transform' : ''}`} />
+          </button>
+
+          {themeOpen && (
+            <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-200 rounded-xl shadow-xl py-1.5 z-50 text-slate-700 animate-in fade-in slide-in-from-top-1 duration-150">
+              <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                {t('theme_label')}
+              </div>
+
+              <button
+                onClick={() => {
+                  setTheme('nordic');
+                  setThemeOpen(false);
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2 text-xs transition-colors cursor-pointer ${
+                  theme === 'nordic' ? 'bg-indigo-50 font-bold text-indigo-700' : 'hover:bg-slate-50'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Sun size={15} className="text-amber-500" />
+                  <span>{t('theme_light')}</span>
+                </div>
+                {theme === 'nordic' && <Check size={14} className="text-indigo-600" />}
+              </button>
+
+              <button
+                onClick={() => {
+                  setTheme('midnight');
+                  setThemeOpen(false);
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2 text-xs transition-colors cursor-pointer ${
+                  theme === 'midnight' ? 'bg-indigo-50 font-bold text-indigo-700' : 'hover:bg-slate-50'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Moon size={15} className="text-indigo-400" />
+                  <span>{t('theme_dark')}</span>
+                </div>
+                {theme === 'midnight' && <Check size={14} className="text-indigo-600" />}
+              </button>
+
+              <button
+                onClick={() => {
+                  setTheme('indigo');
+                  setThemeOpen(false);
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2 text-xs transition-colors cursor-pointer ${
+                  theme === 'indigo' ? 'bg-indigo-50 font-bold text-indigo-700' : 'hover:bg-slate-50'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Flame size={15} className="text-cyan-400" />
+                  <span>{t('theme_indigo')}</span>
+                </div>
+                {theme === 'indigo' && <Check size={14} className="text-indigo-600" />}
               </button>
             </div>
           )}
@@ -232,6 +325,20 @@ export default function Header() {
                   <div className="text-[10px] text-slate-500">{t('action_add_employee_sub')}</div>
                 </div>
               </button>
+
+              <Link
+                href="/departments?action=new"
+                onClick={() => setQuickActionOpen(false)}
+                className="w-full text-left px-3 py-2 text-xs flex items-center gap-2.5 hover:bg-slate-50 transition-colors cursor-pointer"
+              >
+                <div className="p-1.5 rounded-md bg-indigo-50 text-indigo-600">
+                  <Building2 size={14} />
+                </div>
+                <div>
+                  <div className="font-semibold text-slate-800">{t('action_add_department')}</div>
+                  <div className="text-[10px] text-slate-500">{t('action_add_department_sub')}</div>
+                </div>
+              </Link>
 
               <button
                 onClick={() => {
@@ -343,9 +450,11 @@ export default function Header() {
           {notificationsOpen && (
             <div className="absolute right-0 mt-2 w-80 bg-white border border-slate-200 rounded-xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
               <div className="flex items-center justify-between px-4 py-2 border-b border-slate-100">
-                <span className="font-bold text-xs text-slate-900">ការជូនដំណឹង (Notifications)</span>
+                <span className="font-bold text-xs text-slate-900">
+                  {language === 'km' ? 'ការជូនដំណឹង (Notifications)' : 'Notifications'}
+                </span>
                 <span className="text-[10px] font-semibold text-indigo-600 hover:underline cursor-pointer">
-                  សម្គាល់ថាបានអានទាំងអស់
+                  {language === 'km' ? 'សម្គាល់ថាបានអានទាំងអស់' : 'Mark all as read'}
                 </span>
               </div>
               <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto">
@@ -386,7 +495,7 @@ export default function Header() {
               className="w-7 h-7 rounded-full object-cover ring-1 ring-slate-300"
             />
             <div className="hidden sm:block text-left text-xs leading-tight pr-1">
-              <div className="font-semibold text-slate-800">{currentPersona.name}</div>
+              <div className="font-semibold text-slate-800">{formatLocalizedText(currentPersona.name, language)}</div>
               <div className="text-[10px] text-slate-500 font-medium">{currentPersona.role} View</div>
             </div>
             <ChevronDown size={14} className="text-slate-400" />
@@ -395,7 +504,7 @@ export default function Header() {
           {personaOpen && (
             <div className="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-xl shadow-xl p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
               <div className="px-2 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                ប្តូរតួនាទី / Switch Persona
+                {language === 'km' ? 'ប្តូរតួនាទី / Switch Persona' : 'Switch Persona'}
               </div>
               <div className="space-y-1">
                 {PERSONAS.map((p) => {
@@ -418,7 +527,7 @@ export default function Header() {
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <p className="text-xs font-bold text-slate-900 truncate">{p.name}</p>
+                          <p className="text-xs font-bold text-slate-900 truncate">{formatLocalizedText(p.name, language)}</p>
                           <span
                             className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
                               p.role === 'Admin'
@@ -431,7 +540,7 @@ export default function Header() {
                             {p.role}
                           </span>
                         </div>
-                        <p className="text-[11px] text-slate-500 truncate">{p.title}</p>
+                        <p className="text-[11px] text-slate-500 truncate">{formatLocalizedText(p.title, language)}</p>
                       </div>
                     </button>
                   );

@@ -74,7 +74,7 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        showToast(data.error || 'បរាជ័យក្នុងការចូលប្រើប្រព័ន្ធ', 'error');
+        showToast(data.error || (language === 'km' ? 'បរាជ័យក្នុងការចូលប្រើប្រព័ន្ធ' : 'Sign in failed. Please check credentials.'), 'error');
         setLoading(false);
         return;
       }
@@ -83,7 +83,7 @@ export default function LoginPage() {
       finalizeLogin(data.user, data.redirectUrl, data.portalWarning);
     } catch (err) {
       console.error('Login error:', err);
-      showToast('កំហុសម៉ាស៊ីនមេក្នុងការចូលប្រើប្រព័ន្ធ', 'error');
+      showToast(language === 'km' ? 'កំហុសម៉ាស៊ីនមេក្នុងការចូលប្រើប្រព័ន្ធ' : 'Server error occurred during sign in', 'error');
       setLoading(false);
     }
   };
@@ -160,69 +160,98 @@ export default function LoginPage() {
       {/* Main Login Workspace */}
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-10">
         <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-12 bg-white rounded-3xl border border-gray-200/90 shadow-xl overflow-hidden">
-          {/* Left Column: Brand Hero & Value Propositions (5 Cols) */}
-          <div className="lg:col-span-5 bg-gradient-to-br from-indigo-900 via-indigo-950 to-slate-900 text-white p-8 lg:p-10 flex flex-col justify-between relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+          {/* Left Column: Brand Hero & Khmer Corporate Atmosphere (5 Cols) */}
+          <div className="lg:col-span-5 relative text-white p-8 lg:p-10 flex flex-col justify-between overflow-hidden">
+            {/* Cambodian Corporate Boardroom Hero Photo with Gradient Overlay */}
+            <div className="absolute inset-0 z-0">
+              <img
+                src="/images/khmer_office_hero.jpg"
+                alt="Phnom Penh Corporate Headquarters"
+                className="w-full h-full object-cover object-center scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-indigo-950/88 to-slate-900/80 backdrop-blur-[1px]" />
+              <div className="absolute inset-0 bg-radial-at-tr from-indigo-500/25 via-transparent to-black/30" />
+            </div>
 
             <div className="relative z-10">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-indigo-200 text-xs font-semibold backdrop-blur-md mb-6 border border-white/10">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 text-indigo-100 text-xs font-semibold backdrop-blur-md mb-6 border border-white/20 shadow-xs">
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>{language === 'km' ? 'កំណែទម្រង់ HRM ឆ្នាំ 2026' : 'Cambodia Standard HRMS 2026'}</span>
+                <span>{language === 'km' ? 'ប្រព័ន្ធ HRM ស្តង់ដារកម្ពុជា ឆ្នាំ 2026' : 'Cambodia Standard HRMS 2026'}</span>
               </div>
 
-              <h2 className="text-2xl lg:text-3xl font-bold leading-snug tracking-tight">
+              <h2 className="text-2xl lg:text-3xl font-bold leading-snug tracking-tight drop-shadow-sm">
                 {language === 'km'
                   ? 'គ្រប់គ្រងធនធានមនុស្ស ប្រកបដោយប្រសិទ្ធភាព & ទំនុកចិត្ត'
                   : 'Empowering Workforce Excellence Across Cambodia'}
               </h2>
 
-              <p className="text-indigo-200 text-xs leading-relaxed mt-3">
+              <p className="text-indigo-200 text-xs leading-relaxed mt-3 drop-shadow-xs">
                 {language === 'km'
                   ? 'ប្រព័ន្ធគ្រប់គ្រងវត្តមាន, ច្បាប់ឈប់សម្រាក, ប្រាក់បៀវត្សរ៍, ប.ស.ស (NSSF) និងសិទ្ធិចូលដំណើរការ RBAC ស្របតាមច្បាប់ស្តីពីការងារនៃព្រះរាជាណាចក្រកម្ពុជា។'
                   : 'Unified employee self-service and executive management platform complying with Cambodia Ministry of Labour and Vocational Training (MLVT) standards.'}
               </p>
 
-              {/* Feature Bullets */}
-              <div className="mt-8 space-y-3.5 text-xs text-indigo-100">
-                <div className="flex items-start gap-3">
-                  <div className="p-1 rounded-lg bg-emerald-500/20 text-emerald-400 shrink-0 mt-0.5">
+              {/* Feature Glass Cards */}
+              <div className="mt-7 space-y-3 text-xs text-indigo-100">
+                <div className="flex items-start gap-3 p-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/15 transition-all">
+                  <div className="p-1.5 rounded-xl bg-emerald-500/25 text-emerald-300 shrink-0 mt-0.5 border border-emerald-400/30">
                     <CheckCircle2 className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="font-semibold text-white">
+                    <span className="font-bold text-white">
                       {language === 'km' ? 'ផតថលបុគ្គលិកស្វ័យសេវា (ESS)' : 'Employee Self-Service (ESS)'}
                     </span>
-                    <p className="text-[11px] text-indigo-300 mt-0.5">
+                    <p className="text-[11px] text-indigo-200/90 mt-0.5">
                       {language === 'km' ? 'កាតឌីជីថល QR, ពិនិត្យប័ណ្ណប្រាក់ខែ និងកត់ត្រាម៉ោង' : 'Digital QR card, time punch, and payslip downloads'}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="p-1 rounded-lg bg-blue-500/20 text-blue-400 shrink-0 mt-0.5">
+                <div className="flex items-start gap-3 p-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/15 transition-all">
+                  <div className="p-1.5 rounded-xl bg-blue-500/25 text-blue-300 shrink-0 mt-0.5 border border-blue-400/30">
                     <CheckCircle2 className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="font-semibold text-white">
+                    <span className="font-bold text-white">
                       {language === 'km' ? 'ផតថលគណៈគ្រប់គ្រង (MSS)' : 'Manager Approval Hub (MSS)'}
                     </span>
-                    <p className="text-[11px] text-indigo-300 mt-0.5">
+                    <p className="text-[11px] text-indigo-200/90 mt-0.5">
                       {language === 'km' ? 'អនុម័តច្បាប់ឈប់កូនក្រុម និងតាមដានវត្តមានជាក់ស្តែង' : 'One-click leave approvals and team attendance radar'}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="p-1 rounded-lg bg-violet-500/20 text-violet-400 shrink-0 mt-0.5">
+                <div className="flex items-start gap-3 p-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/15 transition-all">
+                  <div className="p-1.5 rounded-xl bg-violet-500/25 text-violet-300 shrink-0 mt-0.5 border border-violet-400/30">
                     <CheckCircle2 className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="font-semibold text-white">
+                    <span className="font-bold text-white">
                       {language === 'km' ? 'សុវត្ថិភាពសិទ្ធិប្រើប្រាស់ RBAC & ការពារទិន្នន័យ' : 'Enterprise RBAC & Data Security'}
                     </span>
-                    <p className="text-[11px] text-indigo-300 mt-0.5">
+                    <p className="text-[11px] text-indigo-200/90 mt-0.5">
                       {language === 'km' ? 'ការពារទិន្នន័យសម្ងាត់ប្រាក់ខែ និងព័ត៌មានបុគ្គលិក' : 'Strict data privacy & 256-bit SSL encrypted sessions'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Social Proof with Authentic Khmer Avatars */}
+              <div className="mt-6 pt-5 border-t border-white/15">
+                <div className="flex items-center gap-3">
+                  <div className="flex -space-x-2.5 overflow-hidden">
+                    <img className="inline-block h-8 w-8 rounded-full ring-2 ring-indigo-300/60 object-cover" src="/avatars/khmer_female_1.jpg" alt="Cambodian HR Leader" />
+                    <img className="inline-block h-8 w-8 rounded-full ring-2 ring-indigo-300/60 object-cover" src="/avatars/khmer_male_1.jpg" alt="Cambodian Tech Lead" />
+                    <img className="inline-block h-8 w-8 rounded-full ring-2 ring-indigo-300/60 object-cover" src="/avatars/khmer_female_2.jpg" alt="Cambodian Specialist" />
+                    <img className="inline-block h-8 w-8 rounded-full ring-2 ring-indigo-300/60 object-cover" src="/avatars/khmer_male_3.jpg" alt="Cambodian Director" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1 text-amber-400 text-xs font-bold">
+                      ★★★★★
+                      <span className="text-white text-[11px] ml-1">4.9/5</span>
+                    </div>
+                    <p className="text-[11px] text-indigo-200">
+                      {language === 'km' ? 'ជឿទុកចិត្តដោយស្ថាប័នឈានមុខនៅកម្ពុជា' : 'Trusted by leading enterprises across Cambodia'}
                     </p>
                   </div>
                 </div>
@@ -230,12 +259,12 @@ export default function LoginPage() {
             </div>
 
             {/* Bottom Certification Badge */}
-            <div className="mt-10 pt-6 border-t border-white/10 flex items-center justify-between text-[11px] text-indigo-300">
+            <div className="relative z-10 mt-8 pt-4 border-t border-white/15 flex items-center justify-between text-[11px] text-indigo-200">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse ring-4 ring-emerald-400/20" />
                 <span>{language === 'km' ? 'ម៉ាស៊ីនមេសុវត្ថិភាពសកម្ម 100%' : 'Secure Cloud Server Active'}</span>
               </div>
-              <span className="font-mono text-indigo-400">v2.6.4</span>
+              <span className="font-mono text-indigo-300/80 bg-white/10 px-2 py-0.5 rounded-md border border-white/10">v2.6.4</span>
             </div>
           </div>
 
@@ -438,10 +467,10 @@ export default function LoginPage() {
 
             {/* Bottom Footer Note */}
             <div className="mt-8 pt-4 border-t border-gray-100 text-center">
-              <p className="text-[11px] text-gray-400">
+              <p className="text-[11px] text-gray-400 font-medium">
                 {language === 'km'
-                  ? 'រក្សាសិទ្ធិគ្រប់យ៉ាង © 2026 HESTRA HRM កម្ពុជា • រក្សាការសម្ងាត់ទិន្នន័យ 100%'
-                  : 'All Rights Reserved © 2026 HESTRA HRM Cambodia • Enterprise Grade Security'}
+                  ? 'រក្សាសិទ្ធិគ្រប់យ៉ាង © 2026 - Sim Sitha'
+                  : 'Copyright 2026 - All rights reserved. Sim Sitha'}
               </p>
             </div>
           </div>
@@ -481,7 +510,7 @@ export default function LoginPage() {
                   <div className="font-bold text-gray-900">
                     {language === 'km' ? 'អ៊ីមែលរដ្ឋបាល HR' : 'HR Administration Email'}
                   </div>
-                  <div className="text-gray-500 font-mono">sarath@hestra.kh</div>
+                  <div className="text-gray-500 font-mono">admin@hestra.kh</div>
                 </div>
               </div>
 

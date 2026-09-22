@@ -1,7 +1,8 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Language, TRANSLATIONS } from '@/lib/translations';
+import { Language, TRANSLATIONS, formatLocalizedText } from '@/lib/translations';
+import { Theme } from '@/lib/types';
 
 export interface Persona {
   id: string;
@@ -15,11 +16,11 @@ export interface Persona {
 export const PERSONAS: Persona[] = [
   {
     id: 'emp-13',
-    name: 'Sarath',
+    name: 'Admin',
     role: 'Admin',
-    title: 'Head of Human Resources',
-    email: 'sarath@hestra.kh',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=256&h=256&fit=crop&crop=faces',
+    title: 'System Administrator',
+    email: 'admin@hestra.kh',
+    avatar: '/avatars/khmer_female_1.jpg',
   },
   {
     id: 'emp-1',
@@ -27,7 +28,7 @@ export const PERSONAS: Persona[] = [
     role: 'Manager',
     title: 'VP of Engineering',
     email: 'van.sopheak@hestra.kh',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=256&h=256&fit=crop&crop=faces',
+    avatar: '/avatars/khmer_male_1.jpg',
   },
   {
     id: 'emp-18',
@@ -35,7 +36,7 @@ export const PERSONAS: Persona[] = [
     role: 'Employee',
     title: 'Senior Software Engineer',
     email: 'chan.thida@hestra.kh',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces',
+    avatar: '/avatars/khmer_female_2.jpg',
   },
 ];
 
@@ -66,6 +67,8 @@ interface AppContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   toggleLanguage: () => void;
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
   t: (key: keyof typeof TRANSLATIONS['km']) => string;
 }
 
@@ -80,16 +83,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [refreshKey, setRefreshKey] = useState<number>(0);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
   const [language, setLanguageState] = useState<Language>('en');
+  const [theme, setThemeState] = useState<Theme>('nordic');
 
   const showToast = useCallback(
     (message: string, type: 'success' | 'error' | 'info' = 'success') => {
       const id = `${Date.now()}-${Math.random()}`;
-      setToasts((prev) => [...prev, { id, message, type }]);
+      const finalMsg = formatLocalizedText(message, language) || message;
+      setToasts((prev) => [...prev, { id, message: finalMsg, type }]);
       setTimeout(() => {
         setToasts((prev) => prev.filter((t) => t.id !== id));
       }, 4000);
     },
-    []
+    [language]
   );
 
   useEffect(() => {
@@ -98,10 +103,51 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (saved === 'en' || saved === 'km') {
         setLanguageState(saved);
       }
+      const savedTheme = (localStorage.getItem('hestra_theme') || localStorage.getItem('pulsehr_theme')) as Theme | null;
+      if (savedTheme === 'nordic' || savedTheme === 'midnight' || savedTheme === 'indigo') {
+        setThemeState(savedTheme);
+      }
     } catch {
       // localStorage may fail in SSR or restricted environments
     }
   }, []);
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-theme', theme);
+      document.documentElement.classList.remove('theme-nordic', 'theme-midnight', 'theme-indigo', 'dark');
+      if (theme === 'midnight') {
+        document.documentElement.classList.add('theme-midnight', 'dark');
+      } else if (theme === 'indigo') {
+        document.documentElement.classList.add('theme-indigo', 'dark');
+      } else {
+        document.documentElement.classList.add('theme-nordic');
+      }
+    }
+  }, [theme]);
+
+  const setTheme = useCallback(
+    (newTheme: Theme) => {
+      setThemeState(newTheme);
+      try {
+        localStorage.setItem('hestra_theme', newTheme);
+      } catch {}
+      const themeName =
+        newTheme === 'nordic'
+          ? (language === 'km' ? 'ពន្លឺធម្មជាតិ (Nordic Light)' : 'Nordic Minimal (Light)')
+          : newTheme === 'midnight'
+          ? (language === 'km' ? 'ងងឹត (Midnight Dark)' : 'Midnight Obsidian (Dark)')
+          : (language === 'km' ? 'ខៀវចាស់ (Indigo)' : 'Indigo Electric');
+
+      showToast(
+        language === 'km'
+          ? `រចនាប័ទ្មប្រព័ន្ធត្រូវបានប្តូរទៅជា ${themeName}`
+          : `System theme switched to ${themeName}`,
+        'info'
+      );
+    },
+    [language, showToast]
+  );
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
@@ -134,7 +180,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const t = useCallback((key: keyof typeof TRANSLATIONS['km']) => {
     const dict = TRANSLATIONS[language];
     if (dict && dict[key]) return dict[key];
-    return TRANSLATIONS['km'][key] || key;
+    if (language === 'en') {
+      return TRANSLATIONS['en'][key] || (key as string);
+    }
+    return TRANSLATIONS['km'][key] || (key as string);
   }, [language]);
 
   const removeToast = useCallback((id: string) => {
@@ -222,7 +271,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       email: userData.email,
       role: userData.role,
       title: userData.title || (userData.role === 'Admin' ? 'Head of Human Resources' : userData.role === 'Manager' ? 'Department Manager' : 'Staff Member'),
-      avatar: userData.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces',
+      avatar: userData.avatar || '/avatars/khmer_female_1.jpg',
     };
     // Ensure state starts strictly manual upon login
     setIsClockedIn(false);
@@ -312,6 +361,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         language,
         setLanguage,
         toggleLanguage,
+        theme,
+        setTheme,
         t,
       }}
     >

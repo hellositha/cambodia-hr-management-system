@@ -144,11 +144,27 @@ export async function PUT(
       doc_others,
     } = body;
 
+    const hasEmail = email !== undefined;
+    const finalEmail = (email && typeof email === 'string' && email.trim()) ? email.trim() : null;
+
+    if (finalEmail) {
+      const existing = db.prepare('SELECT id, first_name, last_name FROM employees WHERE LOWER(email) = LOWER(?) AND id != ?').get(finalEmail, id) as any;
+      if (existing) {
+        return NextResponse.json(
+          { error: `Email "${finalEmail}" is already used by ${existing.first_name} ${existing.last_name} (${existing.id})` },
+          { status: 400 }
+        );
+      }
+    }
+
+    const hasManager = manager_id !== undefined;
+    const finalManagerId = (manager_id && typeof manager_id === 'string' && manager_id.trim()) ? manager_id.trim() : null;
+
     db.prepare(`
       UPDATE employees SET
         first_name = COALESCE(?, first_name),
         last_name = COALESCE(?, last_name),
-        email = COALESCE(?, email),
+        email = CASE WHEN ? = 1 THEN ? ELSE email END,
         phone = COALESCE(?, phone),
         role = COALESCE(?, role),
         department_id = COALESCE(?, department_id),
@@ -174,7 +190,7 @@ export async function PUT(
         contract_type = COALESCE(?, contract_type),
         contract_start = COALESCE(?, contract_start),
         contract_end = COALESCE(?, contract_end),
-        manager_id = COALESCE(?, manager_id),
+        manager_id = CASE WHEN ? = 1 THEN ? ELSE manager_id END,
         work_location = COALESCE(?, work_location),
         salary_currency = COALESCE(?, salary_currency),
         salary_frequency = COALESCE(?, salary_frequency),
@@ -195,7 +211,8 @@ export async function PUT(
     `).run(
       first_name !== undefined ? first_name : null,
       last_name !== undefined ? last_name : null,
-      email !== undefined ? email : null,
+      hasEmail ? 1 : 0,
+      finalEmail,
       phone !== undefined ? phone : null,
       role !== undefined ? role : null,
       department_id !== undefined ? department_id : null,
@@ -221,7 +238,8 @@ export async function PUT(
       contract_type !== undefined ? contract_type : null,
       contract_start !== undefined ? contract_start : null,
       contract_end !== undefined ? contract_end : null,
-      manager_id !== undefined ? manager_id : null,
+      hasManager ? 1 : 0,
+      finalManagerId,
       work_location !== undefined ? work_location : null,
       salary_currency !== undefined ? salary_currency : null,
       salary_frequency !== undefined ? salary_frequency : null,
@@ -245,6 +263,14 @@ export async function PUT(
       db.prepare('UPDATE users SET username = ? WHERE employee_id = ?').run(first_name.trim().toLowerCase(), id);
     }
 
+    if (avatar !== undefined) {
+      db.prepare('UPDATE users SET avatar = ? WHERE employee_id = ?').run(avatar, id);
+    }
+
+    if (hasEmail) {
+      db.prepare('UPDATE users SET email = ? WHERE employee_id = ?').run(finalEmail, id);
+    }
+
     const updated = db.prepare(`
       SELECT 
         e.*,
@@ -254,9 +280,17 @@ export async function PUT(
       LEFT JOIN departments d ON d.id = e.department_id
       LEFT JOIN employees m ON m.id = e.manager_id
       WHERE e.id = ?
-    `).get(id);
+    `).get(id) as any;
 
-    return NextResponse.json(updated);
+    if (!updated) {
+      return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      employee: updated,
+      ...updated,
+    });
   } catch (error: any) {
     console.error('Error updating employee:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -264,17 +298,44 @@ export async function PUT(
 }
 
 export async function DELETE(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
     const db = getDb();
+    const url = new URL(request.url);
+    const isTerminate = url.searchParams.get('action') === 'terminate';
 
-    // Mark as terminated or delete
-    db.prepare("UPDATE employees SET status = 'Terminated' WHERE id = ?").run(id);
+    if (isTerminate) {
+      db.prepare("UPDATE employees SET status = 'Terminated' WHERE id = ?").run(id);
+      return NextResponse.json({ success: true, message: 'Employee status set to Terminated' });
+    }
 
-    return NextResponse.json({ success: true, message: 'Employee status set to Terminated' });
+    const emp = db.prepare('SELECT * FROM employees WHERE id = ?').get(id) as any;
+    if (!emp) {
+      return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
+    }
+
+    const deleteTx = db.transaction(() => {
+      db.prepare('DELETE FROM attendance WHERE employee_id = ?').run(id);
+      db.prepare('DELETE FROM leave_requests WHERE employee_id = ?').run(id);
+      db.prepare('DELETE FROM leave_balances WHERE employee_id = ?').run(id);
+      db.prepare('DELETE FROM payrolls WHERE employee_id = ?').run(id);
+      db.prepare('DELETE FROM performance_reviews WHERE employee_id = ?').run(id);
+      db.prepare('UPDATE leave_requests SET reviewer_id = NULL WHERE reviewer_id = ?').run(id);
+      db.prepare('UPDATE leave_requests SET line_manager_id = NULL WHERE line_manager_id = ?').run(id);
+      db.prepare('UPDATE leave_requests SET admin_reviewer_id = NULL WHERE admin_reviewer_id = ?').run(id);
+      db.prepare('UPDATE performance_reviews SET reviewer_id = NULL WHERE reviewer_id = ?').run(id);
+      db.prepare('UPDATE departments SET manager_id = NULL WHERE manager_id = ?').run(id);
+      db.prepare('UPDATE employees SET manager_id = NULL WHERE manager_id = ?').run(id);
+      db.prepare('DELETE FROM users WHERE employee_id = ?').run(id);
+      db.prepare('DELETE FROM employees WHERE id = ?').run(id);
+    });
+
+    deleteTx();
+
+    return NextResponse.json({ success: true, message: 'Employee deleted successfully' });
   } catch (error: any) {
     console.error('Error deleting employee:', error);
     return NextResponse.json({ error: error.message }, { status: 500 });

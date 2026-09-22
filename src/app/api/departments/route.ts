@@ -41,7 +41,15 @@ export async function POST(request: Request) {
       VALUES (?, ?, ?, ?, ?, ?)
     `).run(id, name, description, manager_id, Number(budget), color);
 
-    const created = db.prepare('SELECT * FROM departments WHERE id = ?').get(id);
+    const created = db.prepare(`
+      SELECT 
+        d.*,
+        m.first_name || ' ' || m.last_name as manager_name,
+        0 as employee_count
+      FROM departments d
+      LEFT JOIN employees m ON m.id = d.manager_id
+      WHERE d.id = ?
+    `).get(id);
     return NextResponse.json(created, { status: 201 });
   } catch (error: any) {
     console.error('Error creating department:', error);

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useApp, PERSONAS } from '@/context/AppContext';
+import { useApp } from '@/context/AppContext';
 import { DashboardStats } from '@/lib/types';
 import confetti from 'canvas-confetti';
 import {
@@ -31,10 +31,6 @@ import {
   Check,
   Shield,
   PartyPopper,
-  Palette,
-  Sun,
-  Moon,
-  Flame,
   UserPlus,
   RotateCcw,
   FileText,
@@ -42,29 +38,20 @@ import {
   CalendarDays,
   Scale,
 } from 'lucide-react';
-
-type DashboardTheme = 'midnight' | 'nordic' | 'indigo';
+import { formatLocalizedText } from '@/lib/translations';
 
 export default function StyledDashboardPage() {
-  const { currentPersona, switchPersona, openModal, refreshKey, triggerRefresh, showToast, language, t } = useApp();
+  const { currentPersona, openModal, refreshKey, triggerRefresh, showToast, language, theme, t } = useApp();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [activityFilter, setActivityFilter] = useState<'all' | 'leave' | 'hire'>('all');
   const [activeChartTab, setActiveChartTab] = useState<'departments' | 'weekly_trend'>('departments');
-  const [theme, setTheme] = useState<DashboardTheme>('nordic');
 
   // Real-time greeting & clock
   const [currentTime, setCurrentTime] = useState<string>('');
   const [greeting, setGreeting] = useState<string>('Welcome back');
 
   useEffect(() => {
-    const savedTheme = (localStorage.getItem('hestra_theme') || localStorage.getItem('pulsehr_theme')) as DashboardTheme | null;
-    if (savedTheme && (savedTheme === 'nordic' || savedTheme === 'midnight' || savedTheme === 'indigo')) {
-      setTheme(savedTheme);
-    } else {
-      setTheme('nordic');
-    }
-
     const updateTime = () => {
       const now = new Date();
       setCurrentTime(
@@ -78,13 +65,7 @@ export default function StyledDashboardPage() {
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
-  }, [language]);
-
-  const changeTheme = (newTheme: DashboardTheme) => {
-    setTheme(newTheme);
-    localStorage.setItem('hestra_theme', newTheme);
-    showToast(`រចនាប័ទ្មផ្ទាំងគ្រប់គ្រងត្រូវបានប្តូរទៅជា ${newTheme.toUpperCase()}`, 'info');
-  };
+  }, [language, t]);
 
   useEffect(() => {
     fetch('/api/dashboard/stats')
@@ -108,18 +89,28 @@ export default function StyledDashboardPage() {
         colors: ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#3b82f6'],
       });
     }
-    showToast(`បានផ្ញើសារអបអរសាទរជូន ${name} សម្រាប់ ${event}! 🎉`, 'success');
+    showToast(
+      language === 'km'
+        ? `បានផ្ញើសារអបអរសាទរជូន ${name} សម្រាប់ ${event}! 🎉`
+        : `Sent congratulations to ${formatLocalizedText(name, language)} for ${formatLocalizedText(event, language)}! 🎉`,
+      'success'
+    );
   };
 
   const handleQuickSeed = async () => {
     try {
       const res = await fetch('/api/seed', { method: 'POST' });
       if (res.ok) {
-        showToast('ទិន្នន័យគំរូកម្ពុជាត្រូវបានបញ្ចូលដោយជោគជ័យ!', 'success');
+        showToast(
+          language === 'km'
+            ? 'ទិន្នន័យគំរូកម្ពុជាត្រូវបានបញ្ចូលដោយជោគជ័យ!'
+            : 'Cambodia sample workforce data seeded successfully!',
+          'success'
+        );
         triggerRefresh();
       }
     } catch {
-      showToast('បរាជ័យក្នុងការបញ្ចូលទិន្នន័យគំរូ', 'error');
+      showToast(language === 'km' ? 'បរាជ័យក្នុងការបញ្ចូលទិន្នន័យគំរូ' : 'Failed to seed sample workforce data', 'error');
     }
   };
 
@@ -128,8 +119,8 @@ export default function StyledDashboardPage() {
       <div className="flex items-center justify-center min-h-[65vh]">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-2xl border-4 border-indigo-500 border-t-transparent animate-spin"></div>
-          <p className="text-xs text-slate-500 font-medium tracking-wide">
-            កំពុងដំណើរការទិន្នន័យគ្រប់គ្រងធនធានមនុស្ស...
+          <p className="text-xs text-slate-500 font-medium tracking-wide font-khmer">
+            {language === 'km' ? 'កំពុងដំណើរការទិន្នន័យគ្រប់គ្រងធនធានមនុស្ស...' : 'Loading human resources dashboard...'}
           </p>
         </div>
       </div>
@@ -183,67 +174,6 @@ export default function StyledDashboardPage() {
 
   return (
     <div className={`space-y-6 transition-colors duration-300 ${themeClasses.wrapper}`}>
-      {/* TOP STYLE SWITCHER & QUICK BAR */}
-      <div className="flex flex-wrap items-center justify-between gap-4 px-2 pb-2">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Palette size={16} className={themeClasses.accentText} />
-            <span className="text-xs font-bold uppercase tracking-wider opacity-80">
-              {t('theme_label')}:
-            </span>
-          </div>
-
-          <div className={`flex items-center p-1 rounded-xl text-xs font-semibold ${themeClasses.subtleBox}`}>
-            <button
-              onClick={() => changeTheme('nordic')}
-              className={`px-3 py-1 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
-                theme === 'nordic' ? themeClasses.pillActive : themeClasses.pillInactive
-              }`}
-            >
-              <Sun size={13} /> {t('theme_light')}
-            </button>
-            <button
-              onClick={() => changeTheme('midnight')}
-              className={`px-3 py-1 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
-                theme === 'midnight' ? themeClasses.pillActive : themeClasses.pillInactive
-              }`}
-            >
-              <Moon size={13} /> {t('theme_dark')}
-            </button>
-            <button
-              onClick={() => changeTheme('indigo')}
-              className={`px-3 py-1 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer ${
-                theme === 'indigo' ? themeClasses.pillActive : themeClasses.pillInactive
-              }`}
-            >
-              <Flame size={13} /> {t('theme_indigo')}
-            </button>
-          </div>
-        </div>
-
-        {/* Persona quick preview */}
-        <div className="flex items-center gap-2 text-xs">
-          <span className={`text-[11px] font-semibold ${themeClasses.textMuted}`}>{t('active_view')}:</span>
-          <div className={`flex items-center gap-1 p-1 rounded-xl ${themeClasses.subtleBox}`}>
-            {PERSONAS.map((p) => {
-              const isCur = p.id === currentPersona.id;
-              return (
-                <button
-                  key={p.id}
-                  onClick={() => switchPersona(p.id)}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                    isCur ? themeClasses.pillActive : themeClasses.pillInactive
-                  }`}
-                >
-                  <img src={p.avatar} alt={p.name} className="w-3.5 h-3.5 rounded-full object-cover" />
-                  <span>{p.name.replace(/\s*\(.*\)/, '').split(' ').slice(-1)[0] || p.name}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
       {/* 1. HERO BENTO BANNER */}
       <div className={`relative overflow-hidden rounded-3xl p-6 sm:p-8 transition-all ${themeClasses.hero}`}>
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -264,14 +194,14 @@ export default function StyledDashboardPage() {
             </div>
 
             <h1 className="text-2xl sm:text-4xl font-black tracking-tight">
-              {greeting}, {currentPersona.name}!
+              {greeting}, {formatLocalizedText(currentPersona.name, language)}!
             </h1>
 
             <p className={`text-xs sm:text-sm leading-relaxed max-w-xl ${themeClasses.textMuted}`}>
               {language === 'km' ? (
                 <>
                   កំពុងដំណើរការក្នុងតួនាទី{' '}
-                  <strong className="text-current font-bold">{currentPersona.role}</strong> ({currentPersona.title})។
+                  <strong className="text-current font-bold">{currentPersona.role}</strong> ({formatLocalizedText(currentPersona.title || '', language)})។
                   {stats.totalEmployees > 0 ? (
                     <> បុគ្គលិកសរុបមានចំនួន <strong className="text-current">{stats.totalEmployees} នាក់</strong> ជាមួយនឹង <span className="text-emerald-600 font-bold">អត្រាវត្តមាន {stats.attendanceToday.percentage}%</span> ថ្ងៃនេះ។</>
                   ) : (
@@ -280,7 +210,7 @@ export default function StyledDashboardPage() {
                 </>
               ) : (
                 <>
-                  Operating in <strong className="text-current font-bold">{currentPersona.role}</strong> role ({currentPersona.title}).
+                  Operating in <strong className="text-current font-bold">{currentPersona.role}</strong> role ({formatLocalizedText(currentPersona.title || '', language)}).
                   {stats.totalEmployees > 0 ? (
                     <> Total active workforce of <strong className="text-current">{stats.totalEmployees} colleagues</strong> with <span className="text-emerald-600 font-bold">{stats.attendanceToday.percentage}% attendance</span> today.</>
                   ) : (
@@ -704,23 +634,32 @@ export default function StyledDashboardPage() {
               </p>
             </div>
 
-            <div className={`flex items-center p-1 rounded-xl text-xs shrink-0 ${themeClasses.subtleBox}`}>
-              <button
-                onClick={() => setActiveChartTab('departments')}
-                className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
-                  activeChartTab === 'departments' ? themeClasses.pillActive : themeClasses.pillInactive
-                }`}
+            <div className="flex items-center gap-2 self-end sm:self-auto">
+              <Link
+                href="/departments"
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 border border-indigo-200/60 bg-indigo-50/70 text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300 shadow-2xs`}
               >
-                {t('divisions_tab')}
-              </button>
-              <button
-                onClick={() => setActiveChartTab('weekly_trend')}
-                className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
-                  activeChartTab === 'weekly_trend' ? themeClasses.pillActive : themeClasses.pillInactive
-                }`}
-              >
-                {t('weekly_trend_tab')}
-              </button>
+                <span>{language === 'km' ? 'គ្រប់គ្រងនាយកដ្ឋាន' : 'Manage Units'}</span>
+                <ChevronRight size={13} />
+              </Link>
+              <div className={`flex items-center p-1 rounded-xl text-xs shrink-0 ${themeClasses.subtleBox}`}>
+                <button
+                  onClick={() => setActiveChartTab('departments')}
+                  className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                    activeChartTab === 'departments' ? themeClasses.pillActive : themeClasses.pillInactive
+                  }`}
+                >
+                  {t('divisions_tab')}
+                </button>
+                <button
+                  onClick={() => setActiveChartTab('weekly_trend')}
+                  className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                    activeChartTab === 'weekly_trend' ? themeClasses.pillActive : themeClasses.pillInactive
+                  }`}
+                >
+                  {t('weekly_trend_tab')}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -738,10 +677,10 @@ export default function StyledDashboardPage() {
                           className="w-2.5 h-2.5 rounded-full shrink-0"
                           style={{ backgroundColor: dept.color }}
                         ></span>
-                        {dept.name}
+                        {formatLocalizedText(dept.name, language)}
                       </span>
                       <span className={themeClasses.textMuted}>
-                        <strong className="text-current font-bold">{dept.count}</strong> នាក់ ({percentage}%)
+                        <strong className="text-current font-bold">{dept.count}</strong> {language === 'km' ? 'នាក់' : 'staff'} ({percentage}%)
                       </span>
                     </div>
 
@@ -772,7 +711,7 @@ export default function StyledDashboardPage() {
                     {language === 'km' ? 'ផ្នែកកម្លាំងធំជាងគេ' : 'Largest Division'}
                   </span>
                   <span className={`text-xl font-black mt-0.5 block ${themeClasses.accentText}`}>
-                    {stats.departmentDistribution[0]?.name.split(' ')[0] || (language === 'km' ? 'ផ្នែកបច្ចេកវិទ្យា' : 'Engineering')}
+                    {formatLocalizedText(stats.departmentDistribution[0]?.name, language) || (language === 'km' ? 'ផ្នែកបច្ចេកវិទ្យា' : 'Engineering')}
                   </span>
                 </div>
                 <div className={`p-3 rounded-xl ${themeClasses.subtleBox}`}>
@@ -976,8 +915,8 @@ export default function StyledDashboardPage() {
                       )}
                     </div>
                     <div>
-                      <h3 className="text-xs font-bold">{act.title}</h3>
-                      <p className={`text-[11px] ${themeClasses.textMuted}`}>{act.subtitle}</p>
+                      <h3 className="text-xs font-bold">{formatLocalizedText(act.title, language)}</h3>
+                      <p className={`text-[11px] ${themeClasses.textMuted}`}>{formatLocalizedText(act.subtitle, language)}</p>
                     </div>
                   </div>
 
@@ -987,7 +926,7 @@ export default function StyledDashboardPage() {
                     </span>
                     {act.statusBadge && (
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${themeClasses.badge}`}>
-                        {act.statusBadge}
+                        {formatLocalizedText(act.statusBadge, language)}
                       </span>
                     )}
                   </div>
@@ -1043,8 +982,8 @@ export default function StyledDashboardPage() {
                         className="w-9 h-9 rounded-xl object-cover shrink-0"
                       />
                       <div className="truncate">
-                        <p className="text-xs font-bold truncate">{cel.name}</p>
-                        <p className="text-[10px] text-pink-500 font-semibold truncate">{cel.subtitle}</p>
+                        <p className="text-xs font-bold truncate">{formatLocalizedText(cel.name, language)}</p>
+                        <p className="text-[10px] text-pink-500 font-semibold truncate">{formatLocalizedText(cel.subtitle, language)}</p>
                       </div>
                     </div>
 

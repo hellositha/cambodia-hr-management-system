@@ -33,6 +33,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { Department } from '@/lib/types';
+import { formatLocalizedText } from '@/lib/translations';
 
 export const CAMBODIA_PROVINCES = [
   'រាជធានីភ្នំពេញ (Phnom Penh)',
@@ -253,10 +254,10 @@ export default function GlobalModals() {
   const [jobForm, setJobForm] = useState({
     title: '',
     department_id: '',
-    location: 'រាជធានីភ្នំពេញ / Hybrid',
+    location: language === 'km' ? 'រាជធានីភ្នំពេញ / Hybrid' : 'Phnom Penh / Hybrid',
     type: 'Full-Time',
-    experience_level: 'កម្រិតមធ្យម-ជាន់ខ្ពស់ (3+ ឆ្នាំ)',
-    salary_range: '$800 - $1,600 / ខែ',
+    experience_level: language === 'km' ? 'កម្រិតមធ្យម-ជាន់ខ្ពស់ (3+ ឆ្នាំ)' : 'Mid-Senior (3+ Years)',
+    salary_range: language === 'km' ? '$800 - $1,600 / ខែ' : '$800 - $1,600 / mo',
     description: '',
     requirements: '',
   });
@@ -269,7 +270,7 @@ export default function GlobalModals() {
   });
 
   const [payrollForm, setPayrollForm] = useState({
-    period: 'ខែតុលា ឆ្នាំ២០២៦ (October 2026)',
+    period: language === 'km' ? 'ខែតុលា ឆ្នាំ២០២៦ (October 2026)' : 'October 2026',
     payment_date: '2026-10-31',
   });
 
@@ -322,18 +323,6 @@ export default function GlobalModals() {
       return;
     }
 
-    // Validate Required Contact Info
-    if (!empForm.email.trim()) {
-      showToast(
-        language === 'km'
-          ? 'សូមបំពេញអ៊ីមែលការងាររបស់បុគ្គលិក'
-          : 'Please enter employee work email',
-        'error'
-      );
-      setActiveStaffTab('contact');
-      return;
-    }
-
     // Validate Required Employment Info
     if (!empForm.role.trim()) {
       showToast(
@@ -380,7 +369,7 @@ export default function GlobalModals() {
         closeModal();
       } else {
         const err = await res.json();
-        showToast(err.error || 'បរាជ័យក្នុងការបញ្ចូលបុគ្គលិក', 'error');
+        showToast(err.error || (language === 'km' ? 'បរាជ័យក្នុងការបញ្ចូលបុគ្គលិក' : 'Failed to register employee'), 'error');
       }
     } catch {
       showToast('Network error adding employee', 'error');
@@ -637,7 +626,7 @@ export default function GlobalModals() {
                         value={empForm.last_name}
                         onChange={(e) => setEmpForm({ ...empForm, last_name: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                        placeholder="ចាន់ / Chan"
+                        placeholder={language === 'km' ? 'ចាន់ / Chan' : 'Chan'}
                       />
                     </div>
                     <div>
@@ -650,7 +639,7 @@ export default function GlobalModals() {
                         value={empForm.first_name}
                         onChange={(e) => setEmpForm({ ...empForm, first_name: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                        placeholder="ធីតា / Thida"
+                        placeholder={language === 'km' ? 'ធីតា / Thida' : 'Thida'}
                       />
                     </div>
                   </div>
@@ -665,9 +654,9 @@ export default function GlobalModals() {
                         onChange={(e) => setEmpForm({ ...empForm, gender: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                       >
-                        <option value="ប្រុស (Male)">ប្រុស (Male)</option>
-                        <option value="ស្រី (Female)">ស្រី (Female)</option>
-                        <option value="ផ្សេងៗ (Other)">ផ្សេងៗ (Other)</option>
+                        <option value="ប្រុស (Male)">{language === 'km' ? 'ប្រុស (Male)' : 'Male'}</option>
+                        <option value="ស្រី (Female)">{language === 'km' ? 'ស្រី (Female)' : 'Female'}</option>
+                        <option value="ផ្សេងៗ (Other)">{language === 'km' ? 'ផ្សេងៗ (Other)' : 'Other'}</option>
                       </select>
                     </div>
                     <div>
@@ -690,7 +679,7 @@ export default function GlobalModals() {
                         value={empForm.nationality}
                         onChange={(e) => setEmpForm({ ...empForm, nationality: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                        placeholder="កម្ពុជា (Cambodian)"
+                        placeholder={language === 'km' ? 'កម្ពុជា (Cambodian)' : 'Cambodian'}
                       />
                     </div>
                   </div>
@@ -705,10 +694,10 @@ export default function GlobalModals() {
                         onChange={(e) => setEmpForm({ ...empForm, marital_status: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                       >
-                        <option value="នៅលីវ (Single)">នៅលីវ (Single)</option>
-                        <option value="រៀបការរួច (Married)">រៀបការរួច (Married)</option>
-                        <option value="លែងលះ (Divorced)">លែងលះ (Divorced)</option>
-                        <option value="ពោះម៉ាយ/មេម៉ាយ (Widowed)">ពោះម៉ាយ/មេម៉ាយ (Widowed)</option>
+                        <option value="នៅលីវ (Single)">{language === 'km' ? 'នៅលីវ (Single)' : 'Single'}</option>
+                        <option value="រៀបការរួច (Married)">{language === 'km' ? 'រៀបការរួច (Married)' : 'Married'}</option>
+                        <option value="លែងលះ (Divorced)">{language === 'km' ? 'លែងលះ (Divorced)' : 'Divorced'}</option>
+                        <option value="ពោះម៉ាយ/មេម៉ាយ (Widowed)">{language === 'km' ? 'ពោះម៉ាយ/មេម៉ាយ (Widowed)' : 'Widowed'}</option>
                       </select>
                     </div>
                     <div>
@@ -735,10 +724,10 @@ export default function GlobalModals() {
                         onChange={(e) => setEmpForm({ ...empForm, status: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                       >
-                        <option value="Active">សកម្ម (Active)</option>
-                        <option value="Probation">សាកល្បង (Probation)</option>
-                        <option value="Remote">ធ្វើការពីផ្ទះ (Remote)</option>
-                        <option value="On Leave">ឈប់សម្រាក (On Leave)</option>
+                        <option value="Active">{language === 'km' ? 'សកម្ម (Active)' : 'Active'}</option>
+                        <option value="Probation">{language === 'km' ? 'សាកល្បង (Probation)' : 'Probation'}</option>
+                        <option value="Remote">{language === 'km' ? 'ធ្វើការពីផ្ទះ (Remote)' : 'Remote'}</option>
+                        <option value="On Leave">{language === 'km' ? 'ឈប់សម្រាក (On Leave)' : 'On Leave'}</option>
                       </select>
                     </div>
                     <div>
@@ -750,10 +739,10 @@ export default function GlobalModals() {
                         onChange={(e) => setEmpForm({ ...empForm, employment_type: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                       >
-                        <option value="ពេញម៉ោង (Full-Time)">ពេញម៉ោង (Full-Time)</option>
-                        <option value="ក្រៅម៉ោង (Part-Time)">ក្រៅម៉ោង (Part-Time)</option>
-                        <option value="កិច្ចសន្យា (Contract)">កិច្ចសន្យា (Contract)</option>
-                        <option value="កម្មសិក្សា (Intern)">កម្មសិក្សា (Intern)</option>
+                        <option value="ពេញម៉ោង (Full-Time)">{language === 'km' ? 'ពេញម៉ោង (Full-Time)' : 'Full-Time'}</option>
+                        <option value="ក្រៅម៉ោង (Part-Time)">{language === 'km' ? 'ក្រៅម៉ោង (Part-Time)' : 'Part-Time'}</option>
+                        <option value="កិច្ចសន្យា (Contract)">{language === 'km' ? 'កិច្ចសន្យា (Contract)' : 'Contract'}</option>
+                        <option value="កម្មសិក្សា (Intern)">{language === 'km' ? 'កម្មសិក្សា (Intern)' : 'Intern'}</option>
                       </select>
                     </div>
                     <div>
@@ -779,7 +768,7 @@ export default function GlobalModals() {
                       value={empForm.location}
                       onChange={(e) => setEmpForm({ ...empForm, location: e.target.value })}
                       className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                      placeholder="រាជធានីភ្នំពេញ (Phnom Penh) / សៀមរាប"
+                      placeholder={language === 'km' ? 'រាជធានីភ្នំពេញ (Phnom Penh) / សៀមរាប' : 'Phnom Penh / Siem Reap'}
                     />
                   </div>
                 </div>
@@ -814,15 +803,14 @@ export default function GlobalModals() {
                     </div>
                     <div>
                       <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        {language === 'km' ? 'អ៊ីមែលការងារ (Work Email) *' : 'Work Email *'}
+                        {language === 'km' ? 'អ៊ីមែលការងារ (Work Email)' : 'Work Email (Optional)'}
                       </label>
                       <input
                         type="email"
-                        required
                         value={empForm.email}
                         onChange={(e) => setEmpForm({ ...empForm, email: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                        placeholder="thida@hestra.kh"
+                        placeholder="thida@hestra.kh (Optional)"
                       />
                     </div>
                   </div>
@@ -836,7 +824,7 @@ export default function GlobalModals() {
                       value={empForm.current_address}
                       onChange={(e) => setEmpForm({ ...empForm, current_address: e.target.value })}
                       className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                      placeholder="ផ្ទះលេខ 128E, ផ្លូវ 2004, សង្កាត់ទឹកថ្លា"
+                      placeholder={language === 'km' ? 'ផ្ទះលេខ 128E, ផ្លូវ 2004, សង្កាត់ទឹកថ្លា' : 'House 128E, St 2004, Teuk Thla'}
                     />
                   </div>
 
@@ -852,7 +840,7 @@ export default function GlobalModals() {
                       >
                         {CAMBODIA_PROVINCES.map((prov) => (
                           <option key={prov} value={prov}>
-                            {prov}
+                            {formatLocalizedText(prov, language)}
                           </option>
                         ))}
                       </select>
@@ -866,7 +854,7 @@ export default function GlobalModals() {
                         value={empForm.district}
                         onChange={(e) => setEmpForm({ ...empForm, district: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                        placeholder="ខណ្ឌសែនសុខ / Khan Sen Sok"
+                        placeholder={language === 'km' ? 'ខណ្ឌសែនសុខ / Khan Sen Sok' : 'Khan Sen Sok'}
                       />
                     </div>
                   </div>
@@ -881,7 +869,7 @@ export default function GlobalModals() {
                         value={empForm.commune_sangkat}
                         onChange={(e) => setEmpForm({ ...empForm, commune_sangkat: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                        placeholder="សង្កាត់ទឹកថ្លា / Sangkat Teuk Thla"
+                        placeholder={language === 'km' ? 'សង្កាត់ទឹកថ្លា / Sangkat Teuk Thla' : 'Sangkat Teuk Thla'}
                       />
                     </div>
                     <div>
@@ -893,7 +881,7 @@ export default function GlobalModals() {
                         value={empForm.village}
                         onChange={(e) => setEmpForm({ ...empForm, village: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                        placeholder="ភូមិស្លែងរលើង / Phum Slaeng Roleung"
+                        placeholder={language === 'km' ? 'ភូមិស្លែងរលើង / Phum Slaeng Roleung' : 'Phum Slaeng Roleung'}
                       />
                     </div>
                   </div>
@@ -937,7 +925,7 @@ export default function GlobalModals() {
                       >
                         {departments.map((d) => (
                           <option key={d.id} value={d.id}>
-                            {d.name}
+                            {formatLocalizedText(d.name, language)}
                           </option>
                         ))}
                       </select>
@@ -967,10 +955,10 @@ export default function GlobalModals() {
                         onChange={(e) => setEmpForm({ ...empForm, employee_type: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                       >
-                        <option value="បុគ្គលិកពេញសិទ្ធិ (Regular / Permanent)">បុគ្គលិកពេញសិទ្ធិ (Regular / Permanent)</option>
-                        <option value="បុគ្គលិកកិច្ចសន្យា (Contractual)">បុគ្គលិកកិច្ចសន្យា (Contractual)</option>
-                        <option value="បុគ្គលិកសាកល្បង (Probationary)">បុគ្គលិកសាកល្បង (Probationary)</option>
-                        <option value="កម្មសិក្សាការី (Internship)">កម្មសិក្សាការី (Internship)</option>
+                        <option value="បុគ្គលិកពេញសិទ្ធិ (Regular / Permanent)">{language === 'km' ? 'បុគ្គលិកពេញសិទ្ធិ (Regular / Permanent)' : 'Regular / Permanent'}</option>
+                        <option value="បុគ្គលិកកិច្ចសន្យា (Contractual)">{language === 'km' ? 'បុគ្គលិកកិច្ចសន្យា (Contractual)' : 'Contractual'}</option>
+                        <option value="បុគ្គលិកសាកល្បង (Probationary)">{language === 'km' ? 'បុគ្គលិកសាកល្បង (Probationary)' : 'Probationary'}</option>
+                        <option value="កម្មសិក្សាការី (Internship)">{language === 'km' ? 'កម្មសិក្សាការី (Internship)' : 'Internship'}</option>
                       </select>
                     </div>
                     <div>
@@ -993,10 +981,10 @@ export default function GlobalModals() {
                         onChange={(e) => setEmpForm({ ...empForm, contract_type: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                       >
-                        <option value="UDC (មិនកំណត់ថិរវេលា)">UDC (មិនកំណត់ថិរវេលា)</option>
-                        <option value="FDC (កំណត់ថិរវេលា)">FDC (កំណត់ថិរវេលា)</option>
-                        <option value="Probation (សាកល្បង)">Probation (សាកល្បង)</option>
-                        <option value="Internship (កម្មសិក្សា)">Internship (កម្មសិក្សា)</option>
+                        <option value="UDC (មិនកំណត់ថិរវេលា)">{language === 'km' ? 'UDC (មិនកំណត់ថិរវេលា)' : 'UDC (Undetermined Duration)'}</option>
+                        <option value="FDC (កំណត់ថិរវេលា)">{language === 'km' ? 'FDC (កំណត់ថិរវេលា)' : 'FDC (Fixed Duration)'}</option>
+                        <option value="Probation (សាកល្បង)">{language === 'km' ? 'Probation (សាកល្បង)' : 'Probation'}</option>
+                        <option value="Internship (កម្មសិក្សា)">{language === 'km' ? 'Internship (កម្មសិក្សា)' : 'Internship'}</option>
                       </select>
                     </div>
                   </div>
@@ -1039,7 +1027,7 @@ export default function GlobalModals() {
                         <option value="">-- {language === 'km' ? 'គ្មានអ្នកគ្រប់គ្រងផ្ទាល់ / ថ្នាក់ដឹកនាំ' : 'None / Executive'} --</option>
                         {managers.map((m) => (
                           <option key={m.id} value={m.id}>
-                            {m.first_name} {m.last_name} ({m.role || 'Colleague'})
+                            {formatLocalizedText(m.first_name, language)} {formatLocalizedText(m.last_name, language)} ({formatLocalizedText(m.role || 'Colleague', language)})
                           </option>
                         ))}
                       </select>
@@ -1053,7 +1041,7 @@ export default function GlobalModals() {
                         value={empForm.work_location}
                         onChange={(e) => setEmpForm({ ...empForm, work_location: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                        placeholder="ការិយាល័យកណ្តាល (Head Office) / Canadia Tower"
+                        placeholder={language === 'km' ? 'ការិយាល័យកណ្តាល (Head Office) / Canadia Tower' : 'Head Office / Canadia Tower'}
                       />
                     </div>
                   </div>
@@ -1097,7 +1085,7 @@ export default function GlobalModals() {
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden font-mono"
                       >
                         <option value="USD ($)">USD ($)</option>
-                        <option value="KHR (៛)">KHR (៛)</option>
+                        <option value="KHR (៛)">{language === 'km' ? 'KHR (៛)' : 'KHR'}</option>
                       </select>
                     </div>
                     <div>
@@ -1109,9 +1097,9 @@ export default function GlobalModals() {
                         onChange={(e) => setEmpForm({ ...empForm, salary_frequency: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                       >
-                        <option value="ប្រចាំខែ (Monthly)">ប្រចាំខែ (Monthly)</option>
-                        <option value="កន្លះខែ (Semi-monthly)">កន្លះខែ (Semi-monthly)</option>
-                        <option value="ប្រចាំសប្តាហ៍ (Weekly)">ប្រចាំសប្តាហ៍ (Weekly)</option>
+                        <option value="ប្រចាំខែ (Monthly)">{language === 'km' ? 'ប្រចាំខែ (Monthly)' : 'Monthly'}</option>
+                        <option value="កន្លះខែ (Semi-monthly)">{language === 'km' ? 'កន្លះខែ (Semi-monthly)' : 'Semi-monthly'}</option>
+                        <option value="ប្រចាំសប្តាហ៍ (Weekly)">{language === 'km' ? 'ប្រចាំសប្តាហ៍ (Weekly)' : 'Weekly'}</option>
                       </select>
                     </div>
                   </div>
@@ -1127,7 +1115,7 @@ export default function GlobalModals() {
                     >
                       {CAMBODIA_BANKS.map((b) => (
                         <option key={b} value={b}>
-                          {b}
+                          {formatLocalizedText(b, language)}
                         </option>
                       ))}
                     </select>
@@ -1192,8 +1180,8 @@ export default function GlobalModals() {
                         onChange={(e) => setEmpForm({ ...empForm, nssf_member: e.target.value })}
                         className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-indigo-700"
                       >
-                        <option value="មាន (Yes)">មាន (Yes)</option>
-                        <option value="គ្មាន (No)">គ្មាន (No)</option>
+                        <option value="មាន (Yes)">{language === 'km' ? 'មាន (Yes)' : 'Yes'}</option>
+                        <option value="គ្មាន (No)">{language === 'km' ? 'គ្មាន (No)' : 'No'}</option>
                       </select>
                     </div>
 
@@ -1249,7 +1237,7 @@ export default function GlobalModals() {
                         value={empForm.emergency_contact_name}
                         onChange={(e) => setEmpForm({ ...empForm, emergency_contact_name: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                        placeholder="សុខ វណ្ណា / Sok Vanna"
+                        placeholder={language === 'km' ? 'សុខ វណ្ណា / Sok Vanna' : 'Sok Vanna'}
                       />
                     </div>
                     <div>
@@ -1261,11 +1249,11 @@ export default function GlobalModals() {
                         onChange={(e) => setEmpForm({ ...empForm, emergency_contact_relationship: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                       >
-                        <option value="ប្តី/ប្រពន្ធ (Spouse)">ប្តី/ប្រពន្ធ (Spouse)</option>
-                        <option value="ឪពុក/ម្តាយ (Parent)">ឪពុក/ម្តាយ (Parent)</option>
-                        <option value="បងប្អូន (Sibling)">បងប្អូន (Sibling)</option>
-                        <option value="សាច់ញាតិ (Relative)">សាច់ញាតិ (Relative)</option>
-                        <option value="មិត្តភក្តិ (Friend)">មិត្តភក្តិ (Friend)</option>
+                        <option value="ប្តី/ប្រពន្ធ (Spouse)">{language === 'km' ? 'ប្តី/ប្រពន្ធ (Spouse)' : 'Spouse'}</option>
+                        <option value="ឪពុក/ម្តាយ (Parent)">{language === 'km' ? 'ឪពុក/ម្តាយ (Parent)' : 'Parent'}</option>
+                        <option value="បងប្អូន (Sibling)">{language === 'km' ? 'បងប្អូន (Sibling)' : 'Sibling'}</option>
+                        <option value="សាច់ញាតិ (Relative)">{language === 'km' ? 'សាច់ញាតិ (Relative)' : 'Relative'}</option>
+                        <option value="មិត្តភក្តិ (Friend)">{language === 'km' ? 'មិត្តភក្តិ (Friend)' : 'Friend'}</option>
                       </select>
                     </div>
                   </div>
@@ -1292,7 +1280,7 @@ export default function GlobalModals() {
                         value={empForm.emergency_contact_address}
                         onChange={(e) => setEmpForm({ ...empForm, emergency_contact_address: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                        placeholder="រាជធានីភ្នំពេញ / Phnom Penh"
+                        placeholder={language === 'km' ? 'រាជធានីភ្នំពេញ / Phnom Penh' : 'Phnom Penh'}
                       />
                     </div>
                   </div>
@@ -1318,12 +1306,12 @@ export default function GlobalModals() {
                       <div>
                         <label className="block text-xs font-bold text-slate-900 flex items-center gap-1.5">
                           <Camera size={15} className="text-indigo-600" />
-                          <span>{language === 'km' ? 'រូបថតផ្ទាល់ខ្លួន (Profile photo)' : 'Profile Photo'}</span>
+                          <span>{language === 'km' ? 'រូបថតបុគ្គលិក (Employee Photo)' : 'Employee Photo'}</span>
                         </label>
                         <p className="text-[11px] text-slate-500">
                           {language === 'km'
-                            ? 'ផ្ទុករូបថតផ្ទាល់ខ្លួនពីឧបករណ៍/កុំព្យូទ័ររបស់អ្នក (JPG, PNG, WEBP)'
-                            : 'Upload photo directly from your computer (JPG, PNG, WEBP)'}
+                            ? 'ផ្ទុករូបថតបុគ្គលិកពីឧបករណ៍/កុំព្យូទ័ររបស់អ្នក (JPG, PNG, WEBP)'
+                            : 'Upload photo directly from your device (JPG, PNG, WEBP)'}
                         </p>
                       </div>
                       {empForm.avatar ? (
@@ -1347,7 +1335,7 @@ export default function GlobalModals() {
                         <div className="relative group shrink-0">
                           <img
                             src={empForm.avatar}
-                            alt="Profile Avatar Preview"
+                            alt="Employee Photo Preview"
                             className="w-24 h-24 rounded-2xl object-cover ring-4 ring-indigo-500/20 shadow-md"
                           />
                           <button
@@ -1416,11 +1404,11 @@ export default function GlobalModals() {
                             : 'Click here or drag & drop photo to upload'}
                         </div>
                         <p className="text-[11px] text-slate-400 mb-3">
-                          JPG, PNG, WEBP (អតិបរមា 10MB) &bull; No URL required
+                          {language === 'km' ? 'JPG, PNG, WEBP (អតិបរមា 10MB) • Upload only' : 'JPG, PNG, WEBP (Max 10MB) • Upload only'}
                         </p>
                         <span className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5">
                           <Upload size={14} />
-                          <span>{language === 'km' ? 'ជ្រើសរើសរូបថតពីកុំព្យូទ័រ' : 'Choose Photo from Computer'}</span>
+                          <span>{language === 'km' ? 'ជ្រើសរើសរូបថតពីកុំព្យូទ័រ' : 'Choose Photo from Device'}</span>
                         </span>
                       </div>
                     )}
@@ -1652,23 +1640,27 @@ export default function GlobalModals() {
           {activeModal === 'request-leave' && (
             <form onSubmit={handleRequestLeave} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">ប្រភេទច្បាប់ (Leave Type)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  {language === 'km' ? 'ប្រភេទច្បាប់ (Leave Type)' : 'Leave Type'}
+                </label>
                 <select
                   value={leaveForm.leave_type}
                   onChange={(e) => setLeaveForm({ ...leaveForm, leave_type: e.target.value })}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                 >
-                  <option value="Annual">ច្បាប់ប្រចាំឆ្នាំ (Annual Leave - 18 ថ្ងៃ/ឆ្នាំ)</option>
-                  <option value="Sick">ច្បាប់ឈឺ (Sick Leave - មានវេជ្ជបញ្ជា)</option>
-                  <option value="Casual">ច្បាប់ធុរៈផ្ទាល់ខ្លួន (Casual / Family Leave)</option>
-                  <option value="Maternity/Paternity">ច្បាប់លំហែមាតុភាព/បិតុភាព (Maternity / Paternity)</option>
-                  <option value="Unpaid">ឈប់សម្រាកគ្មានប្រាក់ឈ្នួល (Unpaid Leave)</option>
+                  <option value="Annual">{language === 'km' ? 'ច្បាប់ប្រចាំឆ្នាំ (Annual Leave - 18 ថ្ងៃ/ឆ្នាំ)' : 'Annual Leave (18 days/year)'}</option>
+                  <option value="Sick">{language === 'km' ? 'ច្បាប់ឈឺ (Sick Leave - មានវេជ្ជបញ្ជា)' : 'Sick Leave (Medical Certificate)'}</option>
+                  <option value="Casual">{language === 'km' ? 'ច្បាប់ធុរៈផ្ទាល់ខ្លួន (Casual / Family Leave)' : 'Casual / Family Leave'}</option>
+                  <option value="Maternity/Paternity">{language === 'km' ? 'ច្បាប់លំហែមាតុភាព/បិតុភាព (Maternity / Paternity)' : 'Maternity / Paternity'}</option>
+                  <option value="Unpaid">{language === 'km' ? 'ឈប់សម្រាកគ្មានប្រាក់ឈ្នួល (Unpaid Leave)' : 'Unpaid Leave'}</option>
                 </select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">ថ្ងៃចាប់ផ្តើម (Start Date)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    {language === 'km' ? 'ថ្ងៃចាប់ផ្តើម (Start Date)' : 'Start Date'}
+                  </label>
                   <input
                     type="date"
                     required
@@ -1678,7 +1670,9 @@ export default function GlobalModals() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">ថ្ងៃបញ្ចប់ (End Date)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    {language === 'km' ? 'ថ្ងៃបញ្ចប់ (End Date)' : 'End Date'}
+                  </label>
                   <input
                     type="date"
                     required
@@ -1690,19 +1684,23 @@ export default function GlobalModals() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">មូលហេតុ / សេចក្តីលម្អិត (Reason)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  {language === 'km' ? 'មូលហេតុ / សេចក្តីលម្អិត (Reason)' : 'Reason / Details'}
+                </label>
                 <textarea
                   rows={3}
                   value={leaveForm.reason}
                   onChange={(e) => setLeaveForm({ ...leaveForm, reason: e.target.value })}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                  placeholder="ធុរៈគ្រួសារ, ទៅស្រុកកំណើត, ពិនិត្យសុខភាព..."
+                  placeholder={language === 'km' ? 'ធុរៈគ្រួសារ, ទៅស្រុកកំណើត, ពិនិត្យសុខភាព...' : 'Personal matters, family travel, health checkup...'}
                 />
               </div>
 
               <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-800 text-xs flex items-center justify-between">
-                <span>ស្នើសុំដោយ៖ <strong>{currentPersona.name}</strong></span>
-                <span className="font-semibold text-amber-900">ការអនុម័តស្តង់ដារ៖ ក្នុងរង្វង់ ២៤ ម៉ោង</span>
+                <span>{language === 'km' ? 'ស្នើសុំដោយ៖ ' : 'Requested by: '}<strong>{formatLocalizedText(currentPersona.name, language)}</strong></span>
+                <span className="font-semibold text-amber-900">
+                  {language === 'km' ? 'ការអនុម័តស្តង់ដារ៖ ក្នុងរង្វង់ ២៤ ម៉ោង' : 'Standard SLA: within 24 hours'}
+                </span>
               </div>
 
               <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
@@ -1711,14 +1709,14 @@ export default function GlobalModals() {
                   onClick={closeModal}
                   className="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg"
                 >
-                  បោះបង់ (Cancel)
+                  {language === 'km' ? 'បោះបង់ (Cancel)' : 'Cancel'}
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
                   className="px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm shadow-indigo-600/30"
                 >
-                  {loading ? 'កំពុងផ្ញើ...' : 'ដាក់ពាក្យស្នើសុំច្បាប់'}
+                  {loading ? (language === 'km' ? 'កំពុងផ្ញើ...' : 'Submitting...') : (language === 'km' ? 'ដាក់ពាក្យស្នើសុំច្បាប់' : 'Submit Leave Request')}
                 </button>
               </div>
             </form>
@@ -1728,7 +1726,9 @@ export default function GlobalModals() {
           {activeModal === 'post-job' && (
             <form onSubmit={handlePostJob} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">មុខតំណែងជ្រើសរើស (Job Title) *</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  {language === 'km' ? 'មុខតំណែងជ្រើសរើស (Job Title) *' : 'Job Title *'}
+                </label>
                 <input
                   type="text"
                   required
@@ -1741,7 +1741,9 @@ export default function GlobalModals() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">នាយកដ្ឋាន (Department)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    {language === 'km' ? 'នាយកដ្ឋាន (Department)' : 'Department'}
+                  </label>
                   <select
                     value={jobForm.department_id}
                     onChange={(e) => setJobForm({ ...jobForm, department_id: e.target.value })}
@@ -1749,54 +1751,62 @@ export default function GlobalModals() {
                   >
                     {departments.map((d) => (
                       <option key={d.id} value={d.id}>
-                        {d.name}
+                        {formatLocalizedText(d.name, language)}
                       </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">ទីតាំង (Location)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    {language === 'km' ? 'ទីតាំង (Location)' : 'Location'}
+                  </label>
                   <input
                     type="text"
                     value={jobForm.location}
                     onChange={(e) => setJobForm({ ...jobForm, location: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="រាជធានីភ្នំពេញ / Exchange Square"
+                    placeholder={language === 'km' ? 'រាជធានីភ្នំពេញ / Exchange Square' : 'Phnom Penh / Exchange Square'}
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">បទពិសោធន៍ (Experience)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    {language === 'km' ? 'បទពិសោធន៍ (Experience)' : 'Experience'}
+                  </label>
                   <input
                     type="text"
                     value={jobForm.experience_level}
                     onChange={(e) => setJobForm({ ...jobForm, experience_level: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="កម្រិតមធ្យម / ៣+ ឆ្នាំ"
+                    placeholder={language === 'km' ? 'កម្រិតមធ្យម / ៣+ ឆ្នាំ' : 'Mid-Level / 3+ Years'}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">កម្រិតប្រាក់បៀវត្សរ៍ (Salary Range)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    {language === 'km' ? 'កម្រិតប្រាក់បៀវត្សរ៍ (Salary Range)' : 'Salary Range'}
+                  </label>
                   <input
                     type="text"
                     value={jobForm.salary_range}
                     onChange={(e) => setJobForm({ ...jobForm, salary_range: e.target.value })}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                    placeholder="$1,200 - $2,000 / ខែ"
+                    placeholder={language === 'km' ? '$1,200 - $2,000 / ខែ' : '$1,200 - $2,000 / month'}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">ការពិពណ៌នាការងារ (Job Description)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  {language === 'km' ? 'ការពិពណ៌នាការងារ (Job Description)' : 'Job Description'}
+                </label>
                 <textarea
                   rows={2}
                   value={jobForm.description}
                   onChange={(e) => setJobForm({ ...jobForm, description: e.target.value })}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                  placeholder="ការទទួលខុសត្រូវ និងគោលដៅចម្បងនៃតួនាទី..."
+                  placeholder={language === 'km' ? 'ការទទួលខុសត្រូវ និងគោលដៅចម្បងនៃតួនាទី...' : 'Key responsibilities and goals for this role...'}
                 />
               </div>
 
@@ -1806,14 +1816,14 @@ export default function GlobalModals() {
                   onClick={closeModal}
                   className="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg"
                 >
-                  បោះបង់ (Cancel)
+                  {language === 'km' ? 'បោះបង់ (Cancel)' : 'Cancel'}
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
                   className="px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm shadow-indigo-600/30"
                 >
-                  {loading ? 'កំពុងផ្សាយ...' : 'ប្រកាសដំណឹងការងារ'}
+                  {loading ? (language === 'km' ? 'កំពុងផ្សាយ...' : 'Publishing...') : (language === 'km' ? 'ប្រកាសដំណឹងការងារ' : 'Post Job Opening')}
                 </button>
               </div>
             </form>
@@ -1823,40 +1833,46 @@ export default function GlobalModals() {
           {activeModal === 'post-announcement' && (
             <form onSubmit={handlePostAnnouncement} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">ចំណងជើងសេចក្តីជូនដំណឹង (Title) *</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  {language === 'km' ? 'ចំណងជើងសេចក្តីជូនដំណឹង (Title) *' : 'Announcement Title *'}
+                </label>
                 <input
                   type="text"
                   required
                   value={annForm.title}
                   onChange={(e) => setAnnForm({ ...annForm, title: e.target.value })}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                  placeholder="សេចក្តីជូនដំណឹងស្តីពី ឈប់សម្រាកបុណ្យអុំទូក ឬគោលការណ៍ថ្មី..."
+                  placeholder={language === 'km' ? 'សេចក្តីជូនដំណឹងស្តីពី ឈប់សម្រាកបុណ្យអុំទូក ឬគោលការណ៍ថ្មី...' : 'Holiday schedule, company memo, or policy update...'}
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">ប្រភេទទូទៅ (Category)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  {language === 'km' ? 'ប្រភេទទូទៅ (Category)' : 'Category'}
+                </label>
                 <select
                   value={annForm.category}
                   onChange={(e) => setAnnForm({ ...annForm, category: e.target.value })}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
                 >
-                  <option value="General">សេចក្តីជូនដំណឹងទូទៅ (General)</option>
-                  <option value="Policy">គោលការណ៍ & ច្បាប់ការងារ (Policy)</option>
-                  <option value="Celebration">កម្មវិធីអបអរ & អត្ថប្រយោជន៍ (Celebration)</option>
-                  <option value="Urgent">ដំណឹងបន្ទាន់ / សំខាន់ (Urgent)</option>
+                  <option value="General">{language === 'km' ? 'សេចក្តីជូនដំណឹងទូទៅ (General)' : 'General Notice'}</option>
+                  <option value="Policy">{language === 'km' ? 'គោលការណ៍ & ច្បាប់ការងារ (Policy)' : 'Policy & Labor Law'}</option>
+                  <option value="Celebration">{language === 'km' ? 'កម្មវិធីអបអរ & អត្ថប្រយោជន៍ (Celebration)' : 'Celebration & Perks'}</option>
+                  <option value="Urgent">{language === 'km' ? 'ដំណឹងបន្ទាន់ / សំខាន់ (Urgent)' : 'Urgent Notice'}</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">ខ្លឹមសារលម្អិត (Content) *</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  {language === 'km' ? 'ខ្លឹមសារលម្អិត (Content) *' : 'Detailed Content *'}
+                </label>
                 <textarea
                   rows={4}
                   required
                   value={annForm.content}
                   onChange={(e) => setAnnForm({ ...annForm, content: e.target.value })}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
-                  placeholder="ចែករំលែកព័ត៌មានលម្អិតជូនបុគ្គលិកទាំងអស់..."
+                  placeholder={language === 'km' ? 'ចែករំលែកព័ត៌មានលម្អិតជូនបុគ្គលិកទាំងអស់...' : 'Share comprehensive update with all staff members...'}
                 />
               </div>
 
@@ -1869,7 +1885,7 @@ export default function GlobalModals() {
                   className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                 />
                 <label htmlFor="pinCheck" className="text-xs font-medium text-slate-700 cursor-pointer">
-                  ខ្ទាស់សេចក្តីជូនដំណឹងនេះនៅខាងលើគេ (Pin Announcement)
+                  {language === 'km' ? 'ខ្ទាស់សេចក្តីជូនដំណឹងនេះនៅខាងលើគេ (Pin Announcement)' : 'Pin this announcement to top of notice board'}
                 </label>
               </div>
 
@@ -1879,14 +1895,14 @@ export default function GlobalModals() {
                   onClick={closeModal}
                   className="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg"
                 >
-                  បោះបង់ (Cancel)
+                  {language === 'km' ? 'បោះបង់ (Cancel)' : 'Cancel'}
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
                   className="px-5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm shadow-indigo-600/30"
                 >
-                  {loading ? 'កំពុងផ្សាយ...' : 'ផ្សាយសេចក្តីជូនដំណឹង'}
+                  {loading ? (language === 'km' ? 'កំពុងផ្សាយ...' : 'Publishing...') : (language === 'km' ? 'ផ្សាយសេចក្តីជូនដំណឹង' : 'Broadcast Announcement')}
                 </button>
               </div>
             </form>
@@ -1897,16 +1913,20 @@ export default function GlobalModals() {
             <form onSubmit={handleRunPayroll} className="space-y-4">
               <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-900 text-xs space-y-2">
                 <div className="font-bold flex items-center gap-1.5 text-sm">
-                  <Check size={16} /> គណនាប្រាក់បៀវត្សរ៍ & បង់វិភាគទាន ប.ស.ស (NSSF Automated Payroll)
+                  <Check size={16} /> {language === 'km' ? 'គណនាប្រាក់បៀវត្សរ៍ & បង់វិភាគទាន ប.ស.ស (NSSF Automated Payroll)' : 'Automated Payroll & Statutory Deductions (NSSF)'}
                 </div>
                 <p>
-                  ប្រព័ន្ធនឹងគណនាប្រាក់ខែមូលដ្ឋាន, ប្រាក់ឧបត្ថម្ភការងារ, ប្រាក់រង្វាន់, កាត់កងវិភាគទាន ប.ស.ស (បេឡាជាតិសន្តិសុខសង្គម) តាមច្បាប់ការងារនៃព្រះរាជាណាចក្រកម្ពុជា និងពន្ធលើប្រាក់បៀវត្សរ៍ជូនបុគ្គលិកទាំងអស់។
+                  {language === 'km'
+                    ? 'ប្រព័ន្ធនឹងគណនាប្រាក់ខែមូលដ្ឋាន, ប្រាក់ឧបត្ថម្ភការងារ, ប្រាក់រង្វាន់, កាត់កងវិភាគទាន ប.ស.ស (បេឡាជាតិសន្តិសុខសង្គម) តាមច្បាប់ការងារនៃព្រះរាជាណាចក្រកម្ពុជា និងពន្ធលើប្រាក់បៀវត្សរ៍ជូនបុគ្គលិកទាំងអស់។'
+                    : 'The system will calculate gross earnings, seniority allowances, attendance bonuses, statutory Cambodian NSSF contributions, and salary withholding tax for all active staff.'}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">ខែបើកបៀវត្សរ៍ (Pay Period)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    {language === 'km' ? 'ខែបើកបៀវត្សរ៍ (Pay Period)' : 'Pay Period'}
+                  </label>
                   <input
                     type="text"
                     required
@@ -1916,7 +1936,9 @@ export default function GlobalModals() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">កាលបរិច្ឆេទបើកប្រាក់ (Disbursement Date)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    {language === 'km' ? 'កាលបរិច្ឆេទបើកប្រាក់ (Disbursement Date)' : 'Disbursement Date'}
+                  </label>
                   <input
                     type="date"
                     required
@@ -1933,14 +1955,14 @@ export default function GlobalModals() {
                   onClick={closeModal}
                   className="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg"
                 >
-                  បោះបង់ (Cancel)
+                  {language === 'km' ? 'បោះបង់ (Cancel)' : 'Cancel'}
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
                   className="px-5 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm shadow-emerald-600/30"
                 >
-                  {loading ? 'កំពុងដំណើរការ...' : 'យល់ព្រមដំណើរការបើកប្រាក់ខែ'}
+                  {loading ? (language === 'km' ? 'កំពុងដំណើរការ...' : 'Processing...') : (language === 'km' ? 'យល់ព្រមដំណើរការបើកប្រាក់ខែ' : 'Approve & Execute Payroll')}
                 </button>
               </div>
             </form>

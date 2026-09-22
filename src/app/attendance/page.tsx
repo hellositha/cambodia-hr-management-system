@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { AttendanceRecord } from '@/lib/types';
+import { formatLocalizedText } from '@/lib/translations';
 import {
   Clock,
   Calendar,
@@ -125,12 +126,12 @@ export default function AttendancePage() {
         body: JSON.stringify(manualForm),
       });
       if (res.ok) {
-        showToast('បានកត់ត្រាវត្តមានដោយជោគជ័យ! ✓ (Attendance logged successfully)', 'success');
+        showToast(language === 'km' ? 'បានកត់ត្រាវត្តមានដោយជោគជ័យ! ✓' : 'Attendance logged successfully! ✓', 'success');
         setManualModalOpen(false);
         triggerRefresh();
       } else {
         const err = await res.json();
-        showToast(err.error || 'បរាជ័យក្នុងការកត់ត្រា', 'error');
+        showToast(err.error || (language === 'km' ? 'បរាជ័យក្នុងការកត់ត្រា' : 'Failed to record attendance'), 'error');
       }
     } catch {
       showToast('Network error saving record', 'error');
@@ -145,8 +146,8 @@ export default function AttendancePage() {
     const headers = ['Date', 'Employee Name', 'Role', 'Clock In', 'Clock Out', 'Logged Hours', 'Status', 'Notes'];
     const rows = filteredRecords.map((r) => [
       r.date,
-      `"${r.employee_name || currentPersona.name}"`,
-      `"${r.employee_role || currentPersona.title}"`,
+      `"${formatLocalizedText(r.employee_name || currentPersona.name, language)}"`,
+      `"${formatLocalizedText(r.employee_role || currentPersona.title, language)}"`,
       r.clock_in || '--',
       r.clock_out || '--',
       r.work_hours || 0,
@@ -162,7 +163,7 @@ export default function AttendancePage() {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    showToast('របាយការណ៍វត្តមានត្រូវបានទាញយកជា CSV រួចរាល់! ✓', 'success');
+    showToast(language === 'km' ? 'របាយការណ៍វត្តមានត្រូវបានទាញយកជា CSV រួចរាល់! ✓' : 'Attendance report exported as CSV! ✓', 'success');
   };
 
   return (
@@ -173,13 +174,17 @@ export default function AttendancePage() {
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
             <Clock className="text-emerald-600" size={26} />
             {isEmployee || viewMode === 'my-report'
-              ? 'របាយការណ៍វត្តមានផ្ទាល់ខ្លួន (My Attendance Report)'
-              : 'វត្តមាន & ម៉ោងធ្វើការបុគ្គលិក (Attendance & Time Tracking)'}
+              ? (language === 'km' ? 'របាយការណ៍វត្តមានផ្ទាល់ខ្លួន (My Attendance Report)' : 'My Attendance Report')
+              : (language === 'km' ? 'វត្តមាន & ម៉ោងធ្វើការបុគ្គលិក (Attendance & Time Tracking)' : 'Attendance & Time Tracking')}
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
             {isEmployee || viewMode === 'my-report'
-              ? `របាយការណ៍វត្តមាន ម៉ោងធ្វើការ និងអត្រាចូលបម្រើការងាររបស់៖ ${currentPersona.name} (${currentPersona.title})`
-              : 'កត់ត្រាវត្តមានជាក់ស្តែង, តាមដានម៉ោងធ្វើការបុគ្គលិកទូទាំងស្ថាប័ន និងរបាយការណ៍ប្រចាំថ្ងៃ'}
+              ? (language === 'km'
+                  ? `របាយការណ៍វត្តមាន ម៉ោងធ្វើការ និងអត្រាចូលបម្រើការងាររបស់៖ ${currentPersona.name} (${currentPersona.title})`
+                  : `Attendance, working hours, and presence rate for: ${formatLocalizedText(currentPersona.name, language)} (${formatLocalizedText(currentPersona.title, language)})`)
+              : (language === 'km'
+                  ? 'កត់ត្រាវត្តមានជាក់ស្តែង, តាមដានម៉ោងធ្វើការបុគ្គលិកទូទាំងស្ថាប័ន និងរបាយការណ៍ប្រចាំថ្ងៃ'
+                  : 'Real-time attendance logs, staff working hours, and daily organizational reports')}
           </p>
         </div>
 
@@ -195,7 +200,7 @@ export default function AttendancePage() {
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                តារាងរួម (Roster)
+                {language === 'km' ? 'តារាងរួម (Roster)' : 'Team Roster'}
               </button>
               <button
                 onClick={() => setViewMode('my-report')}
@@ -205,7 +210,7 @@ export default function AttendancePage() {
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                របាយការណ៍ខ្ញុំ (My Report)
+                {language === 'km' ? 'របាយការណ៍ខ្ញុំ (My Report)' : 'My Report'}
               </button>
             </div>
           )}
@@ -216,7 +221,7 @@ export default function AttendancePage() {
             className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold shadow-2xs flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Printer size={15} className="text-slate-600" />
-            <span>បោះពុម្ព (Print)</span>
+            <span>{language === 'km' ? 'បោះពុម្ព (Print)' : 'Print'}</span>
           </button>
 
           <button
@@ -224,7 +229,7 @@ export default function AttendancePage() {
             className="px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold shadow-2xs flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Download size={15} className="text-indigo-600" />
-            <span>ទាញយក CSV</span>
+            <span>{language === 'km' ? 'ទាញយក CSV' : 'Export CSV'}</span>
           </button>
 
           {/* Manual Entry for Admins/Managers only */}
@@ -233,7 +238,7 @@ export default function AttendancePage() {
               onClick={() => setManualModalOpen(true)}
               className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md shadow-slate-900/20 flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
             >
-              <Plus size={16} /> កត់ត្រាវត្តមានដោយដៃ (Manual Shift)
+              <Plus size={16} /> {language === 'km' ? 'កត់ត្រាវត្តមានដោយដៃ (Manual Shift)' : 'Manual Shift Entry'}
             </button>
           )}
         </div>
@@ -243,30 +248,42 @@ export default function AttendancePage() {
       <div className="hidden print:block p-4 border-b-2 border-slate-800 mb-6 font-khmer">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-black text-slate-900 uppercase">HESTRA HRM - របាយការណ៍វត្តមានផ្លូវការ</h1>
+            <h1 className="text-xl font-black text-slate-900 uppercase">
+              {language === 'km' ? 'HESTRA HRM - របាយការណ៍វត្តមានផ្លូវការ' : 'HESTRA HRM - OFFICIAL ATTENDANCE REPORT'}
+            </h1>
             <p className="text-xs text-slate-600">OFFICIAL MONTHLY ATTENDANCE & TIMESHEET REPORT</p>
           </div>
           <div className="text-right text-xs">
-            <span className="font-bold">កាលបរិច្ឆេទចេញ៖ {new Date().toLocaleDateString('km-KH')}</span>
+            <span className="font-bold">
+              {language === 'km' ? `កាលបរិច្ឆេទចេញ៖ ${new Date().toLocaleDateString('km-KH')}` : `Issue Date: ${new Date().toLocaleDateString('en-US')}`}
+            </span>
             <p className="text-[10px] text-slate-500">Page 1 of 1</p>
           </div>
         </div>
 
         <div className="grid grid-cols-4 gap-4 mt-4 pt-3 border-t border-slate-200 text-xs">
           <div>
-            <span className="text-slate-400 block text-[10px]">ឈ្មោះបុគ្គលិក (Employee Name):</span>
-            <span className="font-bold text-slate-900">{currentPersona.name}</span>
+            <span className="text-slate-400 block text-[10px]">
+              {language === 'km' ? 'ឈ្មោះបុគ្គលិក (Employee Name):' : 'Employee Name:'}
+            </span>
+            <span className="font-bold text-slate-900">{formatLocalizedText(currentPersona.name, language)}</span>
           </div>
           <div>
-            <span className="text-slate-400 block text-[10px]">អត្តលេខ (Staff ID):</span>
+            <span className="text-slate-400 block text-[10px]">
+              {language === 'km' ? 'អត្តលេខ (Staff ID):' : 'Staff ID:'}
+            </span>
             <span className="font-bold font-mono text-slate-900">{currentPersona.id.toUpperCase()}</span>
           </div>
           <div>
-            <span className="text-slate-400 block text-[10px]">តួនាទី (Designation):</span>
-            <span className="font-bold text-slate-900">{currentPersona.title}</span>
+            <span className="text-slate-400 block text-[10px]">
+              {language === 'km' ? 'តួនាទី (Designation):' : 'Designation:'}
+            </span>
+            <span className="font-bold text-slate-900">{formatLocalizedText(currentPersona.title, language)}</span>
           </div>
           <div>
-            <span className="text-slate-400 block text-[10px]">ខែរាយការណ៍ (Period):</span>
+            <span className="text-slate-400 block text-[10px]">
+              {language === 'km' ? 'ខែរាយការណ៍ (Period):' : 'Period:'}
+            </span>
             <span className="font-bold text-slate-900">{selectedMonth}</span>
           </div>
         </div>
@@ -277,22 +294,30 @@ export default function AttendancePage() {
         <div className="space-y-1.5 text-center md:text-left">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-semibold">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-            <span>នាឡិកាកត់ត្រាវត្តមានផ្ទាល់ (Live Punch Clock)</span>
+            <span>{language === 'km' ? 'នាឡិកាកត់ត្រាវត្តមានផ្ទាល់ (Live Punch Clock)' : 'Live Punch Clock'}</span>
           </div>
           <div className="text-3xl sm:text-4xl font-black font-mono tracking-wider text-emerald-400">
             {currentTime || '08:30:00 AM'}
           </div>
           <p className="text-xs text-slate-300">
-            កត់ត្រាវត្តមានសម្រាប់៖ <span className="font-bold text-white">{currentPersona.name}</span> ({currentPersona.title})
+            {language === 'km' ? (
+              <>កត់ត្រាវត្តមានសម្រាប់៖ <span className="font-bold text-white">{currentPersona.name}</span> ({currentPersona.title})</>
+            ) : (
+              <>Logging attendance for: <span className="font-bold text-white">{formatLocalizedText(currentPersona.name, language)}</span> ({formatLocalizedText(currentPersona.title, language)})</>
+            )}
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
           <div className="p-3 bg-white/10 rounded-xl border border-white/10 text-center px-6">
-            <span className="text-[10px] text-slate-300 block uppercase font-bold">ស្ថានភាពវេនការងារ</span>
+            <span className="text-[10px] text-slate-300 block uppercase font-bold">
+              {language === 'km' ? 'ស្ថានភាពវេនការងារ' : 'Shift Status'}
+            </span>
             <span className="text-sm font-extrabold text-white flex items-center justify-center gap-1.5 mt-0.5">
               <span className={`w-2 h-2 rounded-full ${isClockedIn ? 'bg-emerald-400' : 'bg-slate-400'}`}></span>
-              {isClockedIn ? 'កំពុងបំពេញការងារ (Clocked In)' : 'មិនទាន់កត់ត្រាចូល (Shift Inactive)'}
+              {isClockedIn
+                ? (language === 'km' ? 'កំពុងបំពេញការងារ (Clocked In)' : 'Clocked In')
+                : (language === 'km' ? 'មិនទាន់កត់ត្រាចូល (Shift Inactive)' : 'Shift Inactive')}
             </span>
           </div>
 
@@ -306,11 +331,11 @@ export default function AttendancePage() {
           >
             {isClockedIn ? (
               <>
-                <Square size={16} className="fill-current" /> កត់ត្រាចេញ (Clock Out)
+                <Square size={16} className="fill-current" /> {language === 'km' ? 'កត់ត្រាចេញ (Clock Out)' : 'Clock Out'}
               </>
             ) : (
               <>
-                <Play size={16} className="fill-current" /> កត់ត្រាចូល (Clock In)
+                <Play size={16} className="fill-current" /> {language === 'km' ? 'កត់ត្រាចូល (Clock In)' : 'Clock In'}
               </>
             )}
           </button>
@@ -321,52 +346,62 @@ export default function AttendancePage() {
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-3.5">
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[11px] font-bold uppercase">វត្តមានការិយាល័យ</span>
+            <span className="text-[11px] font-bold uppercase">{language === 'km' ? 'វត្តមានការិយាល័យ' : 'Office Present'}</span>
             <Building2 size={16} className="text-emerald-600" />
           </div>
-          <div className="text-2xl font-black text-emerald-600 my-1 font-mono">{presentCount} ថ្ងៃ</div>
+          <div className="text-2xl font-black text-emerald-600 my-1 font-mono">
+            {presentCount} {language === 'km' ? 'ថ្ងៃ' : 'days'}
+          </div>
           <span className="text-[10px] text-slate-500">Office Attendance</span>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[11px] font-bold uppercase">ធ្វើការពីផ្ទះ (WFH)</span>
+            <span className="text-[11px] font-bold uppercase">{language === 'km' ? 'ធ្វើការពីផ្ទះ (WFH)' : 'Remote (WFH)'}</span>
             <Home size={16} className="text-blue-600" />
           </div>
-          <div className="text-2xl font-black text-blue-600 my-1 font-mono">{remoteCount} ថ្ងៃ</div>
+          <div className="text-2xl font-black text-blue-600 my-1 font-mono">
+            {remoteCount} {language === 'km' ? 'ថ្ងៃ' : 'days'}
+          </div>
           <span className="text-[10px] text-slate-500">Remote Work Sessions</span>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[11px] font-bold uppercase">មកយឺត (Late)</span>
+            <span className="text-[11px] font-bold uppercase">{language === 'km' ? 'មកយឺត (Late)' : 'Late Arrivals'}</span>
             <AlertTriangle size={16} className="text-amber-600" />
           </div>
-          <div className="text-2xl font-black text-amber-600 my-1 font-mono">{lateCount} ថ្ងៃ</div>
-          <span className="text-[10px] text-slate-500">ក្រោយ ០៨:៣០ ព្រឹក</span>
+          <div className="text-2xl font-black text-amber-600 my-1 font-mono">
+            {lateCount} {language === 'km' ? 'ថ្ងៃ' : 'days'}
+          </div>
+          <span className="text-[10px] text-slate-500">{language === 'km' ? 'ក្រោយ ០៨:៣០ ព្រឹក' : 'After 08:30 AM'}</span>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[11px] font-bold uppercase">ច្បាប់ / អវត្តមាន</span>
+            <span className="text-[11px] font-bold uppercase">{language === 'km' ? 'ច្បាប់ / អវត្តមាន' : 'Leaves / Absent'}</span>
             <UserX size={16} className="text-rose-600" />
           </div>
-          <div className="text-2xl font-black text-rose-600 my-1 font-mono">{absentCount} ថ្ងៃ</div>
+          <div className="text-2xl font-black text-rose-600 my-1 font-mono">
+            {absentCount} {language === 'km' ? 'ថ្ងៃ' : 'days'}
+          </div>
           <span className="text-[10px] text-slate-500">Leaves / Excused</span>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[11px] font-bold uppercase">ម៉ោងការងារសរុប</span>
+            <span className="text-[11px] font-bold uppercase">{language === 'km' ? 'ម៉ោងការងារសរុប' : 'Total Hours'}</span>
             <Clock size={16} className="text-indigo-600" />
           </div>
-          <div className="text-2xl font-black text-indigo-600 my-1 font-mono">{totalHours.toFixed(1)} ម៉ោង</div>
+          <div className="text-2xl font-black text-indigo-600 my-1 font-mono">
+            {totalHours.toFixed(1)} {language === 'km' ? 'ម៉ោង' : 'hrs'}
+          </div>
           <span className="text-[10px] text-slate-500">Total Hours Logged</span>
         </div>
 
         <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs col-span-2 lg:col-span-1">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-[11px] font-bold uppercase">អត្រាវត្តមាន</span>
+            <span className="text-[11px] font-bold uppercase">{language === 'km' ? 'អត្រាវត្តមាន' : 'Attendance Rate'}</span>
             <TrendingUp size={16} className="text-emerald-600" />
           </div>
           <div className="text-2xl font-black text-emerald-600 my-1 font-mono">{attendanceRate}%</div>
@@ -383,7 +418,7 @@ export default function AttendancePage() {
             /* Month Selector for Personal Report */
             <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl text-xs">
               <Calendar size={15} className="text-indigo-600" />
-              <span className="text-slate-500 font-semibold">ខែរាយការណ៍ (Month):</span>
+              <span className="text-slate-500 font-semibold">{language === 'km' ? 'ខែរាយការណ៍ (Month):' : 'Month:'}</span>
               <input
                 type="month"
                 value={selectedMonth}
@@ -416,7 +451,7 @@ export default function AttendancePage() {
                     selectedMonth === m ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:bg-slate-100'
                   }`}
                 >
-                  {m === '2026-09' ? 'ខែកញ្ញា (Current)' : m}
+                  {m === '2026-09' ? (language === 'km' ? 'ខែកញ្ញា (Current)' : 'Sep (Current)') : m}
                 </button>
               ))}
             </div>
@@ -443,7 +478,7 @@ export default function AttendancePage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
             <input
               type="text"
-              placeholder={viewMode === 'my-report' ? 'Filter by notes or dates...' : 'Search staff...'}
+              placeholder={viewMode === 'my-report' ? (language === 'km' ? 'ស្វែងរកកំណត់សម្គាល់...' : 'Filter by notes...') : (language === 'km' ? 'ស្វែងរកបុគ្គលិក...' : 'Search staff...')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500"
@@ -456,11 +491,11 @@ export default function AttendancePage() {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-hidden cursor-pointer"
           >
-            <option value="all">ស្ថានភាពទាំងអស់ (All)</option>
-            <option value="Present">វត្តមាន (Present)</option>
-            <option value="Remote">ធ្វើការពីផ្ទះ (Remote)</option>
-            <option value="Late">មកយឺត (Late)</option>
-            <option value="Absent">អវត្តមាន (Absent)</option>
+            <option value="all">{language === 'km' ? 'ស្ថានភាពទាំងអស់ (All)' : 'All Statuses'}</option>
+            <option value="Present">{language === 'km' ? 'វត្តមាន (Present)' : 'Present'}</option>
+            <option value="Remote">{language === 'km' ? 'ធ្វើការពីផ្ទះ (Remote)' : 'Remote (WFH)'}</option>
+            <option value="Late">{language === 'km' ? 'មកយឺត (Late)' : 'Late'}</option>
+            <option value="Absent">{language === 'km' ? 'អវត្តមាន (Absent)' : 'Absent'}</option>
           </select>
         </div>
       </div>
@@ -472,8 +507,8 @@ export default function AttendancePage() {
             <FileText size={16} className="text-indigo-600" />
             <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
               {viewMode === 'my-report'
-                ? `ប្រវត្តិនៃការកត់ត្រាវត្តមានប្រចាំខែ (${filteredRecords.length} ថ្ងៃ)`
-                : `បញ្ជីវត្តមានប្រចាំថ្ងៃ (${filteredRecords.length} នាក់)`}
+                ? (language === 'km' ? `ប្រវត្តិនៃការកត់ត្រាវត្តមានប្រចាំខែ (${filteredRecords.length} ថ្ងៃ)` : `Monthly Attendance History (${filteredRecords.length} days)`)
+                : (language === 'km' ? `បញ្ជីវត្តមានប្រចាំថ្ងៃ (${filteredRecords.length} នាក់)` : `Daily Attendance Roster (${filteredRecords.length} staff)`)}
             </h2>
           </div>
           <span className="text-[11px] font-mono text-slate-400">
@@ -482,25 +517,25 @@ export default function AttendancePage() {
         </div>
 
         {loading ? (
-          <div className="py-16 text-center text-slate-400 text-xs">កំពុងទាញយកទិន្នន័យវត្តមាន...</div>
+          <div className="py-16 text-center text-slate-400 text-xs">{language === 'km' ? 'កំពុងទាញយកទិន្នន័យវត្តមាន...' : 'Loading attendance records...'}</div>
         ) : filteredRecords.length === 0 ? (
           <div className="py-16 text-center text-slate-400 text-xs px-4">
             {viewMode === 'my-report'
-              ? 'លោកអ្នកមិនទាន់មានកំណត់ត្រាវត្តមានក្នុងខែនេះនៅឡើយទេ។ សូមចុចប៊ូតុង "កត់ត្រាចូល (Clock In)" ខាងលើដើម្បីកត់ត្រា។'
-              : 'រកមិនឃើញទិន្នន័យវត្តមានសម្រាប់កាលបរិច្ឆេទនេះឡើយ។'}
+              ? (language === 'km' ? 'លោកអ្នកមិនទាន់មានកំណត់ត្រាវត្តមានក្នុងខែនេះនៅឡើយទេ។ សូមចុចប៊ូតុង "កត់ត្រាចូល (Clock In)" ខាងលើដើម្បីកត់ត្រា។' : 'No attendance records found for this month. Click "Clock In" above to start.')
+              : (language === 'km' ? 'រកមិនឃើញទិន្នន័យវត្តមានសម្រាប់កាលបរិច្ឆេទនេះឡើយ។' : 'No attendance records found for this date.')}
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-slate-600">
               <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-700 font-bold uppercase tracking-wider text-[10px]">
                 <tr>
-                  <th className="px-5 py-3.5">កាលបរិច្ឆេទ (Date)</th>
-                  {viewMode !== 'my-report' && <th className="px-5 py-3.5">បុគ្គលិក (Employee)</th>}
-                  <th className="px-5 py-3.5">ម៉ោងកត់ត្រាចូល (Clock In)</th>
-                  <th className="px-5 py-3.5">ម៉ោងកត់ត្រាចេញ (Clock Out)</th>
-                  <th className="px-5 py-3.5 font-mono">ម៉ោងសរុប (Hours)</th>
-                  <th className="px-5 py-3.5">ស្ថានភាព (Status)</th>
-                  <th className="px-5 py-3.5">កំណត់សម្គាល់ (Activity Notes)</th>
+                  <th className="px-5 py-3.5">{language === 'km' ? 'កាលបរិច្ឆេទ (Date)' : 'Date'}</th>
+                  {viewMode !== 'my-report' && <th className="px-5 py-3.5">{language === 'km' ? 'បុគ្គលិក (Employee)' : 'Employee'}</th>}
+                  <th className="px-5 py-3.5">{language === 'km' ? 'ម៉ោងកត់ត្រាចូល (Clock In)' : 'Clock In'}</th>
+                  <th className="px-5 py-3.5">{language === 'km' ? 'ម៉ោងកត់ត្រាចេញ (Clock Out)' : 'Clock Out'}</th>
+                  <th className="px-5 py-3.5 font-mono">{language === 'km' ? 'ម៉ោងសរុប (Hours)' : 'Hours'}</th>
+                  <th className="px-5 py-3.5">{language === 'km' ? 'ស្ថានភាព (Status)' : 'Status'}</th>
+                  <th className="px-5 py-3.5">{language === 'km' ? 'កំណត់សម្គាល់ (Activity Notes)' : 'Activity Notes'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -516,13 +551,13 @@ export default function AttendancePage() {
                     {viewMode !== 'my-report' && (
                       <td className="px-5 py-3 flex items-center gap-3">
                         <img
-                          src={rec.employee_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces'}
+                          src={rec.employee_avatar || '/avatars/khmer_female_1.jpg'}
                           alt={rec.employee_name || 'Staff'}
                           className="w-8 h-8 rounded-xl object-cover ring-1 ring-slate-200"
                         />
                         <div>
-                          <div className="font-bold text-slate-900">{rec.employee_name}</div>
-                          <div className="text-[11px] text-slate-400">{rec.employee_role}</div>
+                          <div className="font-bold text-slate-900">{formatLocalizedText(rec.employee_name, language)}</div>
+                          <div className="text-[11px] text-slate-400">{formatLocalizedText(rec.employee_role, language)}</div>
                         </div>
                       </td>
                     )}
@@ -564,17 +599,17 @@ export default function AttendancePage() {
                         }`}
                       >
                         {rec.status === 'Present'
-                          ? '✓ វត្តមាន (Present)'
+                          ? (language === 'km' ? '✓ វត្តមាន (Present)' : '✓ Present')
                           : rec.status === 'Remote'
-                          ? '🏠 ធ្វើការពីផ្ទះ (WFH)'
+                          ? (language === 'km' ? '🏠 ធ្វើការពីផ្ទះ (WFH)' : '🏠 Remote (WFH)')
                           : rec.status === 'Late'
-                          ? '⏰ មកយឺត (Late)'
-                          : '✕ អវត្តមាន (Absent)'}
+                          ? (language === 'km' ? '⏰ មកយឺត (Late)' : '⏰ Late')
+                          : (language === 'km' ? '✕ អវត្តមាន (Absent)' : '✕ Absent')}
                       </span>
                     </td>
 
                     <td className="px-5 py-3 text-slate-500 text-[11px] max-w-xs truncate">
-                      {rec.notes || 'កត់ត្រាតាមប្រព័ន្ធស្វ័យប្រវត្តិ'}
+                      {formatLocalizedText(rec.notes, language) || (language === 'km' ? 'កត់ត្រាតាមប្រព័ន្ធស្វ័យប្រវត្តិ' : 'Auto-recorded')}
                     </td>
                   </tr>
                 ))}
@@ -587,15 +622,15 @@ export default function AttendancePage() {
       {/* Printable Sign-off Footer (shown only when printing) */}
       <div className="hidden print:grid grid-cols-2 gap-12 pt-12 mt-12 border-t-2 border-slate-300 font-khmer text-xs">
         <div className="space-y-12">
-          <p className="font-semibold text-slate-700">ហត្ថលេខាបុគ្គលិក (Employee Signature):</p>
+          <p className="font-semibold text-slate-700">{language === 'km' ? 'ហត្ថលេខាបុគ្គលិក (Employee Signature):' : 'Employee Signature:'}</p>
           <div className="border-b border-dashed border-slate-400 w-48"></div>
-          <p className="text-[11px] text-slate-500">កាលបរិច្ឆេទ៖ ..... / ..... / .........</p>
+          <p className="text-[11px] text-slate-500">{language === 'km' ? 'កាលបរិច្ឆេទ៖ ..... / ..... / .........' : 'Date: ..... / ..... / .........'}</p>
         </div>
 
         <div className="space-y-12 text-right">
-          <p className="font-semibold text-slate-700">ហត្ថលេខាប្រធានផ្នែក / HR (Approved By):</p>
+          <p className="font-semibold text-slate-700">{language === 'km' ? 'ហត្ថលេខាប្រធានផ្នែក / HR (Approved By):' : 'Approved By (HR / Manager):'}</p>
           <div className="border-b border-dashed border-slate-400 w-48 ml-auto"></div>
-          <p className="text-[11px] text-slate-500">កាលបរិច្ឆេទ៖ ..... / ..... / .........</p>
+          <p className="text-[11px] text-slate-500">{language === 'km' ? 'កាលបរិច្ឆេទ៖ ..... / ..... / .........' : 'Date: ..... / ..... / .........'}</p>
         </div>
       </div>
 
@@ -606,7 +641,7 @@ export default function AttendancePage() {
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <Clock size={18} className="text-indigo-600" />
-                <span>កត់ត្រាវត្តមានដោយដៃ (Manual Shift Entry)</span>
+                <span>{language === 'km' ? 'កត់ត្រាវត្តមានដោយដៃ (Manual Shift Entry)' : 'Manual Shift Entry'}</span>
               </h3>
               <button
                 onClick={() => setManualModalOpen(false)}
@@ -618,7 +653,7 @@ export default function AttendancePage() {
 
             <form onSubmit={handleManualSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">កាលបរិច្ឆេទ (Date)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{language === 'km' ? 'កាលបរិច្ឆេទ (Date)' : 'Date'}</label>
                 <input
                   type="date"
                   required
@@ -630,7 +665,7 @@ export default function AttendancePage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">ម៉ោងចូល (Clock In)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">{language === 'km' ? 'ម៉ោងចូល (Clock In)' : 'Clock In'}</label>
                   <input
                     type="time"
                     step="1"
@@ -641,7 +676,7 @@ export default function AttendancePage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">ម៉ោងចេញ (Clock Out)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">{language === 'km' ? 'ម៉ោងចេញ (Clock Out)' : 'Clock Out'}</label>
                   <input
                     type="time"
                     step="1"
@@ -655,7 +690,7 @@ export default function AttendancePage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">ស្ថានភាព (Status)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">{language === 'km' ? 'ស្ថានភាព (Status)' : 'Status'}</label>
                   <select
                     value={manualForm.status}
                     onChange={(e) => setManualForm({ ...manualForm, status: e.target.value })}
@@ -668,7 +703,7 @@ export default function AttendancePage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">ម៉ោងការងារ (Hours)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">{language === 'km' ? 'ម៉ោងការងារ (Hours)' : 'Hours'}</label>
                   <input
                     type="number"
                     step="0.5"
@@ -681,12 +716,12 @@ export default function AttendancePage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">កំណត់សម្គាល់ (Notes)</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">{language === 'km' ? 'កំណត់សម្គាល់ (Notes)' : 'Notes'}</label>
                 <input
                   type="text"
                   value={manualForm.notes}
                   onChange={(e) => setManualForm({ ...manualForm, notes: e.target.value })}
-                  placeholder="មូលហេតុ ឬសេចក្តីលម្អិតវេន..."
+                  placeholder={language === 'km' ? 'មូលហេតុ ឬសេចក្តីលម្អិតវេន...' : 'Reason or shift details...'}
                   className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl"
                 />
               </div>
@@ -697,13 +732,13 @@ export default function AttendancePage() {
                   onClick={() => setManualModalOpen(false)}
                   className="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-xl cursor-pointer"
                 >
-                  បោះបង់
+                  {language === 'km' ? 'បោះបង់' : 'Cancel'}
                 </button>
                 <button
                   type="submit"
                   className="px-5 py-2 text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 rounded-xl shadow-sm cursor-pointer"
                 >
-                  រក្សាទុកវត្តមាន
+                  {language === 'km' ? 'រក្សាទុកវត្តមាន' : 'Save Attendance'}
                 </button>
               </div>
             </form>

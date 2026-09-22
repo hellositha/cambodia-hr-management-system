@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
+import { formatLocalizedText } from '@/lib/translations';
 import { LeaveRequest } from '@/lib/types';
 import {
   CalendarCheck,
@@ -19,7 +20,7 @@ import {
 } from 'lucide-react';
 
 export default function LeavesPage() {
-  const { currentPersona, openModal, showToast, triggerRefresh, refreshKey } = useApp();
+  const { currentPersona, openModal, showToast, triggerRefresh, refreshKey, language } = useApp();
 
   const [leaves, setLeaves] = useState<LeaveRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -67,26 +68,32 @@ export default function LeavesPage() {
           reviewer_role: currentPersona.role,
           reviewer_comments:
             decision === 'Rejected'
-              ? `ពុំអាចអនុញ្ញាតបានដោយសារតម្រូវការការងារបន្ទាន់ (Declined by ${currentPersona.name}).`
+              ? (language === 'km'
+                  ? `ពុំអាចអនុញ្ញាតបានដោយសារតម្រូវការការងារបន្ទាន់ (Declined by ${currentPersona.name}).`
+                  : `Declined due to operational requirements by ${formatLocalizedText(currentPersona.name, language)}.`)
               : isLineManagerStage
-              ? `អនុម័តជំហានទី១ ដោយប្រធានផ្នែក ${currentPersona.name}។ បានបញ្ជូនទៅរដ្ឋបាល HR Admin (Step 1 Approved by Line Manager. Forwarded to Admin).`
-              : `អនុម័តជាស្ថាពរដោយរដ្ឋបាល HR Admin ${currentPersona.name} (Step 2 Final Approval granted by HR Administrator).`,
+              ? (language === 'km'
+                  ? `អនុម័តជំហានទី១ ដោយប្រធានផ្នែក ${currentPersona.name}។ បានបញ្ជូនទៅរដ្ឋបាល HR Admin (Step 1 Approved by Line Manager. Forwarded to Admin).`
+                  : `Step 1 Approved by Line Manager ${formatLocalizedText(currentPersona.name, language)}. Forwarded to HR Admin.`)
+              : (language === 'km'
+                  ? `អនុម័តជាស្ថាពរដោយរដ្ឋបាល HR Admin ${currentPersona.name} (Step 2 Final Approval granted by HR Administrator).`
+                  : `Step 2 Final Approval granted by HR Administrator ${formatLocalizedText(currentPersona.name, language)}.`),
         }),
       });
 
       if (res.ok) {
         const updated = await res.json();
         if (decision === 'Rejected') {
-          showToast(`សំណើសុំច្បាប់របស់ ${employeeName} ត្រូវបានបដិសេធ`, 'info');
+          showToast(language === 'km' ? `សំណើសុំច្បាប់របស់ ${employeeName} ត្រូវបានបដិសេធ` : `Leave request for ${formatLocalizedText(employeeName, language)} was rejected`, 'info');
         } else if (updated.status === 'Pending Admin') {
-          showToast(`បានអនុម័តជំហានទី១ សម្រាប់ ${employeeName} និងបញ្ជូនទៅរដ្ឋបាលរួចរាល់! ✓`, 'success');
+          showToast(language === 'km' ? `បានអនុម័តជំហានទី១ សម្រាប់ ${employeeName} និងបញ្ជូនទៅរដ្ឋបាលរួចរាល់! ✓` : `Step 1 approved for ${formatLocalizedText(employeeName, language)} and forwarded to Admin! ✓`, 'success');
         } else {
-          showToast(`បានអនុម័តជាស្ថាពរសម្រាប់ ${employeeName} (2/2 ជំហាន)! ✓`, 'success');
+          showToast(language === 'km' ? `បានអនុម័តជាស្ថាពរសម្រាប់ ${employeeName} (2/2 ជំហាន)! ✓` : `Final approval granted for ${formatLocalizedText(employeeName, language)} (2/2 steps)! ✓`, 'success');
         }
         triggerRefresh();
       } else {
         const err = await res.json();
-        showToast(err.error || 'បរាជ័យក្នុងការអនុម័ត', 'error');
+        showToast(err.error || (language === 'km' ? 'បរាជ័យក្នុងការអនុម័ត' : 'Failed to process review'), 'error');
       }
     } catch {
       showToast('Network error updating leave', 'error');
@@ -136,19 +143,25 @@ export default function LeavesPage() {
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
             <CalendarCheck className="text-amber-500" size={26} />
-            {isEmployee ? 'ពាក្យស្នើសុំ និងសមតុល្យច្បាប់ (My Leaves & Requests)' : 'គ្រប់គ្រងច្បាប់ឈប់សម្រាក (Two-Stage Leave Management)'}
+            {isEmployee
+              ? (language === 'km' ? 'ពាក្យស្នើសុំ និងសមតុល្យច្បាប់ (My Leaves & Requests)' : 'My Leaves & Requests')
+              : (language === 'km' ? 'គ្រប់គ្រងច្បាប់ឈប់សម្រាក (Two-Stage Leave Management)' : 'Two-Stage Leave Management')}
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
             {isEmployee
-              ? 'ដាក់ពាក្យស្នើសុំច្បាប់ តាមដានដំណើរការអនុម័ត ២ ជំហាន (ប្រធានផ្នែក ➔ រដ្ឋបាល) និងសមតុល្យច្បាប់ផ្ទាល់ខ្លួន'
-              : 'ប្រព័ន្ធអនុម័តច្បាប់ ២ ជំហាន៖ ជំហានទី១ ប្រធានផ្នែក (Line Manager) ➔ ជំហានទី២ រដ្ឋបាល (Administrator)'}
+              ? (language === 'km'
+                  ? 'ដាក់ពាក្យស្នើសុំច្បាប់ តាមដានដំណើរការអនុម័ត ២ ជំហាន (ប្រធានផ្នែក ➔ រដ្ឋបាល) និងសមតុល្យច្បាប់ផ្ទាល់ខ្លួន'
+                  : 'Submit leave requests, track two-stage approval (Line Manager ➔ Administrator), and view personal balances')
+              : (language === 'km'
+                  ? 'ប្រព័ន្ធអនុម័តច្បាប់ ២ ជំហាន៖ ជំហានទី១ ប្រធានផ្នែក (Line Manager) ➔ ជំហានទី២ រដ្ឋបាល (Administrator)'
+                  : 'Two-stage approval workflow: Step 1 Line Manager ➔ Step 2 Administrator')}
           </p>
         </div>
         <button
           onClick={() => openModal('request-leave')}
           className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/30 flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
         >
-          <Plus size={16} /> សុំច្បាប់ឈប់សម្រាក (Request Leave)
+          <Plus size={16} /> {language === 'km' ? 'សុំច្បាប់ឈប់សម្រាក (Request Leave)' : 'Request Leave'}
         </button>
       </div>
 
@@ -160,10 +173,12 @@ export default function LeavesPage() {
           </div>
           <div>
             <h3 className="text-xs font-bold text-white tracking-wide uppercase">
-              ដំណើរការអនុម័ត ២ ជំហានស្តង់ដារ (Two-Stage Approval Chain)
+              {language === 'km' ? 'ដំណើរការអនុម័ត ២ ជំហានស្តង់ដារ (Two-Stage Approval Chain)' : 'Standard Two-Stage Approval Chain'}
             </h3>
             <p className="text-[11px] text-slate-300 mt-0.5">
-              បុគ្គលិកស្នើសុំ ➔ ជំហានទី ១៖ ប្រធានផ្នែក (Line Manager) ➔ ជំហានទី ២៖ រដ្ឋបាល (Administrator) ➔ អនុម័តជាស្ថាពរ
+              {language === 'km'
+                ? 'បុគ្គលិកស្នើសុំ ➔ ជំហានទី ១៖ ប្រធានផ្នែក (Line Manager) ➔ ជំហានទី ២៖ រដ្ឋបាល (Administrator) ➔ អនុម័តជាស្ថាពរ'
+                : 'Staff Submission ➔ Step 1: Line Manager ➔ Step 2: Administrator ➔ Final Approval'}
             </p>
           </div>
         </div>
@@ -191,47 +206,61 @@ export default function LeavesPage() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-sm font-bold text-slate-900">
-              សមតុល្យច្បាប់ផ្ទាល់ខ្លួន ({currentPersona.name})
+              {language === 'km' ? `សមតុល្យច្បាប់ផ្ទាល់ខ្លួន (${currentPersona.name})` : `Personal Leave Balances (${formatLocalizedText(currentPersona.name, language)})`}
             </h2>
-            <p className="text-[11px] text-slate-500">សិទ្ធិឈប់សម្រាកប្រចាំឆ្នាំ ស្របតាមច្បាប់ការងារកម្ពុជា</p>
+            <p className="text-[11px] text-slate-500">
+              {language === 'km' ? 'សិទ្ធិឈប់សម្រាកប្រចាំឆ្នាំ ស្របតាមច្បាប់ការងារកម្ពុជា' : 'Annual leave entitlements compliant with Cambodia Labour Law'}
+            </p>
           </div>
           <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">
-            ផុតកំណត់ត្រឹម ៣១ ធ្នូ
+            {language === 'km' ? 'ផុតកំណត់ត្រឹម ៣១ ធ្នូ' : 'Expires Dec 31'}
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-100 space-y-2">
             <div className="flex items-center justify-between text-xs font-bold text-blue-900">
-              <span>ច្បាប់ប្រចាំឆ្នាំ (Annual Leave)</span>
-              <span>{Math.max(0, 18 - annualUsed)} / 18 ថ្ងៃ</span>
+              <span>{language === 'km' ? 'ច្បាប់ប្រចាំឆ្នាំ (Annual Leave)' : 'Annual Leave'}</span>
+              <span>{Math.max(0, 18 - annualUsed)} / 18 {language === 'km' ? 'ថ្ងៃ' : 'days'}</span>
             </div>
             <div className="w-full h-2 bg-blue-200 rounded-full overflow-hidden">
               <div className="h-full bg-blue-600 rounded-full" style={{ width: `${Math.min(100, Math.round((Math.max(0, 18 - annualUsed) / 18) * 100))}%` }}></div>
             </div>
-            <span className="text-[10px] text-blue-700 block">ប្រើអស់ {annualUsed} ថ្ងៃ &bull; នៅសល់ {Math.max(0, 18 - annualUsed)} ថ្ងៃ</span>
+            <span className="text-[10px] text-blue-700 block">
+              {language === 'km'
+                ? `ប្រើអស់ ${annualUsed} ថ្ងៃ • នៅសល់ ${Math.max(0, 18 - annualUsed)} ថ្ងៃ`
+                : `Used ${annualUsed} days • Balance ${Math.max(0, 18 - annualUsed)} days`}
+            </span>
           </div>
 
           <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-100 space-y-2">
             <div className="flex items-center justify-between text-xs font-bold text-emerald-900">
-              <span>ច្បាប់ឈឺ (Sick Leave)</span>
-              <span>{Math.max(0, 10 - sickUsed)} / 10 ថ្ងៃ</span>
+              <span>{language === 'km' ? 'ច្បាប់ឈឺ (Sick Leave)' : 'Sick Leave'}</span>
+              <span>{Math.max(0, 10 - sickUsed)} / 10 {language === 'km' ? 'ថ្ងៃ' : 'days'}</span>
             </div>
             <div className="w-full h-2 bg-emerald-200 rounded-full overflow-hidden">
               <div className="h-full bg-emerald-600 rounded-full" style={{ width: `${Math.min(100, Math.round((Math.max(0, 10 - sickUsed) / 10) * 100))}%` }}></div>
             </div>
-            <span className="text-[10px] text-emerald-700 block">ប្រើអស់ {sickUsed} ថ្ងៃ &bull; នៅសល់ {Math.max(0, 10 - sickUsed)} ថ្ងៃ</span>
+            <span className="text-[10px] text-emerald-700 block">
+              {language === 'km'
+                ? `ប្រើអស់ ${sickUsed} ថ្ងៃ • នៅសល់ ${Math.max(0, 10 - sickUsed)} ថ្ងៃ`
+                : `Used ${sickUsed} days • Balance ${Math.max(0, 10 - sickUsed)} days`}
+            </span>
           </div>
 
           <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-100 space-y-2">
             <div className="flex items-center justify-between text-xs font-bold text-amber-900">
-              <span>ច្បាប់ធុរៈគ្រួសារ (Casual Days)</span>
-              <span>{Math.max(0, 5 - casualUsed)} / 5 ថ្ងៃ</span>
+              <span>{language === 'km' ? 'ច្បាប់ធុរៈគ្រួសារ (Casual Days)' : 'Special Leave (Casual)'}</span>
+              <span>{Math.max(0, 5 - casualUsed)} / 5 {language === 'km' ? 'ថ្ងៃ' : 'days'}</span>
             </div>
             <div className="w-full h-2 bg-amber-200 rounded-full overflow-hidden">
               <div className="h-full bg-amber-600 rounded-full" style={{ width: `${Math.min(100, Math.round((Math.max(0, 5 - casualUsed) / 5) * 100))}%` }}></div>
             </div>
-            <span className="text-[10px] text-amber-700 block">ប្រើអស់ {casualUsed} ថ្ងៃ &bull; នៅសល់ {Math.max(0, 5 - casualUsed)} ថ្ងៃ</span>
+            <span className="text-[10px] text-amber-700 block">
+              {language === 'km'
+                ? `ប្រើអស់ ${casualUsed} ថ្ងៃ • នៅសល់ ${Math.max(0, 5 - casualUsed)} ថ្ងៃ`
+                : `Used ${casualUsed} days • Balance ${Math.max(0, 5 - casualUsed)} days`}
+            </span>
           </div>
         </div>
       </div>
@@ -242,12 +271,12 @@ export default function LeavesPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <span>កម្រងសំណើសុំច្បាប់កំពុងរង់ចាំការអនុម័ត (Pending Approval Queues)</span>
+                <span>{language === 'km' ? 'កម្រងសំណើសុំច្បាប់កំពុងរង់ចាំការអនុម័ត (Pending Approval Queues)' : 'Pending Approval Queues'}</span>
               </h2>
               <p className="text-xs text-slate-500">
                 {isAdmin
-                  ? 'អ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin) ទទួលខុសត្រូវលើជំហានទី២ (Final Approval) និងអាចត្រួតពិនិត្យជំហានទី១'
-                  : 'ប្រធានផ្នែក (Line Manager) ទទួលខុសត្រូវលើការអនុម័តជំហានទី១ រួចបញ្ជូនទៅកាន់ Administrator'}
+                  ? (language === 'km' ? 'អ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin) ទទួលខុសត្រូវលើជំហានទី២ (Final Approval) និងអាចត្រួតពិនិត្យជំហានទី១' : 'HR Administrator conducts Step 2 (Final Approval) and oversees Step 1')
+                  : (language === 'km' ? 'ប្រធានផ្នែក (Line Manager) ទទួលខុសត្រូវលើការអនុម័តជំហានទី១ រួចបញ្ជូនទៅកាន់ Administrator' : 'Line Manager performs Step 1 review then forwards to Administrator')}
               </p>
             </div>
 
@@ -262,7 +291,7 @@ export default function LeavesPage() {
                 }`}
               >
                 <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-                <span>ជំហាន ២៖ រដ្ឋបាល Admin</span>
+                <span>{language === 'km' ? 'ជំហាន ២៖ រដ្ឋបាល Admin' : 'Step 2: HR Admin'}</span>
                 <span className="px-1.5 py-0.5 rounded-md bg-indigo-100 text-indigo-800 text-[10px]">
                   {step2Leaves.length}
                 </span>
@@ -277,7 +306,7 @@ export default function LeavesPage() {
                 }`}
               >
                 <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                <span>ជំហាន ១៖ ប្រធានផ្នែក Line Manager</span>
+                <span>{language === 'km' ? 'ជំហាន ១៖ ប្រធានផ្នែក Line Manager' : 'Step 1: Line Manager'}</span>
                 <span className="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px]">
                   {step1Leaves.length}
                 </span>
@@ -292,8 +321,12 @@ export default function LeavesPage() {
               {step2Leaves.length === 0 ? (
                 <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500 text-xs">
                   <CheckCircle2 size={32} className="mx-auto text-emerald-500 mb-2" />
-                  <div className="font-bold text-slate-800">គ្មានសំណើរង់ចាំការអនុម័តពីរដ្ឋបាលទេ! (No pending Step 2 requests)</div>
-                  <p className="mt-1">គ្រប់សំណើទាំងអស់ត្រូវបានអនុម័ត ឬកំពុងស្ថិតក្នុងជំហានទី១ នៅឡើយ។</p>
+                  <div className="font-bold text-slate-800">
+                    {language === 'km' ? 'គ្មានសំណើរង់ចាំការអនុម័តពីរដ្ឋបាលទេ! (No pending Step 2 requests)' : 'No pending Step 2 requests!'}
+                  </div>
+                  <p className="mt-1">
+                    {language === 'km' ? 'គ្រប់សំណើទាំងអស់ត្រូវបានអនុម័ត ឬកំពុងស្ថិតក្នុងជំហានទី១ នៅឡើយ។' : 'All requests have been approved or are currently awaiting Step 1.'}
+                  </p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -306,17 +339,17 @@ export default function LeavesPage() {
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-center gap-2.5">
                             <img
-                              src={req.employee_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces'}
+                              src={req.employee_avatar || '/avatars/khmer_female_1.jpg'}
                               alt={req.employee_name || 'Staff'}
                               className="w-10 h-10 rounded-xl object-cover ring-1 ring-slate-200"
                             />
                             <div>
-                              <div className="font-bold text-xs text-slate-900">{req.employee_name}</div>
-                              <div className="text-[11px] text-slate-400">{req.employee_role}</div>
+                              <div className="font-bold text-xs text-slate-900">{formatLocalizedText(req.employee_name, language)}</div>
+                              <div className="text-[11px] text-slate-400">{formatLocalizedText(req.employee_role, language)}</div>
                             </div>
                           </div>
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200">
-                            ជំហាន ២/២
+                            {language === 'km' ? 'ជំហាន ២/២' : 'Step 2/2'}
                           </span>
                         </div>
 
@@ -324,11 +357,11 @@ export default function LeavesPage() {
                         <div className="mt-3 p-2.5 rounded-xl bg-emerald-50/80 border border-emerald-200 text-[11px] text-emerald-900 flex items-start gap-2">
                           <CheckCircle2 size={15} className="text-emerald-600 shrink-0 mt-0.5" />
                           <div>
-                            <span className="font-bold">បានអនុម័តដោយ Line Manager: </span>
-                            <span>{req.line_manager_name || 'Line Manager'}</span>
+                            <span className="font-bold">{language === 'km' ? 'បានអនុម័តដោយ Line Manager: ' : 'Approved by Line Manager: '}</span>
+                            <span>{formatLocalizedText(req.line_manager_name || 'Line Manager', language)}</span>
                             {req.line_manager_comments && (
                               <p className="text-[10px] text-emerald-700 italic mt-0.5">
-                                &ldquo;{req.line_manager_comments}&rdquo;
+                                &ldquo;{formatLocalizedText(req.line_manager_comments, language)}&rdquo;
                               </p>
                             )}
                           </div>
@@ -336,16 +369,16 @@ export default function LeavesPage() {
 
                         <div className="mt-3 p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5 text-xs">
                           <div className="flex items-center justify-between text-slate-700">
-                            <span className="font-semibold">ប្រភេទច្បាប់៖</span>
-                            <span className="font-bold text-slate-900">{req.leave_type} ({req.days_count} ថ្ងៃ)</span>
+                            <span className="font-semibold">{language === 'km' ? 'ប្រភេទច្បាប់៖' : 'Leave Type:'}</span>
+                            <span className="font-bold text-slate-900">{req.leave_type} ({req.days_count} {language === 'km' ? 'ថ្ងៃ' : 'days'})</span>
                           </div>
                           <div className="flex items-center justify-between text-slate-500 text-[11px]">
-                            <span>កាលបរិច្ឆេទ៖</span>
+                            <span>{language === 'km' ? 'កាលបរិច្ឆេទ៖' : 'Duration:'}</span>
                             <span>{req.start_date} &rarr; {req.end_date}</span>
                           </div>
                           {req.reason && (
                             <p className="pt-1.5 border-t border-slate-200/60 text-slate-600 text-[11px] italic">
-                              &ldquo;{req.reason}&rdquo;
+                              &ldquo;{formatLocalizedText(req.reason, language)}&rdquo;
                             </p>
                           )}
                         </div>
@@ -359,7 +392,7 @@ export default function LeavesPage() {
                               disabled={actionLoading === req.id}
                               className="flex-1 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm shadow-indigo-600/20 cursor-pointer"
                             >
-                              <Check size={14} /> អនុម័តចុងក្រោយ (Final Admin Sign-off)
+                              <Check size={14} /> {language === 'km' ? 'អនុម័តចុងក្រោយ (Final Admin Sign-off)' : 'Final Admin Sign-off'}
                             </button>
                             <button
                               onClick={() => handleReview(req.id, 'Rejected', req.employee_name || 'colleague', 'admin')}
@@ -371,7 +404,7 @@ export default function LeavesPage() {
                           </div>
                         ) : (
                           <div className="p-2 bg-slate-50 rounded-xl text-center text-slate-500 text-[11px] font-medium border border-slate-200/80">
-                            ⏳ កំពុងរង់ចាំការអនុម័តចុងក្រោយពីរដ្ឋបាល HR Admin
+                            {language === 'km' ? '⏳ កំពុងរង់ចាំការអនុម័តចុងក្រោយពីរដ្ឋបាល HR Admin' : '⏳ Awaiting final approval from HR Admin'}
                           </div>
                         )}
                       </div>
@@ -386,8 +419,12 @@ export default function LeavesPage() {
               {step1Leaves.length === 0 ? (
                 <div className="bg-white p-8 rounded-2xl border border-slate-200 text-center text-slate-500 text-xs">
                   <CheckCircle2 size={32} className="mx-auto text-emerald-500 mb-2" />
-                  <div className="font-bold text-slate-800">គ្មានសំណើរង់ចាំប្រធានផ្នែកទេ! (No pending Step 1 requests)</div>
-                  <p className="mt-1">គ្រប់សំណើទាំងអស់ត្រូវបានប្រធានផ្នែកពិនិត្យរួចរាល់។</p>
+                  <div className="font-bold text-slate-800">
+                    {language === 'km' ? 'គ្មានសំណើរង់ចាំប្រធានផ្នែកទេ! (No pending Step 1 requests)' : 'No pending Step 1 requests!'}
+                  </div>
+                  <p className="mt-1">
+                    {language === 'km' ? 'គ្រប់សំណើទាំងអស់ត្រូវបានប្រធានផ្នែកពិនិត្យរួចរាល់។' : 'All requests have been reviewed by Line Managers.'}
+                  </p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -400,32 +437,32 @@ export default function LeavesPage() {
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-center gap-2.5">
                             <img
-                              src={req.employee_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces'}
+                              src={req.employee_avatar || '/avatars/khmer_female_1.jpg'}
                               alt={req.employee_name || 'Staff'}
                               className="w-10 h-10 rounded-xl object-cover ring-1 ring-slate-200"
                             />
                             <div>
-                              <div className="font-bold text-xs text-slate-900">{req.employee_name}</div>
-                              <div className="text-[11px] text-slate-400">{req.employee_role}</div>
+                              <div className="font-bold text-xs text-slate-900">{formatLocalizedText(req.employee_name, language)}</div>
+                              <div className="text-[11px] text-slate-400">{formatLocalizedText(req.employee_role, language)}</div>
                             </div>
                           </div>
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
-                            ជំហាន ១/២
+                            {language === 'km' ? 'ជំហាន ១/២' : 'Step 1/2'}
                           </span>
                         </div>
 
                         <div className="mt-4 p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5 text-xs">
                           <div className="flex items-center justify-between text-slate-700">
-                            <span className="font-semibold">ប្រភេទច្បាប់៖</span>
-                            <span className="font-bold text-slate-900">{req.leave_type} ({req.days_count} ថ្ងៃ)</span>
+                            <span className="font-semibold">{language === 'km' ? 'ប្រភេទច្បាប់៖' : 'Leave Type:'}</span>
+                            <span className="font-bold text-slate-900">{req.leave_type} ({req.days_count} {language === 'km' ? 'ថ្ងៃ' : 'days'})</span>
                           </div>
                           <div className="flex items-center justify-between text-slate-500 text-[11px]">
-                            <span>កាលបរិច្ឆេទ៖</span>
+                            <span>{language === 'km' ? 'កាលបរិច្ឆេទ៖' : 'Duration:'}</span>
                             <span>{req.start_date} &rarr; {req.end_date}</span>
                           </div>
                           {req.reason && (
                             <p className="pt-1.5 border-t border-slate-200/60 text-slate-600 text-[11px] italic">
-                              &ldquo;{req.reason}&rdquo;
+                              &ldquo;{formatLocalizedText(req.reason, language)}&rdquo;
                             </p>
                           )}
                         </div>
@@ -437,14 +474,14 @@ export default function LeavesPage() {
                           disabled={actionLoading === req.id}
                           className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-sm shadow-emerald-600/20 cursor-pointer"
                         >
-                          <Check size={14} /> អនុម័តជំហាន១ ➔ បញ្ជូនទៅរដ្ឋបាល
+                          <Check size={14} /> {language === 'km' ? 'អនុម័តជំហាន១ ➔ បញ្ជូនទៅរដ្ឋបាល' : 'Approve Step 1 ➔ Forward to Admin'}
                         </button>
                         <button
                           onClick={() => handleReview(req.id, 'Rejected', req.employee_name || 'colleague', 'manager')}
                           disabled={actionLoading === req.id}
                           className="py-2 px-3 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
                         >
-                          <X size={14} /> បដិសេធ
+                          <X size={14} /> {language === 'km' ? 'បដិសេធ' : 'Reject'}
                         </button>
                       </div>
                     </div>
@@ -461,8 +498,8 @@ export default function LeavesPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h2 className="text-base font-bold text-slate-900">
             {isEmployee
-              ? 'ប្រវត្តិនៃការស្នើសុំច្បាប់ផ្ទាល់ខ្លួន (My Leave Requests & History)'
-              : 'បញ្ជីស្នើសុំច្បាប់ទាំងអស់ (All Leave Requests & Historical Records)'}
+              ? (language === 'km' ? 'ប្រវត្តិនៃការស្នើសុំច្បាប់ផ្ទាល់ខ្លួន (My Leave Requests & History)' : 'My Leave Requests & History')
+              : (language === 'km' ? 'បញ្ជីស្នើសុំច្បាប់ទាំងអស់ (All Leave Requests & Historical Records)' : 'All Leave Requests & Records')}
           </h2>
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -478,37 +515,37 @@ export default function LeavesPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-xl text-slate-700 focus:outline-hidden"
+              className="px-3 py-1.5 text-xs bg-white border border-slate-200 rounded-xl text-slate-700 focus:outline-hidden cursor-pointer"
             >
-              <option value="all">ស្ថានភាពទាំងអស់ (All Statuses)</option>
-              <option value="Pending Manager">ជំហាន ១៖ រង់ចាំប្រធានផ្នែក (Line Manager)</option>
-              <option value="Pending Admin">ជំហាន ២៖ រង់ចាំរដ្ឋបាល (Administrator)</option>
-              <option value="Approved">បានអនុម័តពេញលេញ (Fully Approved)</option>
-              <option value="Rejected">បានបដិសេធ (Rejected)</option>
+              <option value="all">{language === 'km' ? 'ស្ថានភាពទាំងអស់ (All Statuses)' : 'All Statuses'}</option>
+              <option value="Pending Manager">{language === 'km' ? 'ជំហាន ១៖ រង់ចាំប្រធានផ្នែក (Line Manager)' : 'Step 1: Awaiting Line Manager'}</option>
+              <option value="Pending Admin">{language === 'km' ? 'ជំហាន ២៖ រង់ចាំរដ្ឋបាល (Administrator)' : 'Step 2: Awaiting HR Admin'}</option>
+              <option value="Approved">{language === 'km' ? 'បានអនុម័តពេញលេញ (Fully Approved)' : 'Fully Approved'}</option>
+              <option value="Rejected">{language === 'km' ? 'បានបដិសេធ (Rejected)' : 'Rejected'}</option>
             </select>
           </div>
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
           {loading ? (
-            <div className="py-16 text-center text-slate-400 text-xs">កំពុងទាញយកទិន្នន័យ...</div>
+            <div className="py-16 text-center text-slate-400 text-xs">{language === 'km' ? 'កំពុងទាញយកទិន្នន័យ...' : 'Loading leave records...'}</div>
           ) : filteredLeaves.length === 0 ? (
             <div className="py-16 text-center text-slate-400 text-xs px-4">
               {isEmployee
-                ? 'លោកអ្នកមិនទាន់មានសំណើសុំច្បាប់នៅឡើយទេ។ ចុចប៊ូតុង "សុំច្បាប់ឈប់សម្រាក" ខាងលើដើម្បីស្នើសុំ (No leave requests yet. Click "Request Leave" above).'
-                : 'រកមិនឃើញសំណើសុំច្បាប់ដែលត្រូវនឹងលក្ខខណ្ឌស្វែងរកទេ។'}
+                ? (language === 'km' ? 'លោកអ្នកមិនទាន់មានសំណើសុំច្បាប់នៅឡើយទេ។ ចុចប៊ូតុង "សុំច្បាប់ឈប់សម្រាក" ខាងលើដើម្បីស្នើសុំ (No leave requests yet. Click "Request Leave" above).' : 'No leave requests found yet. Click "Request Leave" above.')
+                : (language === 'km' ? 'រកមិនឃើញសំណើសុំច្បាប់ដែលត្រូវនឹងលក្ខខណ្ឌស្វែងរកទេ។' : 'No leave requests found matching your filter.')}
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs text-slate-600">
                 <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-700 font-bold uppercase tracking-wider text-[10px]">
                   <tr>
-                    <th className="px-5 py-3.5">អ្នកស្នើសុំ (Applicant)</th>
-                    <th className="px-5 py-3.5">ប្រភេទច្បាប់ (Type)</th>
-                    <th className="px-5 py-3.5">កាលបរិច្ឆេទ (Duration)</th>
-                    <th className="px-5 py-3.5">ចំនួន (Days)</th>
-                    <th className="px-5 py-3.5">ដំណើរការអនុម័ត ២ ជំហាន (2-Stage Approval Chain)</th>
-                    <th className="px-5 py-3.5 text-right">ស្ថានភាពរួម (Status)</th>
+                    <th className="px-5 py-3.5">{language === 'km' ? 'អ្នកស្នើសុំ (Applicant)' : 'Applicant'}</th>
+                    <th className="px-5 py-3.5">{language === 'km' ? 'ប្រភេទច្បាប់ (Type)' : 'Type'}</th>
+                    <th className="px-5 py-3.5">{language === 'km' ? 'កាលបរិច្ឆេទ (Duration)' : 'Duration'}</th>
+                    <th className="px-5 py-3.5">{language === 'km' ? 'ចំនួន (Days)' : 'Days'}</th>
+                    <th className="px-5 py-3.5">{language === 'km' ? 'ដំណើរការអនុម័ត ២ ជំហាន (2-Stage Approval Chain)' : '2-Stage Approval Chain'}</th>
+                    <th className="px-5 py-3.5 text-right">{language === 'km' ? 'ស្ថានភាពរួម (Status)' : 'Status'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -516,20 +553,20 @@ export default function LeavesPage() {
                     <tr key={l.id} className="hover:bg-slate-50/70 transition-colors">
                       <td className="px-5 py-3 flex items-center gap-3">
                         <img
-                          src={l.employee_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces'}
+                          src={l.employee_avatar || '/avatars/khmer_female_1.jpg'}
                           alt={l.employee_name || 'Staff'}
                           className="w-8 h-8 rounded-xl object-cover ring-1 ring-slate-200"
                         />
                         <div>
-                          <div className="font-bold text-slate-900">{l.employee_name}</div>
-                          <div className="text-[11px] text-slate-400">{l.employee_role}</div>
+                          <div className="font-bold text-slate-900">{formatLocalizedText(l.employee_name, language)}</div>
+                          <div className="text-[11px] text-slate-400">{formatLocalizedText(l.employee_role, language)}</div>
                         </div>
                       </td>
                       <td className="px-5 py-3 font-semibold text-slate-800">
                         <span>{l.leave_type}</span>
                         {l.reason && (
                           <span className="block text-[11px] text-slate-400 max-w-xs truncate font-normal">
-                            {l.reason}
+                            {formatLocalizedText(l.reason, language)}
                           </span>
                         )}
                       </td>
@@ -544,22 +581,22 @@ export default function LeavesPage() {
                             {l.status === 'Approved' || l.status === 'Pending Admin' ? (
                               <span className="inline-flex items-center gap-1 text-emerald-700 font-medium">
                                 <CheckCircle2 size={12} className="text-emerald-600" />
-                                <span>ជំហាន ១: {l.line_manager_name || 'ប្រធានផ្នែក'} ✓</span>
+                                <span>{language === 'km' ? `ជំហាន ១: ${l.line_manager_name || 'ប្រធានផ្នែក'} ✓` : `Step 1: ${formatLocalizedText(l.line_manager_name || 'Line Manager', language)} ✓`}</span>
                               </span>
                             ) : l.status === 'Rejected' && !l.line_manager_id ? (
                               <span className="inline-flex items-center gap-1 text-slate-400">
                                 <span className="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
-                                <span>ជំហាន ១: Line Manager</span>
+                                <span>{language === 'km' ? 'ជំហាន ១: Line Manager' : 'Step 1: Line Manager'}</span>
                               </span>
                             ) : l.status === 'Rejected' && l.line_manager_id ? (
                               <span className="inline-flex items-center gap-1 text-rose-700 font-medium">
                                 <XCircle size={12} className="text-rose-600" />
-                                <span>ជំហាន ១: បដិសេធដោយប្រធានផ្នែក</span>
+                                <span>{language === 'km' ? 'ជំហាន ១: បដិសេធដោយប្រធានផ្នែក' : 'Step 1: Rejected by Line Manager'}</span>
                               </span>
                             ) : (
                               <span className="inline-flex items-center gap-1 text-amber-700 font-medium">
                                 <Clock size={12} className="text-amber-600 animate-pulse" />
-                                <span>ជំហាន ១: រង់ចាំប្រធានផ្នែក</span>
+                                <span>{language === 'km' ? 'ជំហាន ១: រង់ចាំប្រធានផ្នែក' : 'Step 1: Pending Line Manager'}</span>
                               </span>
                             )}
                           </div>
@@ -569,22 +606,22 @@ export default function LeavesPage() {
                             {l.status === 'Approved' ? (
                               <span className="inline-flex items-center gap-1 text-indigo-700 font-medium">
                                 <CheckCircle2 size={12} className="text-indigo-600" />
-                                <span>ជំហាន ២: {l.admin_reviewer_name || 'រដ្ឋបាល HR'} ✓</span>
+                                <span>{language === 'km' ? `ជំហាន ២: ${l.admin_reviewer_name || 'រដ្ឋបាល HR'} ✓` : `Step 2: ${formatLocalizedText(l.admin_reviewer_name || 'HR Admin', language)} ✓`}</span>
                               </span>
                             ) : l.status === 'Pending Admin' ? (
                               <span className="inline-flex items-center gap-1 text-indigo-700 font-bold">
                                 <Clock size={12} className="text-indigo-600 animate-pulse" />
-                                <span>ជំហាន ២: រង់ចាំរដ្ឋបាល HR Admin</span>
+                                <span>{language === 'km' ? 'ជំហាន ២: រង់ចាំរដ្ឋបាល HR Admin' : 'Step 2: Awaiting HR Admin'}</span>
                               </span>
                             ) : l.status === 'Rejected' && l.admin_reviewer_id ? (
                               <span className="inline-flex items-center gap-1 text-rose-700 font-medium">
                                 <XCircle size={12} className="text-rose-600" />
-                                <span>ជំហាន ២: បដិសេធដោយរដ្ឋបាល</span>
+                                <span>{language === 'km' ? 'ជំហាន ២: បដិសេធដោយរដ្ឋបាល' : 'Step 2: Rejected by Admin'}</span>
                               </span>
                             ) : (
                               <span className="inline-flex items-center gap-1 text-slate-400">
-                                <span className="w-2 h-2 rounded-full bg-slate-300"></span>
-                                <span>ជំហាន ២: រដ្ឋបាល (រង់ចាំជំហាន១)</span>
+                                <span className="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+                                <span>{language === 'km' ? 'ជំហាន ២: រដ្ឋបាល (រង់ចាំជំហាន១)' : 'Step 2: HR Admin (Awaiting Step 1)'}</span>
                               </span>
                             )}
                           </div>
@@ -603,12 +640,12 @@ export default function LeavesPage() {
                           }`}
                         >
                           {l.status === 'Approved'
-                            ? '✓ បានអនុម័តពេញលេញ'
+                            ? (language === 'km' ? '✓ បានអនុម័តពេញលេញ' : '✓ Approved')
                             : l.status === 'Pending Admin'
-                            ? '⏳ រង់ចាំរដ្ឋបាល (Admin)'
+                            ? (language === 'km' ? '⏳ រង់ចាំរដ្ឋបាល (Admin)' : '⏳ Awaiting Admin')
                             : l.status === 'Rejected'
-                            ? '✕ បានបដិសេធ'
-                            : '⏳ រង់ចាំប្រធានផ្នែក'}
+                            ? (language === 'km' ? '✕ បានបដិសេធ' : '✕ Rejected')
+                            : (language === 'km' ? '⏳ រង់ចាំប្រធានផ្នែក' : '⏳ Awaiting Manager')}
                         </span>
                       </td>
                     </tr>

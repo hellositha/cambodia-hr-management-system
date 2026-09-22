@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
+import { formatLocalizedText } from '@/lib/translations';
 import { PayrollRecord } from '@/lib/types';
 import {
   CreditCard,
@@ -97,10 +98,12 @@ export default function PayrollPage() {
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
             <CreditCard className="text-indigo-600" size={26} />
-            គ្រប់គ្រងប្រាក់បៀវត្សរ៍ & ប.ស.ស (Payroll & NSSF Management)
+            {language === 'km' ? 'គ្រប់គ្រងប្រាក់បៀវត្សរ៍ & ប.ស.ស (Payroll & NSSF Management)' : 'Payroll & Statutory Benefits'}
           </h1>
           <p className="text-xs text-slate-500">
-            បញ្ជីបៀវត្សរ៍ប្រចាំខែ, ការកាត់កងពន្ធ និងវិភាគទាន ប.ស.ស (NSSF), និងប័ណ្ណបើកប្រាក់បៀវត្សរ៍
+            {language === 'km'
+              ? 'បញ្ជីបៀវត្សរ៍ប្រចាំខែ, ការកាត់កងពន្ធ និងវិភាគទាន ប.ស.ស (NSSF), និងប័ណ្ណបើកប្រាក់បៀវត្សរ៍'
+              : 'Monthly payroll ledger, salary tax withholding, NSSF statutory contributions, and official payslips'}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
@@ -115,7 +118,7 @@ export default function PayrollPage() {
             onClick={() => openModal('run-payroll')}
             className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/30 flex items-center gap-2 transition-transform active:scale-95 cursor-pointer"
           >
-            <Plus size={16} /> រៀបចំបើកប្រាក់ខែ (Run Payroll)
+            <Plus size={16} /> {language === 'km' ? 'រៀបចំបើកប្រាក់ខែ (Run Payroll)' : 'Run Payroll'}
           </button>
         </div>
       </div>
@@ -124,44 +127,50 @@ export default function PayrollPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
           <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            ប្រាក់បៀវត្សរ៍សុទ្ធសរុប (Net Pay)
+            {language === 'km' ? 'ប្រាក់បៀវត្សរ៍សុទ្ធសរុប (Net Pay)' : 'Total Net Pay'}
           </span>
           <div className="text-2xl font-black text-slate-900 my-1">
             ${totalNet.toLocaleString()}
           </div>
           <span className="text-[11px] text-slate-500">
-            ~ {((totalNet * 4100) / 1000000).toFixed(1)}M ៛ (KHR)
+            ~ {((totalNet * 4100) / 1000000).toFixed(1)}M {language === 'km' ? '៛ (KHR)' : 'KHR'}
           </span>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
           <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            បៀវត្សរ៍គោលសរុប (Base Pay)
+            {language === 'km' ? 'បៀវត្សរ៍គោលសរុប (Base Pay)' : 'Total Base Pay'}
           </span>
           <div className="text-2xl font-black text-indigo-600 my-1">
             ${totalBase.toLocaleString()}
           </div>
-          <span className="text-[11px] text-slate-500">ប្រាក់ខែគោលសរុប</span>
+          <span className="text-[11px] text-slate-500">
+            {language === 'km' ? 'ប្រាក់ខែគោលសរុប' : 'Total Base Salaries'}
+          </span>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
           <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            ពន្ធ & ប.ស.ស (Tax & NSSF)
+            {language === 'km' ? 'ពន្ធ & ប.ស.ស (Tax & NSSF)' : 'Tax & NSSF Deductions'}
           </span>
           <div className="text-2xl font-black text-rose-600 my-1">
             ${totalTax.toLocaleString()}
           </div>
-          <span className="text-[11px] text-slate-500">កាត់បង់ពន្ធ & សន្តិសុខសង្គម</span>
+          <span className="text-[11px] text-slate-500">
+            {language === 'km' ? 'កាត់បង់ពន្ធ & សន្តិសុខសង្គម' : 'Statutory Deductions'}
+          </span>
         </div>
 
         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
           <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            ប្រាក់ឧបត្ថម្ភ & រង្វាន់
+            {language === 'km' ? 'ប្រាក់ឧបត្ថម្ភ & រង្វាន់' : 'Allowances & Bonuses'}
           </span>
           <div className="text-2xl font-black text-emerald-600 my-1">
             ${totalAllowances.toLocaleString()}
           </div>
-          <span className="text-[11px] text-slate-500">ឧបត្ថម្ភទូរស័ព្ទ, ធ្វើដំណើរ, ស្នាក់នៅ</span>
+          <span className="text-[11px] text-slate-500">
+            {language === 'km' ? 'ឧបត្ថម្ភទូរស័ព្ទ, ធ្វើដំណើរ, ស្នាក់នៅ' : 'Phone, transport, housing'}
+          </span>
         </div>
       </div>
 
@@ -237,16 +246,16 @@ export default function PayrollPage() {
                     <tr key={p.id} className="hover:bg-slate-50/70 transition-colors">
                       <td className="px-5 py-3 flex items-center gap-3">
                         <img
-                          src={p.employee_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces'}
+                          src={p.employee_avatar || '/avatars/khmer_female_1.jpg'}
                           alt={p.employee_name || 'Staff'}
                           className="w-8 h-8 rounded-xl object-cover ring-1 ring-slate-200"
                         />
                         <div>
-                          <div className="font-bold text-slate-900">{p.employee_name}</div>
-                          <div className="text-[11px] text-slate-400">{p.employee_role}</div>
+                          <div className="font-bold text-slate-900">{formatLocalizedText(p.employee_name, language)}</div>
+                          <div className="text-[11px] text-slate-400">{formatLocalizedText(p.employee_role, language)}</div>
                         </div>
                       </td>
-                      <td className="px-5 py-3 font-medium text-slate-700">{p.department_name}</td>
+                      <td className="px-5 py-3 font-medium text-slate-700">{formatLocalizedText(p.department_name, language)}</td>
                       <td className="px-5 py-3 font-semibold text-slate-800">
                         ${p.base_salary.toLocaleString()}
                       </td>
@@ -332,34 +341,48 @@ export default function PayrollPage() {
                     <img src="/hestra-logo.svg" alt="HESTRA HRM" className="w-full h-full object-contain" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-bold text-slate-900 font-khmer">HESTRA HRM កម្ពុជា (HESTRA HRM Cambodia Co., Ltd.)</h2>
-                    <p className="text-[11px] text-slate-500 font-khmer">អគារ Exchange Square, មហាវិថីព្រះនរោត្តម, រាជធានីភ្នំពេញ</p>
-                    <p className="text-[11px] text-slate-500 font-khmer">លេខសារពើពន្ធ TIN: K009-90218928 &bull; លេខបញ្ជិកា ប.ស.ស (NSSF): 1029482</p>
+                    <h2 className="text-lg font-bold text-slate-900 font-khmer">
+                      {language === 'km' ? 'HESTRA HRM កម្ពុជា (HESTRA HRM Cambodia Co., Ltd.)' : 'HESTRA HRM Cambodia Co., Ltd.'}
+                    </h2>
+                    <p className="text-[11px] text-slate-500 font-khmer">
+                      {language === 'km' ? 'អគារ Exchange Square, មហាវិថីព្រះនរោត្តម, រាជធានីភ្នំពេញ' : 'Exchange Square Building, Norodom Blvd, Phnom Penh'}
+                    </p>
+                    <p className="text-[11px] text-slate-500 font-khmer">
+                      {language === 'km' ? 'លេខសារពើពន្ធ TIN: K009-90218928 • លេខបញ្ជិកា ប.ស.ស (NSSF): 1029482' : 'Tax TIN: K009-90218928 • NSSF Reg: 1029482'}
+                    </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <span className="text-sm text-slate-900 font-khmer-moul block leading-normal">
-                    ប័ណ្ណបើកប្រាក់បៀវត្សរ៍
-                  </span>
+                  {language === 'km' && (
+                    <span className="text-sm text-slate-900 font-khmer-moul block leading-normal">
+                      ប័ណ្ណបើកប្រាក់បៀវត្សរ៍
+                    </span>
+                  )}
                   <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
                     Official Salary Payslip
                   </span>
                   <span className="text-sm font-mono font-bold text-slate-900">{activePayslip.id}</span>
-                  <span className="text-xs text-slate-500 block mt-1 font-khmer">កាលបរិច្ឆេទបើក៖ {activePayslip.payment_date}</span>
+                  <span className="text-xs text-slate-500 block mt-1 font-khmer">
+                    {language === 'km' ? `កាលបរិច្ឆេទបើក៖ ${activePayslip.payment_date}` : `Payment Date: ${activePayslip.payment_date}`}
+                  </span>
                 </div>
               </div>
 
               {/* Employee & Payroll Meta */}
               <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">ឈ្មោះបុគ្គលិក (Employee Name)</span>
-                  <span className="text-sm font-bold text-slate-900">{activePayslip.employee_name}</span>
-                  <span className="text-slate-500 block mt-0.5">{activePayslip.employee_role}</span>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                    {language === 'km' ? 'ឈ្មោះបុគ្គលិក (Employee Name)' : 'Employee Name'}
+                  </span>
+                  <span className="text-sm font-bold text-slate-900">{formatLocalizedText(activePayslip.employee_name, language)}</span>
+                  <span className="text-slate-500 block mt-0.5">{formatLocalizedText(activePayslip.employee_role, language)}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">ដេប៉ាតឺម៉ង់ & អត្តលេខ (Dept & ID)</span>
-                  <span className="text-sm font-bold text-slate-900">{activePayslip.department_name}</span>
-                  <span className="text-slate-500 block mt-0.5">អត្តលេខ៖ {activePayslip.employee_id}</span>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block">
+                    {language === 'km' ? 'ដេប៉ាតឺម៉ង់ & អត្តលេខ (Dept & ID)' : 'Department & Staff ID'}
+                  </span>
+                  <span className="text-sm font-bold text-slate-900">{formatLocalizedText(activePayslip.department_name, language)}</span>
+                  <span className="text-slate-500 block mt-0.5">{language === 'km' ? `អត្តលេខ៖ ${activePayslip.employee_id}` : `ID: ${activePayslip.employee_id}`}</span>
                 </div>
               </div>
 
@@ -368,23 +391,23 @@ export default function PayrollPage() {
                 {/* Earnings */}
                 <div className="border border-slate-200 rounded-xl overflow-hidden">
                   <div className="bg-slate-100 px-4 py-2 font-bold text-slate-800 text-[11px] uppercase tracking-wider">
-                    ប្រាក់ចំណូលសរុប (Gross Earnings)
+                    {language === 'km' ? 'ប្រាក់ចំណូលសរុប (Gross Earnings)' : 'Gross Earnings'}
                   </div>
                   <div className="p-4 space-y-2.5">
                     <div className="flex items-center justify-between">
-                      <span>ប្រាក់ខែគោល (Basic Salary)</span>
+                      <span>{language === 'km' ? 'ប្រាក់ខែគោល (Basic Salary)' : 'Basic Salary'}</span>
                       <span className="font-bold font-mono">${activePayslip.base_salary.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between text-slate-600">
-                      <span>ប្រាក់ឧបត្ថម្ភការងារ (Allowances)</span>
+                      <span>{language === 'km' ? 'ប្រាក់ឧបត្ថម្ភការងារ (Allowances)' : 'Allowances'}</span>
                       <span className="font-mono">${activePayslip.allowances.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between text-slate-600">
-                      <span>ប្រាក់រង្វាន់លើកទឹកចិត្ត (Bonus)</span>
+                      <span>{language === 'km' ? 'ប្រាក់រង្វាន់លើកទឹកចិត្ត (Bonus)' : 'Bonuses'}</span>
                       <span className="font-mono">${activePayslip.bonuses.toLocaleString()}</span>
                     </div>
                     <div className="pt-2 border-t border-slate-200 flex items-center justify-between font-bold text-slate-900">
-                      <span>ប្រាក់បៀវត្សរ៍សរុប (Total Gross)</span>
+                      <span>{language === 'km' ? 'ប្រាក់បៀវត្សរ៍សរុប (Total Gross)' : 'Total Gross'}</span>
                       <span className="font-mono">
                         ${(activePayslip.base_salary + activePayslip.allowances + activePayslip.bonuses).toLocaleString()}
                       </span>
@@ -395,23 +418,23 @@ export default function PayrollPage() {
                 {/* Deductions */}
                 <div className="border border-slate-200 rounded-xl overflow-hidden">
                   <div className="bg-slate-100 px-4 py-2 font-bold text-slate-800 text-[11px] uppercase tracking-wider">
-                    ការកាត់កងតាមច្បាប់ (Statutory Deductions)
+                    {language === 'km' ? 'ការកាត់កងតាមច្បាប់ (Statutory Deductions)' : 'Statutory Deductions'}
                   </div>
                   <div className="p-4 space-y-2.5">
                     <div className="flex items-center justify-between text-slate-600">
-                      <span>ពន្ធលើប្រាក់បៀវត្សរ៍ (Salary Tax)</span>
+                      <span>{language === 'km' ? 'ពន្ធលើប្រាក់បៀវត្សរ៍ (Salary Tax)' : 'Salary Tax (TOS)'}</span>
                       <span className="font-mono text-rose-600">-${activePayslip.tax_deduction.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between text-slate-600">
-                      <span>វិភាគទាន ប.ស.ស (NSSF Healthcare/Pension)</span>
+                      <span>{language === 'km' ? 'វិភាគទាន ប.ស.ស (NSSF Healthcare/Pension)' : 'NSSF (Healthcare & Pension)'}</span>
                       <span className="font-mono text-rose-600">-${activePayslip.insurance_deduction.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between text-slate-600">
-                      <span>ការកាត់កងផ្សេងៗ (Other Deductions)</span>
+                      <span>{language === 'km' ? 'ការកាត់កងផ្សេងៗ (Other Deductions)' : 'Other Deductions'}</span>
                       <span className="font-mono text-rose-600">-${activePayslip.other_deductions.toLocaleString()}</span>
                     </div>
                     <div className="pt-2 border-t border-slate-200 flex items-center justify-between font-bold text-slate-900">
-                      <span>ការកាត់កងសរុប (Total Deductions)</span>
+                      <span>{language === 'km' ? 'ការកាត់កងសរុប (Total Deductions)' : 'Total Deductions'}</span>
                       <span className="font-mono text-rose-600">
                         -${(activePayslip.tax_deduction + activePayslip.insurance_deduction + activePayslip.other_deductions).toLocaleString()}
                       </span>
@@ -424,27 +447,31 @@ export default function PayrollPage() {
               <div className="p-5 rounded-2xl bg-slate-900 text-white flex items-center justify-between shadow-lg">
                 <div>
                   <span className="text-[10px] text-slate-300 uppercase font-bold tracking-wider block">
-                    ប្រាក់បៀវត្សរ៍សុទ្ធទទួលបាន (Net Take-Home Pay)
+                    {language === 'km' ? 'ប្រាក់បៀវត្សរ៍សុទ្ធទទួលបាន (Net Take-Home Pay)' : 'Net Take-Home Pay'}
                   </span>
                   <div className="text-2xl sm:text-3xl font-black font-mono mt-0.5 text-emerald-400">
                     ${activePayslip.net_salary.toLocaleString()} USD
                   </div>
                   <div className="text-xs text-amber-300 font-semibold mt-0.5">
-                    ~ {(activePayslip.net_salary * 4100).toLocaleString()} ៛ (រៀលកម្ពុជា KHR)
+                    ~ {(activePayslip.net_salary * 4100).toLocaleString()} {language === 'km' ? '៛ (រៀលកម្ពុជា KHR)' : 'KHR'}
                   </div>
                   <p className="text-[11px] text-slate-300 mt-1">
-                    បើកប្រាក់តាម៖ {activePayslip.payment_method} (ABA Bank / Bakong KHQR)
+                    {language === 'km' ? `បើកប្រាក់តាម៖ ${activePayslip.payment_method} (ABA Bank / Bakong KHQR)` : `Payment Method: ${activePayslip.payment_method} (ABA Bank / Bakong KHQR)`}
                   </p>
                 </div>
                 <div className="text-right">
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                    ស្ថានភាព៖ {activePayslip.status === 'Paid' ? 'បានទូទាត់រួចរាល់' : activePayslip.status}
+                    {language === 'km'
+                      ? `ស្ថានភាព៖ ${activePayslip.status === 'Paid' ? 'បានទូទាត់រួចរាល់' : activePayslip.status}`
+                      : `Status: ${activePayslip.status}`}
                   </span>
                 </div>
               </div>
 
               <div className="text-center text-[10px] text-slate-400 pt-4 border-t border-slate-200">
-                នេះជាឯកសារគណនាប្រាក់បៀវត្សរ៍ និងពន្ធស្របតាមច្បាប់ការងារនៃព្រះរាជាណាចក្រកម្ពុជា បញ្ជាក់ដោយ HESTRA HRM Cambodia People Operations។
+                {language === 'km'
+                  ? 'នេះជាឯកសារគណនាប្រាក់បៀវត្សរ៍ និងពន្ធស្របតាមច្បាប់ការងារនៃព្រះរាជាណាចក្រកម្ពុជា បញ្ជាក់ដោយ HESTRA HRM Cambodia People Operations។'
+                  : 'This official salary and tax statement complies with Cambodia Labour Law and is certified by HESTRA HRM Cambodia People Operations.'}
               </div>
             </div>
           </div>

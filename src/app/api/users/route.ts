@@ -50,19 +50,23 @@ export async function POST(request: Request) {
       status = 'Active',
       employee_id = null,
       department_name = 'ទូទៅ (General)',
-      avatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=256&h=256&fit=crop&crop=faces',
+      avatar = '/avatars/khmer_female_1.jpg',
       permissions = 'self_service,clock_in,request_leave,view_payslips',
       two_factor_enabled = 0,
     } = body;
 
-    if (!name || !email) {
-      return NextResponse.json({ error: 'Name and email are required' }, { status: 400 });
+    if (!name) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 });
     }
 
-    // Check email uniqueness
-    const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
-    if (existing) {
-      return NextResponse.json({ error: 'Email already exists in system' }, { status: 409 });
+    const finalEmail = email && typeof email === 'string' && email.trim() ? email.trim() : null;
+
+    // Check email uniqueness if email provided
+    if (finalEmail) {
+      const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(finalEmail);
+      if (existing) {
+        return NextResponse.json({ error: 'Email already exists in system' }, { status: 409 });
+      }
     }
 
     const id = `usr-${Date.now().toString().slice(-6)}`;
@@ -78,7 +82,7 @@ export async function POST(request: Request) {
     `).run(
       id,
       name,
-      email,
+      finalEmail,
       role,
       status,
       employee_id,

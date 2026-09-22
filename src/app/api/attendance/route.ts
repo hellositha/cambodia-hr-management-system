@@ -34,7 +34,7 @@ export async function GET(request: Request) {
         a.*,
         COALESCE(e.first_name || ' ' || e.last_name, u.name, 'Staff Member') as employee_name,
         COALESCE(e.role, u.role, 'Employee') as employee_role,
-        COALESCE(e.avatar, u.avatar, 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces') as employee_avatar,
+        COALESCE(e.avatar, u.avatar, '/avatars/khmer_female_1.jpg') as employee_avatar,
         COALESCE(d.name, 'General') as department_name
       FROM attendance a
       LEFT JOIN employees e ON e.id = a.employee_id
@@ -122,7 +122,7 @@ export async function POST(request: Request) {
         a.*,
         COALESCE(e.first_name || ' ' || e.last_name, u.name, 'Staff Member') as employee_name,
         COALESCE(e.role, u.role, 'Employee') as employee_role,
-        COALESCE(e.avatar, u.avatar, 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces') as employee_avatar
+        COALESCE(e.avatar, u.avatar, '/avatars/khmer_female_1.jpg') as employee_avatar
       FROM attendance a
       LEFT JOIN employees e ON e.id = a.employee_id
       LEFT JOIN users u ON (u.id = a.employee_id OR u.employee_id = a.employee_id)

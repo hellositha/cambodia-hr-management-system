@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
+import { formatLocalizedText } from '@/lib/translations';
 import {
   Shield,
   Users,
@@ -44,7 +45,7 @@ export default function ManagementPortalPage() {
 
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [loadingTeam, setLoadingTeam] = useState(true);
-  const [departmentName, setDepartmentName] = useState('ផ្នែកបច្ចេកវិទ្យា (Engineering)');
+  const [departmentName, setDepartmentName] = useState('Engineering');
 
   // Load pending leaves
   const fetchLeaves = () => {
@@ -127,7 +128,7 @@ export default function ManagementPortalPage() {
             status,
             statusColor,
             clockIn,
-            leaveBalance: `${Math.floor(12 + (emp.id.charCodeAt(emp.id.length - 1) % 6))} ថ្ងៃ`,
+            leaveBalance: `${Math.floor(12 + (emp.id.charCodeAt(emp.id.length - 1) % 6))} ${language === 'km' ? 'ថ្ងៃ' : 'days'}`,
           };
         });
 
@@ -153,24 +154,28 @@ export default function ManagementPortalPage() {
           reviewer_role: 'Manager',
           reviewer_comments:
             decision === 'Approved'
-              ? `អនុម័តជំហានទី១ ដោយប្រធានផ្នែក ${currentPersona.name}។ បានបញ្ជូនទៅរដ្ឋបាល (Step 1 Approved by Line Manager. Forwarded to Admin).`
-              : 'ពុំអាចអនុញ្ញាតបានដោយសារតម្រូវការការងារបន្ទាន់ (Declined due to work schedule)',
+              ? (language === 'km'
+                  ? `អនុម័តជំហានទី១ ដោយប្រធានផ្នែក ${currentPersona.name}។ បានបញ្ជូនទៅរដ្ឋបាល (Step 1 Approved by Line Manager. Forwarded to Admin).`
+                  : `Step 1 Approved by Line Manager ${formatLocalizedText(currentPersona.name, language)}. Forwarded to Admin.`)
+              : (language === 'km'
+                  ? 'ពុំអាចអនុញ្ញាតបានដោយសារតម្រូវការការងារបន្ទាន់ (Declined due to work schedule)'
+                  : 'Declined due to operational coverage requirements.'),
         }),
       });
 
       if (res.ok) {
         showToast(
           decision === 'Approved'
-            ? 'បានអនុម័តជំហានទី១ និងបញ្ជូនទៅរដ្ឋបាល Admin ដោយជោគជ័យ! ✓'
-            : 'បានបដិសេធសំណើសុំច្បាប់',
+            ? (language === 'km' ? 'បានអនុម័តជំហានទី១ និងបញ្ជូនទៅរដ្ឋបាល Admin ដោយជោគជ័យ! ✓' : 'Step 1 approved and forwarded to HR Admin! ✓')
+            : (language === 'km' ? 'បានបដិសេធសំណើសុំច្បាប់' : 'Leave request rejected.'),
           decision === 'Approved' ? 'success' : 'info'
         );
         fetchLeaves();
       } else {
-        showToast('បរាជ័យក្នុងការអនុម័តសំណើ', 'error');
+        showToast(language === 'km' ? 'បរាជ័យក្នុងការអនុម័តសំណើ' : 'Failed to process request', 'error');
       }
     } catch (err) {
-      showToast('កំហុសប្រព័ន្ធ', 'error');
+      showToast(language === 'km' ? 'កំហុសប្រព័ន្ធ' : 'System error', 'error');
     } finally {
       setApprovingId(null);
     }
@@ -217,10 +222,10 @@ export default function ManagementPortalPage() {
             {language === 'km' ? 'សមាជិកក្រុមសរុប' : 'Direct Reports'}
           </span>
           <div className="text-2xl font-black text-slate-900 my-1 font-mono">
-            {teamMembers.length} <span className="text-xs font-sans text-slate-500 font-semibold">នាក់</span>
+            {teamMembers.length} <span className="text-xs font-sans text-slate-500 font-semibold">{language === 'km' ? 'នាក់' : 'members'}</span>
           </div>
           <span className="text-[11px] text-slate-500">
-            ផ្នែកបច្ចេកវិទ្យា (Engineering)
+            {formatLocalizedText(departmentName, language)}
           </span>
         </div>
 
@@ -233,7 +238,7 @@ export default function ManagementPortalPage() {
             75%
           </div>
           <span className="text-[11px] text-slate-500">
-            ២ នាក់នៅការិយាល័យ &bull; ១ WFH
+            {language === 'km' ? '២ នាក់នៅការិយាល័យ • ១ WFH' : '2 In-Office • 1 WFH'}
           </span>
         </div>
 
@@ -243,10 +248,10 @@ export default function ManagementPortalPage() {
             {language === 'km' ? 'សំណើសុំច្បាប់រង់ចាំ' : 'Pending Approvals'}
           </span>
           <div className="text-2xl font-black text-amber-600 my-1 font-mono">
-            {pendingLeaves.length} <span className="text-xs font-sans text-slate-500 font-semibold">សំណើ</span>
+            {pendingLeaves.length} <span className="text-xs font-sans text-slate-500 font-semibold">{language === 'km' ? 'សំណើ' : 'pending'}</span>
           </div>
           <span className="text-[11px] text-slate-500">
-            {pendingLeaves.length > 0 ? 'ត្រូវការការអនុម័តជាបន្ទាន់' : 'ពុំមានសំណើរង់ចាំឡើយ'}
+            {pendingLeaves.length > 0 ? (language === 'km' ? 'ត្រូវការការអនុម័តជាបន្ទាន់' : 'Requires review') : (language === 'km' ? 'ពុំមានសំណើរង់ចាំឡើយ' : 'No pending requests')}
           </span>
         </div>
 
@@ -259,7 +264,7 @@ export default function ManagementPortalPage() {
             $380,000
           </div>
           <span className="text-[11px] text-slate-500">
-            អត្រាប្រើប្រាស់ ៧២%
+            {language === 'km' ? 'អត្រាប្រើប្រាស់ ៧២%' : '72% Utilized'}
           </span>
         </div>
       </div>
@@ -278,20 +283,20 @@ export default function ManagementPortalPage() {
           </div>
 
           <span className="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-            {pendingLeaves.length} សំណើរង់ចាំ
+            {pendingLeaves.length} {language === 'km' ? 'សំណើរង់ចាំ' : 'Pending Requests'}
           </span>
         </div>
 
         {loadingLeaves ? (
-          <div className="py-12 text-center text-xs text-slate-400">កំពុងដំណើរការទិន្នន័យ...</div>
+          <div className="py-12 text-center text-xs text-slate-400">{language === 'km' ? 'កំពុងដំណើរការទិន្នន័យ...' : 'Loading pending requests...'}</div>
         ) : pendingLeaves.length === 0 ? (
           <div className="py-12 text-center">
             <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto mb-3">
               <CheckCircle2 size={24} />
             </div>
-            <h4 className="text-xs font-bold text-slate-700">ពុំមានសំណើសុំច្បាប់ដែលនៅសេសសល់ឡើយ!</h4>
+            <h4 className="text-xs font-bold text-slate-700">{language === 'km' ? 'ពុំមានសំណើសុំច្បាប់ដែលនៅសេសសល់ឡើយ!' : 'No pending leave requests!'}</h4>
             <p className="text-[11px] text-slate-400 mt-1">
-              សំណើសុំច្បាប់ទាំងអស់របស់ក្រុមការងារត្រូវបានពិនិត្យ និងអនុម័តរួចរាល់។
+              {language === 'km' ? 'សំណើសុំច្បាប់ទាំងអស់របស់ក្រុមការងារត្រូវបានពិនិត្យ និងអនុម័តរួចរាល់។' : 'All leave requests from your team have been reviewed and approved.'}
             </p>
           </div>
         ) : (
@@ -303,27 +308,27 @@ export default function ManagementPortalPage() {
               >
                 <div className="flex items-start gap-3">
                   <img
-                    src={leave.employee_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces'}
+                    src={leave.employee_avatar || '/avatars/khmer_female_1.jpg'}
                     alt={leave.employee_name}
                     className="w-10 h-10 rounded-xl object-cover ring-2 ring-indigo-100 shrink-0"
                   />
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-xs text-slate-900">{leave.employee_name}</h4>
+                      <h4 className="font-bold text-xs text-slate-900">{formatLocalizedText(leave.employee_name, language)}</h4>
                       <span className="text-[10px] font-mono text-slate-400">({leave.employee_id})</span>
                     </div>
-                    <p className="text-[11px] text-slate-500">{leave.employee_role}</p>
+                    <p className="text-[11px] text-slate-500">{formatLocalizedText(leave.employee_role, language)}</p>
                     <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
                       <span className="font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200/60">
-                        {leave.leave_type} ({leave.days_count} ថ្ងៃ)
+                        {leave.leave_type} ({leave.days_count} {language === 'km' ? 'ថ្ងៃ' : 'days'})
                       </span>
                       <span className="text-slate-500 font-mono">
-                        {leave.start_date} ដល់ {leave.end_date}
+                        {leave.start_date} {language === 'km' ? 'ដល់' : 'to'} {leave.end_date}
                       </span>
                     </div>
                     {leave.reason && (
                       <p className="text-[11px] text-slate-600 mt-1 italic">
-                        &ldquo;{leave.reason}&rdquo;
+                        &ldquo;{formatLocalizedText(leave.reason, language)}&rdquo;
                       </p>
                     )}
                   </div>
@@ -336,7 +341,7 @@ export default function ManagementPortalPage() {
                     className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-transform active:scale-95 cursor-pointer disabled:opacity-50"
                   >
                     <Check size={14} />
-                    <span>{approvingId === leave.id ? 'កំពុងបញ្ជូន...' : 'អនុម័តជំហាន១ ➔ បញ្ជូនទៅរដ្ឋបាល'}</span>
+                    <span>{approvingId === leave.id ? (language === 'km' ? 'កំពុងបញ្ជូន...' : 'Forwarding...') : (language === 'km' ? 'អនុម័តជំហាន១ ➔ បញ្ជូនទៅរដ្ឋបាល' : 'Approve Step 1 ➔ Forward')}</span>
                   </button>
 
                   <button
@@ -345,7 +350,7 @@ export default function ManagementPortalPage() {
                     className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer disabled:opacity-50"
                   >
                     <X size={14} />
-                    <span>បដិសេធ</span>
+                    <span>{language === 'km' ? 'បដិសេធ' : 'Reject'}</span>
                   </button>
                 </div>
               </div>
@@ -372,7 +377,7 @@ export default function ManagementPortalPage() {
               href="/employees"
               className="text-xs font-bold text-indigo-600 hover:text-indigo-700"
             >
-              មើលទាំងអស់ &rarr;
+              {language === 'km' ? 'មើលទាំងអស់ →' : 'View All →'}
             </Link>
           </div>
 
@@ -390,19 +395,23 @@ export default function ManagementPortalPage() {
                   />
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="font-bold text-xs text-slate-900">{member.name}</h4>
+                      <h4 className="font-bold text-xs text-slate-900">{formatLocalizedText(member.name, language)}</h4>
                       <span className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-600">
                         <span className={`w-2 h-2 rounded-full ${member.statusColor}`}></span>
                         {member.status}
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-500">{member.role}</p>
+                    <p className="text-[11px] text-slate-500">{formatLocalizedText(member.role, language)}</p>
                   </div>
                 </div>
 
                 <div className="text-right text-xs">
-                  <span className="font-mono text-slate-500 block">កត់ត្រា៖ {member.clockIn}</span>
-                  <span className="text-[10px] text-slate-400">ច្បាប់នៅសល់៖ {member.leaveBalance}</span>
+                  <span className="font-mono text-slate-500 block">
+                    {language === 'km' ? `កត់ត្រា៖ ${member.clockIn}` : `Clock In: ${member.clockIn}`}
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    {language === 'km' ? `ច្បាប់នៅសល់៖ ${member.leaveBalance}` : `Balance: ${member.leaveBalance}`}
+                  </span>
                 </div>
               </div>
             ))}
@@ -426,11 +435,13 @@ export default function ManagementPortalPage() {
 
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3 text-xs">
               <div className="flex items-center justify-between">
-                <span className="font-bold text-slate-700">ចន្ទ - សុក្រ (សប្តាហ៍នេះ)</span>
-                <span className="text-emerald-600 font-bold">✓ កម្លាំងការងារគ្រប់គ្រាន់</span>
+                <span className="font-bold text-slate-700">{language === 'km' ? 'ចន្ទ - សុក្រ (សប្តាហ៍នេះ)' : 'Mon - Fri (This Week)'}</span>
+                <span className="text-emerald-600 font-bold">{language === 'km' ? '✓ កម្លាំងការងារគ្រប់គ្រាន់' : '✓ Full Coverage'}</span>
               </div>
               <p className="text-[11px] text-slate-500 leading-relaxed font-khmer">
-                មានសមាជិក ១ នាក់ (អ៊ុំ ម៉ាលីស) កំពុងឈប់សម្រាកច្បាប់ប្រចាំឆ្នាំ។ ការងាររចនា UI ត្រូវបានប្រគល់បណ្តោះអាសន្នជូន ចាន់ ធីតា។
+                {language === 'km'
+                  ? 'មានសមាជិក ១ នាក់ (អ៊ុំ ម៉ាលីស) កំពុងឈប់សម្រាកច្បាប់ប្រចាំឆ្នាំ។ ការងាររចនា UI ត្រូវបានប្រគល់បណ្តោះអាសន្នជូន ចាន់ ធីតា។'
+                  : '1 team member (Oum Malis) is currently on annual leave. UI design tasks are temporarily handed over to Chan Thida.'}
               </p>
             </div>
           </div>
@@ -445,7 +456,7 @@ export default function ManagementPortalPage() {
                 className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 font-bold text-slate-700 flex items-center gap-1.5 transition-colors"
               >
                 <FileText size={14} className="text-indigo-600" />
-                <span>ចេញលិខិតសរសើរ</span>
+                <span>{language === 'km' ? 'ចេញលិខិតសរសើរ' : 'Recognition Letter'}</span>
               </Link>
 
               <Link
@@ -453,7 +464,7 @@ export default function ManagementPortalPage() {
                 className="p-2 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 font-bold text-slate-700 flex items-center gap-1.5 transition-colors"
               >
                 <TrendingUp size={14} className="text-emerald-600" />
-                <span>វាយតម្លៃសមិទ្ធកម្ម</span>
+                <span>{language === 'km' ? 'វាយតម្លៃសមិទ្ធកម្ម' : 'Performance Review'}</span>
               </Link>
             </div>
           </div>

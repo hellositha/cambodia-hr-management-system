@@ -1,5 +1,7 @@
 export type Role = 'Admin' | 'Manager' | 'Employee';
 
+export type Theme = 'nordic' | 'midnight' | 'indigo';
+
 export type EmploymentType = 'Full-Time' | 'Part-Time' | 'Contract' | 'Intern';
 
 export type EmployeeStatus = 'Active' | 'On Leave' | 'Remote' | 'Terminated';
@@ -46,6 +48,7 @@ export interface Employee {
   commune_sangkat?: string;
   village?: string;
   // 3. Employee & Contract Information
+  employee_type?: string;
   contract_type?: string;
   contract_start?: string;
   contract_end?: string;
@@ -88,6 +91,71 @@ export interface AttendanceRecord {
   status: AttendanceStatus;
   work_hours: number;
   notes?: string;
+}
+
+export type ShiftType = 'morning' | 'office' | 'evening' | 'night' | 'weekend_duty' | 'on_call' | 'off' | 'custom';
+
+export interface ShiftDefinition {
+  id: ShiftType;
+  name_en: string;
+  name_km: string;
+  short_code: string;
+  start_time: string;
+  end_time: string;
+  default_hours: number;
+  color: string;
+  badgeBg: string;
+  badgeText: string;
+  badgeBorder: string;
+}
+
+export interface DutyRosterEntry {
+  id: string;
+  employee_id: string;
+  employee_name?: string;
+  employee_role?: string;
+  employee_avatar?: string;
+  department_id?: string;
+  department_name?: string;
+  date: string;
+  shift_type: ShiftType;
+  start_time?: string;
+  end_time?: string;
+  hours: number;
+  location?: string;
+  notes?: string;
+  created_at: string;
+}
+
+export type OvertimeRateType = 'normal_day_150' | 'night_200' | 'weekend_200' | 'holiday_200';
+export type OvertimeStatus = 'Pending' | 'Pending Manager' | 'Pending Admin' | 'Approved' | 'Rejected';
+
+export interface OvertimeRequest {
+  id: string;
+  employee_id: string;
+  employee_name?: string;
+  employee_role?: string;
+  employee_avatar?: string;
+  department_id?: string;
+  department_name?: string;
+  date: string;
+  start_time: string;
+  end_time: string;
+  hours: number;
+  ot_rate_type: OvertimeRateType;
+  multiplier: number;
+  hourly_rate: number;
+  estimated_pay: number;
+  reason: string;
+  project_name?: string;
+  status: OvertimeStatus;
+  line_manager_id?: string;
+  line_manager_reviewed_at?: string;
+  line_manager_comments?: string;
+  admin_reviewer_id?: string;
+  admin_reviewed_at?: string;
+  admin_comments?: string;
+  created_at: string;
 }
 
 export type LeaveType = 'Annual' | 'Sick' | 'Maternity/Paternity' | 'Casual' | 'Unpaid';

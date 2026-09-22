@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '@/context/AppContext';
 import { UserAccount, UserRole, UserStatus, Employee } from '@/lib/types';
+import { formatLocalizedText } from '@/lib/translations';
 import {
   Shield,
   ShieldCheck,
@@ -81,9 +82,9 @@ export default function UserManagementPage() {
     email: '',
     role: 'Employee' as UserRole,
     status: 'Active' as UserStatus,
-    department_name: 'បច្ចេកវិទ្យា (Engineering)',
+    department_name: language === 'km' ? 'បច្ចេកវិទ្យា (Engineering)' : 'Engineering',
     employee_id: '',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces',
+    avatar: '/avatars/khmer_female_1.jpg',
     two_factor_enabled: false,
     permissions: ['self_service', 'clock_in', 'request_leave', 'view_payslips'],
   });
@@ -105,7 +106,7 @@ export default function UserManagementPage() {
       if (Array.isArray(empsData)) setEmployees(empsData);
     } catch (err) {
       console.error('Failed to load user management data:', err);
-      showToast('បរាជ័យក្នុងការទាញយកទិន្នន័យ', 'error');
+      showToast(language === 'km' ? 'បរាជ័យក្នុងការទាញយកទិន្នន័យ' : 'Failed to fetch user data', 'error');
     } finally {
       setLoading(false);
     }
@@ -150,9 +151,9 @@ export default function UserManagementPage() {
       email: '',
       role: 'Employee',
       status: 'Active',
-      department_name: 'បច្ចេកវិទ្យា (Engineering)',
+      department_name: language === 'km' ? 'បច្ចេកវិទ្យា (Engineering)' : 'Engineering',
       employee_id: '',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces',
+      avatar: '/avatars/khmer_female_1.jpg',
       two_factor_enabled: false,
       permissions: ['self_service', 'clock_in', 'request_leave', 'view_payslips'],
     });
@@ -164,11 +165,11 @@ export default function UserManagementPage() {
     setEditingUser(user);
     const userPerms = user.permissions ? user.permissions.split(',').map((p) => p.trim()) : [];
     setFormData({
-      name: user.name,
+      name: language === 'km' ? user.name : formatLocalizedText(user.name, 'en'),
       email: user.email,
       role: user.role,
       status: user.status,
-      department_name: user.department_name || '',
+      department_name: language === 'km' ? (user.department_name || '') : formatLocalizedText(user.department_name || '', 'en'),
       employee_id: user.employee_id || '',
       avatar: user.avatar || '',
       two_factor_enabled: user.two_factor_enabled === 1,
@@ -190,9 +191,9 @@ export default function UserManagementPage() {
 
     setFormData((prev) => ({
       ...prev,
-      name: `${emp.first_name} ${emp.last_name}`,
+      name: language === 'km' ? `${emp.first_name} ${emp.last_name}` : formatLocalizedText(`${emp.first_name} ${emp.last_name}`, 'en'),
       email: emp.email,
-      department_name: emp.department_name || prev.department_name,
+      department_name: language === 'km' ? (emp.department_name || prev.department_name) : formatLocalizedText(emp.department_name || prev.department_name, 'en'),
       employee_id: emp.id,
       avatar: emp.avatar || prev.avatar,
       role: detectedRole,
@@ -244,8 +245,8 @@ export default function UserManagementPage() {
   // Submit Create User
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.email) {
-      showToast('សូមបំពេញឈ្មោះ និងអ៊ីមែល', 'error');
+    if (!formData.name) {
+      showToast(language === 'km' ? 'សូមបំពេញឈ្មោះ' : 'Please fill in name', 'error');
       return;
     }
 
@@ -263,15 +264,15 @@ export default function UserManagementPage() {
 
       if (!res.ok) {
         const err = await res.json();
-        showToast(err.error || 'បរាជ័យក្នុងការបង្កើតគណនី', 'error');
+        showToast(err.error || (language === 'km' ? 'បរាជ័យក្នុងការបង្កើតគណនី' : 'Failed to create user account'), 'error');
         return;
       }
 
-      showToast('បានបង្កើតគណនីអ្នកប្រើប្រាស់ថ្មីដោយជោគជ័យ! ✓', 'success');
+      showToast(language === 'km' ? 'បានបង្កើតគណនីអ្នកប្រើប្រាស់ថ្មីដោយជោគជ័យ! ✓' : 'User account created successfully! ✓', 'success');
       setIsAddModalOpen(false);
       fetchData();
     } catch (err) {
-      showToast('កំហុសក្នុងការបង្កើតគណនី', 'error');
+      showToast(language === 'km' ? 'កំហុសក្នុងការបង្កើតគណនី' : 'Error creating account', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -298,24 +299,30 @@ export default function UserManagementPage() {
       });
 
       if (!res.ok) {
-        showToast('បរាជ័យក្នុងការកែប្រែគណនី', 'error');
+        showToast(language === 'km' ? 'បរាជ័យក្នុងការកែប្រែគណនី' : 'Failed to update user account', 'error');
         return;
       }
 
-      showToast('បានធ្វើបច្ចុប្បន្នភាពគណនីជោគជ័យ! ✓', 'success');
+      showToast(language === 'km' ? 'បានធ្វើបច្ចុប្បន្នភាពគណនីជោគជ័យ! ✓' : 'User account updated successfully! ✓', 'success');
       setEditingUser(null);
       fetchData();
     } catch (err) {
-      showToast('កំហុសប្រព័ន្ធ', 'error');
+      showToast(language === 'km' ? 'កំហុសប្រព័ន្ធ' : 'System error', 'error');
     } finally {
       setSubmitting(false);
     }
   };
 
+  const isPrimaryAdmin = (u: UserAccount | null | undefined) => {
+    if (!u) return false;
+    const adminCount = users.filter((x) => x.role === 'Admin' && x.status === 'Active').length;
+    return u.role === 'Admin' && adminCount <= 1;
+  };
+
   // Toggle user status (Active <-> Suspended)
   const handleToggleStatus = async (user: UserAccount) => {
-    if (user.id === 'usr-1') {
-      showToast('មិនអាចផ្អាកគណនីអ្នកគ្រប់គ្រងគោល (Root Admin) បានទេ', 'error');
+    if (isPrimaryAdmin(user)) {
+      showToast(language === 'km' ? 'មិនអាចផ្អាកគណនីអ្នកគ្រប់គ្រងគោល (Root Admin) បានទេ' : 'Cannot suspend Root Administrator account', 'error');
       return;
     }
 
@@ -330,24 +337,24 @@ export default function UserManagementPage() {
       if (res.ok) {
         showToast(
           nextStatus === 'Active'
-            ? `បានបើកដំណើរការគណនី ${user.name} ឡើងវិញ`
-            : `បានផ្អាកដំណើរការគណនី ${user.name}`,
+            ? (language === 'km' ? `បានបើកដំណើរការគណនី ${user.name} ឡើងវិញ` : `Account ${user.name} reactivated`)
+            : (language === 'km' ? `បានផ្អាកដំណើរការគណនី ${user.name}` : `Account ${user.name} suspended`),
           'success'
         );
         fetchData();
       } else {
-        showToast('បរាជ័យក្នុងការប្តូរស្ថានភាព', 'error');
+        showToast(language === 'km' ? 'បរាជ័យក្នុងការប្តូរស្ថានភាព' : 'Failed to update account status', 'error');
       }
     } catch (err) {
-      showToast('កំហុសប្រព័ន្ធ', 'error');
+      showToast(language === 'km' ? 'កំហុសប្រព័ន្ធ' : 'System error', 'error');
     }
   };
 
   // Delete User
   const handleDeleteUser = async () => {
     if (!deletingUser) return;
-    if (deletingUser.id === 'usr-1') {
-      showToast('មិនអាចលុបគណនីអ្នកគ្រប់គ្រងគោល (Root Admin) បានទេ', 'error');
+    if (isPrimaryAdmin(deletingUser)) {
+      showToast(language === 'km' ? 'មិនអាចលុបគណនីអ្នកគ្រប់គ្រងគោល (Root Admin) បានទេ' : 'Cannot delete Root Administrator account', 'error');
       setDeletingUser(null);
       return;
     }
@@ -358,15 +365,15 @@ export default function UserManagementPage() {
       });
 
       if (res.ok) {
-        showToast(`បានលុបគណនី ${deletingUser.name} ចេញពីប្រព័ន្ធ`, 'info');
+        showToast(language === 'km' ? `បានលុបគណនី ${deletingUser.name} ចេញពីប្រព័ន្ធ` : `Account ${deletingUser.name} deleted`, 'info');
         setDeletingUser(null);
         fetchData();
       } else {
         const data = await res.json();
-        showToast(data.error || 'បរាជ័យក្នុងការលុបគណនី', 'error');
+        showToast(data.error || (language === 'km' ? 'បរាជ័យក្នុងការលុបគណនី' : 'Failed to delete user'), 'error');
       }
     } catch (err) {
-      showToast('កំហុសក្នុងការលុប', 'error');
+      showToast(language === 'km' ? 'កំហុសក្នុងការលុប' : 'Error deleting account', 'error');
     }
   };
 
@@ -606,7 +613,7 @@ export default function UserManagementPage() {
                 ) : (
                   filteredUsers.map((u) => {
                     const permList = u.permissions ? u.permissions.split(',').filter(Boolean) : [];
-                    const isRootAdmin = u.id === 'usr-1';
+                    const isRootAdmin = isPrimaryAdmin(u);
 
                     return (
                       <tr key={u.id} className="hover:bg-gray-50/80 transition-colors">
@@ -615,7 +622,7 @@ export default function UserManagementPage() {
                           <div className="flex items-center gap-3">
                             <div className="relative">
                               <img
-                                src={u.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=256&h=256&fit=crop&crop=faces'}
+                                src={u.avatar || '/avatars/khmer_female_1.jpg'}
                                 alt={u.name}
                                 className="w-10 h-10 rounded-full object-cover border border-gray-200"
                               />
@@ -627,7 +634,7 @@ export default function UserManagementPage() {
                             </div>
                             <div>
                               <div className="flex items-center gap-1.5">
-                                <span className="font-semibold text-gray-900 font-khmer">{u.name}</span>
+                                <span className="font-semibold text-gray-900 font-khmer">{formatLocalizedText(u.name, language)}</span>
                                 {isRootAdmin && (
                                   <span className="px-1.5 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-800 rounded">
                                     Primary Admin
@@ -649,18 +656,18 @@ export default function UserManagementPage() {
                         {/* Role */}
                         <td className="py-3 px-4">
                           {u.role === 'Admin' ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 border border-indigo-200/80 text-indigo-700 font-semibold text-[11px]">
-                              <ShieldCheck className="w-3.5 h-3.5" />
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-800 border border-rose-200">
+                              <ShieldAlert className="w-3 h-3" />
                               <span>Administrator</span>
                             </span>
                           ) : u.role === 'Manager' ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200/80 text-blue-700 font-semibold text-[11px]">
-                              <ShieldAlert className="w-3.5 h-3.5" />
-                              <span>Line Manager</span>
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+                              <ShieldCheck className="w-3 h-3" />
+                              <span>Team Manager</span>
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-700 font-semibold text-[11px]">
-                              <Users className="w-3.5 h-3.5" />
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-700">
+                              <UserCheck className="w-3 h-3" />
                               <span>Staff Employee</span>
                             </span>
                           )}
@@ -668,7 +675,7 @@ export default function UserManagementPage() {
 
                         {/* Department */}
                         <td className="py-3 px-4 font-khmer text-gray-700">
-                          {u.department_name || 'ទូទៅ (General)'}
+                          {formatLocalizedText(u.department_name || (language === 'km' ? 'ទូទៅ (General)' : 'General'), language)}
                         </td>
 
                         {/* Permissions */}
@@ -897,13 +904,13 @@ export default function UserManagementPage() {
                     <td className="py-3.5 px-4 text-center">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold text-[11px] font-khmer">
                         <AlertCircle className="w-3.5 h-3.5" />
-                        <span>មើលក្រុមខ្លួន (Team Only)</span>
+                        <span>{language === 'km' ? 'មើលក្រុមខ្លួន (Team Only)' : 'Team Only'}</span>
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-center">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 font-semibold text-[11px] font-khmer">
                         <BadgeCheck className="w-3.5 h-3.5" />
-                        <span>មើលតែខ្លួនឯង (Self Profile)</span>
+                        <span>{language === 'km' ? 'មើលតែខ្លួនឯង (Self Profile)' : 'Self Profile'}</span>
                       </span>
                     </td>
                   </tr>
@@ -927,13 +934,13 @@ export default function UserManagementPage() {
                     <td className="py-3.5 px-4 text-center">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold text-[11px] font-khmer">
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>អនុម័តកូនក្រុម (Direct Reports)</span>
+                        <span>{language === 'km' ? 'អនុម័តកូនក្រុម (Direct Reports)' : 'Direct Reports'}</span>
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-center">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 font-semibold text-[11px] font-khmer">
                         <BadgeCheck className="w-3.5 h-3.5" />
-                        <span>ស្នើសុំផ្ទាល់ខ្លួន (Submit Only)</span>
+                        <span>{language === 'km' ? 'ស្នើសុំផ្ទាល់ខ្លួន (Submit Only)' : 'Submit Only'}</span>
                       </span>
                     </td>
                   </tr>
@@ -963,7 +970,7 @@ export default function UserManagementPage() {
                     <td className="py-3.5 px-4 text-center">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 font-semibold text-[11px] font-khmer">
                         <BadgeCheck className="w-3.5 h-3.5" />
-                        <span>ប័ណ្ណប្រាក់ខែខ្លួនឯង (My Payslip)</span>
+                        <span>{language === 'km' ? 'ប័ណ្ណប្រាក់ខែខ្លួនឯង (My Payslip)' : 'My Payslip'}</span>
                       </span>
                     </td>
                   </tr>
@@ -987,13 +994,13 @@ export default function UserManagementPage() {
                     <td className="py-3.5 px-4 text-center">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 font-semibold text-[11px] font-khmer">
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>វាយតម្លៃកូនក្រុម (Team Appraisals)</span>
+                        <span>{language === 'km' ? 'វាយតម្លៃកូនក្រុម (Team Appraisals)' : 'Team Appraisals'}</span>
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-center">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-50 text-violet-700 font-semibold text-[11px] font-khmer">
                         <BadgeCheck className="w-3.5 h-3.5" />
-                        <span>ស្វ័យវាយតម្លៃ (Self-Review)</span>
+                        <span>{language === 'km' ? 'ស្វ័យវាយតម្លៃ (Self-Review)' : 'Self-Review'}</span>
                       </span>
                     </td>
                   </tr>
@@ -1119,7 +1126,7 @@ export default function UserManagementPage() {
                   </option>
                   {employees.map((emp) => (
                     <option key={emp.id} value={emp.id}>
-                      {emp.first_name} {emp.last_name} ({emp.id}) - {emp.role} [{emp.department_name}]
+                      {formatLocalizedText(`${emp.first_name} ${emp.last_name}`, language)} ({emp.id}) - {formatLocalizedText(emp.role, language)} [{formatLocalizedText(emp.department_name, language)}]
                     </option>
                   ))}
                 </select>
@@ -1136,20 +1143,19 @@ export default function UserManagementPage() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="e.g. សារ៉ាត់ (Sarath)"
+                    placeholder={language === 'km' ? 'e.g. សារ៉ាត់ (Sarath)' : 'e.g. Sarath'}
                     className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                   />
                 </div>
                 <div>
                   <label className="block font-semibold text-gray-700 mb-1">
-                    {language === 'km' ? 'អ៊ីមែលចូលប្រព័ន្ធ (Email) *' : 'Work Email *'}
+                    {language === 'km' ? 'អ៊ីមែលចូលប្រព័ន្ធ (Email)' : 'Work Email (Optional)'}
                   </label>
                   <input
                     type="email"
-                    required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    placeholder="name@hestra.kh"
+                    placeholder="name@hestra.kh (Optional)"
                     className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                   />
                 </div>
@@ -1165,7 +1171,7 @@ export default function UserManagementPage() {
                     type="text"
                     value={formData.department_name}
                     onChange={(e) => setFormData({ ...formData, department_name: e.target.value })}
-                    placeholder="e.g. បច្ចេកវិទ្យា (Engineering)"
+                    placeholder={language === 'km' ? 'e.g. បច្ចេកវិទ្យា (Engineering)' : 'e.g. Engineering'}
                     className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                   />
                 </div>
@@ -1289,13 +1295,13 @@ export default function UserManagementPage() {
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-indigo-50/60 to-white">
               <div className="flex items-center gap-2.5">
                 <img
-                  src={editingUser.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=256&h=256&fit=crop&crop=faces'}
+                  src={editingUser.avatar || '/avatars/khmer_female_1.jpg'}
                   alt={editingUser.name}
                   className="w-10 h-10 rounded-full object-cover border border-gray-200"
                 />
                 <div>
                   <h3 className="text-base font-bold text-gray-900 font-khmer">
-                    {language === 'km' ? `កែប្រែគណនី: ${editingUser.name}` : `Edit User: ${editingUser.name}`}
+                    {language === 'km' ? `កែប្រែគណនី: ${editingUser.name}` : `Edit User: ${formatLocalizedText(editingUser.name, language)}`}
                   </h3>
                   <p className="text-[11px] text-gray-500 font-khmer">
                     ID: {editingUser.id} &bull; {editingUser.email}
@@ -1369,7 +1375,7 @@ export default function UserManagementPage() {
                   </label>
                   <select
                     value={formData.status}
-                    disabled={editingUser.id === 'usr-1'}
+                    disabled={isPrimaryAdmin(editingUser)}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
                     className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs font-semibold focus:outline-hidden"
                   >
@@ -1390,7 +1396,9 @@ export default function UserManagementPage() {
                       {language === 'km' ? 'សុវត្ថិភាព 2FA (Two-Factor Authentication)' : 'Enforce 2FA Security'}
                     </div>
                     <div className="text-[11px] text-gray-500">
-                      {formData.two_factor_enabled ? 'បើកដំណើរការ (Active)' : 'បិទដំណើរការ (Disabled)'}
+                      {formData.two_factor_enabled
+                        ? (language === 'km' ? 'បើកដំណើរការ (Active)' : 'Active')
+                        : (language === 'km' ? 'បិទដំណើរការ (Disabled)' : 'Disabled')}
                     </div>
                   </div>
                 </div>
@@ -1481,7 +1489,7 @@ export default function UserManagementPage() {
             <p className="text-xs text-gray-500 font-khmer mt-2 leading-relaxed">
               {language === 'km'
                 ? `តើអ្នកប្រាកដជាចង់លុបគណនី "${deletingUser.name}" (${deletingUser.email}) ចេញពីប្រព័ន្ធមែនទេ? សកម្មភាពនេះមិនអាចត្រឡប់វិញបានឡើយ។`
-                : `Are you sure you want to permanently delete user account "${deletingUser.name}" (${deletingUser.email})? This action cannot be reversed.`}
+                : `Are you sure you want to permanently delete user account "${formatLocalizedText(deletingUser.name, language)}" (${deletingUser.email})? This action cannot be reversed.`}
             </p>
             <div className="mt-6 flex items-center justify-center gap-3">
               <button

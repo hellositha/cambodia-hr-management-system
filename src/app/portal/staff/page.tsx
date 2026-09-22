@@ -3,9 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
+import { formatLocalizedText } from '@/lib/translations';
 import {
   UserCheck,
   Clock,
+  Timer,
   CalendarCheck,
   CreditCard,
   Building2,
@@ -57,12 +59,12 @@ export default function StaffPortalPage() {
     role: currentPersona.title,
     empId: currentPersona.id.toUpperCase(),
     email: currentPersona.email,
-    department: 'ផ្នែកបច្ចេកវិទ្យា & វិស្វកម្ម (Engineering & Tech)',
-    location: 'រាជធានីភ្នំពេញ (Phnom Penh Office)',
+    department: 'Engineering & Tech',
+    location: 'Phnom Penh Office',
     joinDate: '2023-03-15',
     phone: '+855 12 778 990',
-    managerName: 'វ៉ាន់ សុភ័ក្ត្រ (Van Sopheak)',
-    managerRole: 'នាយកផ្នែកបច្ចេកវិទ្យា (VP of Engineering)',
+    managerName: 'Van Sopheak',
+    managerRole: 'VP of Engineering',
     managerEmail: 'van.sopheak@hestra.kh',
   });
 
@@ -75,30 +77,30 @@ export default function StaffPortalPage() {
   const [myLeaveHistory, setMyLeaveHistory] = useState<any[]>([
     {
       id: 'l-01',
-      type: 'Annual Leave (ច្បាប់ប្រចាំឆ្នាំ)',
+      type: 'Annual Leave',
       startDate: '2026-10-12',
       endDate: '2026-10-14',
       days: 3,
-      reason: 'ចូលរួមពិធីបុណ្យគ្រួសារនៅខេត្តសៀមរាប',
+      reason: 'Family event in Siem Reap',
       status: 'Approved',
-      reviewer: 'វ៉ាន់ សុភ័ក្ត្រ',
+      reviewer: 'Van Sopheak',
     },
     {
       id: 'l-02',
-      type: 'Sick Leave (ច្បាប់ឈឺ)',
+      type: 'Sick Leave',
       startDate: '2026-09-04',
       endDate: '2026-09-05',
       days: 2,
-      reason: 'គ្រុនផ្តាសាយធំ មានវេជ្ជបញ្ជាពីគ្លីនិក',
+      reason: 'Flu with clinic medical certificate',
       status: 'Approved',
-      reviewer: 'វ៉ាន់ សុភ័ក្ត្រ',
+      reviewer: 'Van Sopheak',
     },
   ]);
 
   const [myPayslips, setMyPayslips] = useState<StaffPayslip[]>([
     {
       id: 'PAY-2026-09-018',
-      period: 'ខែកញ្ញា ២០២៦ (September 2026)',
+      period: 'September 2026',
       payment_date: '2026-09-30',
       base_salary: 2200,
       allowances: 150,
@@ -108,7 +110,7 @@ export default function StaffPortalPage() {
     },
     {
       id: 'PAY-2026-08-018',
-      period: 'ខែសីហា ២០២៦ (August 2026)',
+      period: 'August 2026',
       payment_date: '2026-08-31',
       base_salary: 2200,
       allowances: 150,
@@ -145,11 +147,11 @@ export default function StaffPortalPage() {
               empId: emp.id.toUpperCase(),
               email: emp.email,
               department: emp.department_name || 'General Department',
-              location: emp.location || 'រាជធានីភ្នំពេញ (Phnom Penh Office)',
+              location: emp.location || (language === 'km' ? 'រាជធានីភ្នំពេញ (Phnom Penh Office)' : 'Phnom Penh Office'),
               joinDate: emp.join_date || '2024-01-01',
               phone: emp.phone || '+855 12 778 990',
-              managerName: emp.manager_name || 'វ៉ាន់ សុភ័ក្ត្រ (Van Sopheak)',
-              managerRole: 'ប្រធានផ្នែក (Department Head)',
+              managerName: emp.manager_name || (language === 'km' ? 'វ៉ាន់ សុភ័ក្ត្រ (Van Sopheak)' : 'Van Sopheak'),
+              managerRole: language === 'km' ? 'ប្រធានផ្នែក (Department Head)' : 'Department Head',
               managerEmail: 'van.sopheak@hestra.kh',
             });
           }
@@ -178,13 +180,13 @@ export default function StaffPortalPage() {
             setMyLeaveHistory(
               data.leaves.map((l: any) => ({
                 id: l.id,
-                type: `${l.leave_type} Leave (ច្បាប់${l.leave_type === 'Annual' ? 'ប្រចាំឆ្នាំ' : l.leave_type === 'Sick' ? 'ឈឺ' : 'ធុរៈ'})`,
+                type: language === 'km' ? `${l.leave_type} Leave (ច្បាប់${l.leave_type === 'Annual' ? 'ប្រចាំឆ្នាំ' : l.leave_type === 'Sick' ? 'ឈឺ' : 'ធុរៈ'})` : `${l.leave_type} Leave`,
                 startDate: l.start_date,
                 endDate: l.end_date,
                 days: l.days_count,
                 reason: l.reason,
                 status: l.status,
-                reviewer: l.reviewer_name || 'ប្រធានផ្នែក',
+                reviewer: l.reviewer_name || (language === 'km' ? 'ប្រធានផ្នែក' : 'Line Manager'),
               }))
             );
           }
@@ -274,6 +276,14 @@ export default function StaffPortalPage() {
             <span>{language === 'km' ? 'របាយការណ៍វត្តមាន' : 'Attendance Report'}</span>
           </Link>
 
+          <Link
+            href="/overtime"
+            className="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold flex items-center gap-2 transition-colors shadow-2xs cursor-pointer"
+          >
+            <Timer size={15} className="text-indigo-600" />
+            <span>{language === 'km' ? 'ម៉ោងបន្ថែម (Overtime)' : 'My Overtime'}</span>
+          </Link>
+
           <button
             onClick={() => showToast(language === 'km' ? 'សំណើសុំលិខិតបញ្ជាក់ការងារត្រូវបានផ្ញើទៅកាន់ផ្នែកធនធានមនុស្សរួចរាល់' : 'Employment verification request sent to HR Department', 'info')}
             className="px-4 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold flex items-center gap-2 transition-colors shadow-2xs cursor-pointer"
@@ -297,7 +307,7 @@ export default function StaffPortalPage() {
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="text-base sm:text-lg font-black text-slate-900 font-khmer">
-                  {staffData.name}
+                  {formatLocalizedText(staffData.name, language)}
                 </h2>
                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
                   {staffData.empId}
@@ -306,8 +316,8 @@ export default function StaffPortalPage() {
                   {currentPersona.role}
                 </span>
               </div>
-              <p className="text-xs font-semibold text-slate-600 font-khmer">{staffData.role}</p>
-              <p className="text-[11px] text-slate-400 font-khmer">{staffData.department}</p>
+              <p className="text-xs font-semibold text-slate-600 font-khmer">{formatLocalizedText(staffData.role, language)}</p>
+              <p className="text-[11px] text-slate-400 font-khmer">{formatLocalizedText(staffData.department, language)}</p>
             </div>
           </div>
 
@@ -322,7 +332,7 @@ export default function StaffPortalPage() {
             </div>
             <div className="flex items-center gap-2">
               <MapPin size={14} className="text-slate-400 shrink-0" />
-              <span className="text-[11px] truncate">{staffData.location}</span>
+              <span className="text-[11px] truncate">{formatLocalizedText(staffData.location, language)}</span>
             </div>
           </div>
         </div>
@@ -387,13 +397,13 @@ export default function StaffPortalPage() {
               {language === 'km' ? 'ច្បាប់ប្រចាំឆ្នាំ (Annual Leave)' : 'Annual Leave'}
             </span>
             <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700">
-              {leaveBalances.annual.remaining} ថ្ងៃនៅសល់
+              {leaveBalances.annual.remaining} {language === 'km' ? 'ថ្ងៃនៅសល់' : 'days left'}
             </span>
           </div>
 
           <div className="my-3">
             <div className="text-3xl font-black text-slate-900 font-mono">
-              {leaveBalances.annual.remaining} <span className="text-xs text-slate-400 font-sans">/ {leaveBalances.annual.total} ថ្ងៃ</span>
+              {leaveBalances.annual.remaining} <span className="text-xs text-slate-400 font-sans">/ {leaveBalances.annual.total} {language === 'km' ? 'ថ្ងៃ' : 'days'}</span>
             </div>
             <div className="w-full h-2 bg-slate-100 rounded-full mt-2 overflow-hidden">
               <div
@@ -404,8 +414,10 @@ export default function StaffPortalPage() {
           </div>
 
           <div className="text-[11px] text-slate-400 flex justify-between pt-2 border-t border-slate-100">
-            <span>បានប្រើ៖ {leaveBalances.annual.used} ថ្ងៃ</span>
-            <span className="text-indigo-600 font-bold cursor-pointer" onClick={() => openModal('request-leave')}>+ ស្នើសុំ</span>
+            <span>{language === 'km' ? `បានប្រើ៖ ${leaveBalances.annual.used} ថ្ងៃ` : `Used: ${leaveBalances.annual.used} days`}</span>
+            <span className="text-indigo-600 font-bold cursor-pointer" onClick={() => openModal('request-leave')}>
+              {language === 'km' ? '+ ស្នើសុំ' : '+ Request'}
+            </span>
           </div>
         </div>
 
@@ -416,13 +428,13 @@ export default function StaffPortalPage() {
               {language === 'km' ? 'ច្បាប់ឈឺ (Sick Leave)' : 'Sick Leave'}
             </span>
             <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
-              {leaveBalances.sick.remaining} ថ្ងៃនៅសល់
+              {leaveBalances.sick.remaining} {language === 'km' ? 'ថ្ងៃនៅសល់' : 'days left'}
             </span>
           </div>
 
           <div className="my-3">
             <div className="text-3xl font-black text-slate-900 font-mono">
-              {leaveBalances.sick.remaining} <span className="text-xs text-slate-400 font-sans">/ {leaveBalances.sick.total} ថ្ងៃ</span>
+              {leaveBalances.sick.remaining} <span className="text-xs text-slate-400 font-sans">/ {leaveBalances.sick.total} {language === 'km' ? 'ថ្ងៃ' : 'days'}</span>
             </div>
             <div className="w-full h-2 bg-slate-100 rounded-full mt-2 overflow-hidden">
               <div
@@ -433,8 +445,8 @@ export default function StaffPortalPage() {
           </div>
 
           <div className="text-[11px] text-slate-400 flex justify-between pt-2 border-t border-slate-100">
-            <span>បានប្រើ៖ {leaveBalances.sick.used} ថ្ងៃ</span>
-            <span>មានវិញ្ញាបនបត្រពេទ្យ</span>
+            <span>{language === 'km' ? `បានប្រើ៖ ${leaveBalances.sick.used} ថ្ងៃ` : `Used: ${leaveBalances.sick.used} days`}</span>
+            <span>{language === 'km' ? 'មានវិញ្ញាបនបត្រពេទ្យ' : 'Medical cert'}</span>
           </div>
         </div>
 
@@ -445,13 +457,13 @@ export default function StaffPortalPage() {
               {language === 'km' ? 'ច្បាប់ធុរៈ (Casual Leave)' : 'Casual Leave'}
             </span>
             <span className="text-xs font-bold font-mono px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
-              {leaveBalances.casual.remaining} ថ្ងៃនៅសល់
+              {leaveBalances.casual.remaining} {language === 'km' ? 'ថ្ងៃនៅសល់' : 'days left'}
             </span>
           </div>
 
           <div className="my-3">
             <div className="text-3xl font-black text-slate-900 font-mono">
-              {leaveBalances.casual.remaining} <span className="text-xs text-slate-400 font-sans">/ {leaveBalances.casual.total} ថ្ងៃ</span>
+              {leaveBalances.casual.remaining} <span className="text-xs text-slate-400 font-sans">/ {leaveBalances.casual.total} {language === 'km' ? 'ថ្ងៃ' : 'days'}</span>
             </div>
             <div className="w-full h-2 bg-slate-100 rounded-full mt-2 overflow-hidden">
               <div
@@ -462,8 +474,8 @@ export default function StaffPortalPage() {
           </div>
 
           <div className="text-[11px] text-slate-400 flex justify-between pt-2 border-t border-slate-100">
-            <span>បានប្រើ៖ {leaveBalances.casual.used} ថ្ងៃ</span>
-            <span>ធុរៈបន្ទាន់ផ្ទាល់ខ្លួន</span>
+            <span>{language === 'km' ? `បានប្រើ៖ ${leaveBalances.casual.used} ថ្ងៃ` : `Used: ${leaveBalances.casual.used} days`}</span>
+            <span>{language === 'km' ? 'ធុរៈបន្ទាន់ផ្ទាល់ខ្លួន' : 'Personal matters'}</span>
           </div>
         </div>
       </div>
@@ -493,7 +505,7 @@ export default function StaffPortalPage() {
                 onClick={() => openModal('request-leave')}
                 className="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition-colors cursor-pointer"
               >
-                + ស្នើសុំថ្មី
+                {language === 'km' ? '+ ស្នើសុំថ្មី' : '+ New Request'}
               </button>
             </div>
           </div>
@@ -502,24 +514,24 @@ export default function StaffPortalPage() {
             <table className="w-full text-left text-xs text-slate-700">
               <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
                 <tr>
-                  <th className="py-2.5 px-3">ប្រភេទច្បាប់ (Type)</th>
-                  <th className="py-2.5 px-3">កាលបរិច្ឆេទ (Dates)</th>
-                  <th className="py-2.5 px-3">ចំនួន</th>
-                  <th className="py-2.5 px-3">ស្ថានភាព (Status)</th>
+                  <th className="py-2.5 px-3">{language === 'km' ? 'ប្រភេទច្បាប់ (Type)' : 'Leave Type'}</th>
+                  <th className="py-2.5 px-3">{language === 'km' ? 'កាលបរិច្ឆេទ (Dates)' : 'Dates'}</th>
+                  <th className="py-2.5 px-3">{language === 'km' ? 'ចំនួន' : 'Days'}</th>
+                  <th className="py-2.5 px-3">{language === 'km' ? 'ស្ថានភាព (Status)' : 'Status'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 font-khmer">
                 {myLeaveHistory.map((req) => (
                   <tr key={req.id} className="hover:bg-slate-50">
                     <td className="py-3 px-3">
-                      <span className="font-bold text-slate-900 block">{req.type}</span>
-                      <span className="text-[11px] text-slate-400">{req.reason}</span>
+                      <span className="font-bold text-slate-900 block">{formatLocalizedText(req.type, language)}</span>
+                      <span className="text-[11px] text-slate-400">{formatLocalizedText(req.reason, language)}</span>
                     </td>
                     <td className="py-3 px-3 font-mono whitespace-nowrap">
-                      {req.startDate} ដល់ {req.endDate}
+                      {req.startDate} {language === 'km' ? 'ដល់' : 'to'} {req.endDate}
                     </td>
                     <td className="py-3 px-3 font-mono font-bold">
-                      {req.days} ថ្ងៃ
+                      {req.days} {language === 'km' ? 'ថ្ងៃ' : 'days'}
                     </td>
                     <td className="py-3 px-3 whitespace-nowrap">
                       <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] ${
@@ -532,12 +544,12 @@ export default function StaffPortalPage() {
                           : 'bg-amber-50 text-amber-700 border border-amber-200'
                       }`}>
                         {req.status === 'Approved'
-                          ? '✓ បានអនុម័តពេញលេញ'
+                          ? (language === 'km' ? '✓ បានអនុម័តពេញលេញ' : '✓ Approved')
                           : req.status === 'Pending Admin'
-                          ? '⏳ ជំហាន ២/២: រង់ចាំរដ្ឋបាល (Admin)'
+                          ? (language === 'km' ? '⏳ ជំហាន ២/២: រង់ចាំរដ្ឋបាល (Admin)' : '⏳ Step 2/2: Awaiting Admin')
                           : req.status === 'Rejected'
-                          ? '✕ បានបដិសេធ'
-                          : '⏳ ជំហាន ១/២: រង់ចាំប្រធានផ្នែក'}
+                          ? (language === 'km' ? '✕ បានបដិសេធ' : '✕ Rejected')
+                          : (language === 'km' ? '⏳ ជំហាន ១/២: រង់ចាំប្រធានផ្នែក' : '⏳ Step 1/2: Awaiting Manager')}
                       </span>
                     </td>
                   </tr>
@@ -569,8 +581,10 @@ export default function StaffPortalPage() {
                   className="p-3 rounded-xl border border-slate-200/80 hover:border-indigo-300 hover:bg-slate-50 transition-all flex items-center justify-between"
                 >
                   <div>
-                    <span className="font-bold text-xs text-slate-900 block font-khmer">{pay.period}</span>
-                    <span className="text-[10px] text-slate-400 font-mono">បើកថ្ងៃ៖ {pay.payment_date}</span>
+                    <span className="font-bold text-xs text-slate-900 block font-khmer">{formatLocalizedText(pay.period, language)}</span>
+                    <span className="text-[10px] text-slate-400 font-mono">
+                      {language === 'km' ? `បើកថ្ងៃ៖ ${pay.payment_date}` : `Paid: ${pay.payment_date}`}
+                    </span>
                   </div>
 
                   <div className="text-right">
@@ -581,7 +595,7 @@ export default function StaffPortalPage() {
                       onClick={() => setActivePayslipModal(pay)}
                       className="text-[11px] font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 cursor-pointer mt-0.5"
                     >
-                      <span>មើលប័ណ្ណ</span>
+                      <span>{language === 'km' ? 'មើលប័ណ្ណ' : 'View Slip'}</span>
                       <ExternalLink size={12} />
                     </button>
                   </div>
@@ -591,8 +605,8 @@ export default function StaffPortalPage() {
           </div>
 
           <div className="mt-4 p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs text-slate-500">
-            <span>គណនីធនាគារ៖ ABA Bank (002 918 288)</span>
-            <span className="font-bold text-emerald-600">✓ ផ្ទៀងផ្ទាត់រួច</span>
+            <span>{language === 'km' ? 'គណនីធនាគារ៖ ABA Bank (002 918 288)' : 'Bank Account: ABA Bank (002 918 288)'}</span>
+            <span className="font-bold text-emerald-600">{language === 'km' ? '✓ ផ្ទៀងផ្ទាត់រួច' : '✓ Verified'}</span>
           </div>
         </div>
       </div>
@@ -608,9 +622,9 @@ export default function StaffPortalPage() {
               {language === 'km' ? 'ប្រធានផ្នែកផ្ទាល់ (Direct Line Manager)' : 'Direct Line Manager'}
             </span>
             <h4 className="text-xs sm:text-sm font-bold text-slate-900 font-khmer">
-              {staffData.managerName}
+              {formatLocalizedText(staffData.managerName, language)}
             </h4>
-            <p className="text-[11px] text-slate-500">{staffData.managerRole} &bull; {staffData.managerEmail}</p>
+            <p className="text-[11px] text-slate-500">{formatLocalizedText(staffData.managerRole, language)} &bull; {staffData.managerEmail}</p>
           </div>
         </div>
 
@@ -619,7 +633,7 @@ export default function StaffPortalPage() {
             href={`mailto:${staffData.managerEmail}`}
             className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-50 transition-colors shadow-2xs"
           >
-            ផ្ញើអ៊ីមែល (Email)
+            {language === 'km' ? 'ផ្ញើអ៊ីមែល (Email)' : 'Send Email'}
           </a>
         </div>
       </div>
@@ -636,9 +650,15 @@ export default function StaffPortalPage() {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-slate-900 font-khmer">HESTRA HRM CAMBODIA</h3>
-                  <span className="text-xs text-slate-500 font-khmer-moul text-indigo-700 block mt-0.5">
-                    ប័ណ្ណបើកប្រាក់បៀវត្សរ៍
-                  </span>
+                  {language === 'km' ? (
+                    <span className="text-xs text-slate-500 font-khmer-moul text-indigo-700 block mt-0.5">
+                      ប័ណ្ណបើកប្រាក់បៀវត្សរ៍
+                    </span>
+                  ) : (
+                    <span className="text-xs text-slate-500 font-bold uppercase tracking-wider text-indigo-700 block mt-0.5">
+                      Official Salary Payslip
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -653,19 +673,19 @@ export default function StaffPortalPage() {
             {/* Meta */}
             <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
               <div>
-                <span className="text-slate-400 text-[10px] uppercase font-bold block">ឈ្មោះបុគ្គលិក</span>
-                <span className="font-bold text-slate-900">{staffData.name}</span>
+                <span className="text-slate-400 text-[10px] uppercase font-bold block">{language === 'km' ? 'ឈ្មោះបុគ្គលិក' : 'Employee Name'}</span>
+                <span className="font-bold text-slate-900">{formatLocalizedText(staffData.name, language)}</span>
               </div>
               <div>
-                <span className="text-slate-400 text-[10px] uppercase font-bold block">អត្តលេខ</span>
+                <span className="text-slate-400 text-[10px] uppercase font-bold block">{language === 'km' ? 'អត្តលេខ' : 'Staff ID'}</span>
                 <span className="font-mono font-bold text-slate-900">{staffData.empId}</span>
               </div>
               <div>
-                <span className="text-slate-400 text-[10px] uppercase font-bold block">ការិយាល័យ</span>
-                <span className="font-bold text-slate-900">{activePayslipModal.period}</span>
+                <span className="text-slate-400 text-[10px] uppercase font-bold block">{language === 'km' ? 'ការិយាល័យ' : 'Period'}</span>
+                <span className="font-bold text-slate-900">{formatLocalizedText(activePayslipModal.period, language)}</span>
               </div>
               <div>
-                <span className="text-slate-400 text-[10px] uppercase font-bold block">កាលបរិច្ឆេទ</span>
+                <span className="text-slate-400 text-[10px] uppercase font-bold block">{language === 'km' ? 'កាលបរិច្ឆេទ' : 'Payment Date'}</span>
                 <span className="font-mono font-bold text-slate-900">{activePayslipModal.payment_date}</span>
               </div>
             </div>
@@ -673,23 +693,23 @@ export default function StaffPortalPage() {
             {/* Financial itemization */}
             <div className="space-y-2 text-xs border border-slate-200 rounded-xl p-4">
               <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-600">ប្រាក់ខែគោល (Basic Salary):</span>
+                <span className="text-slate-600">{language === 'km' ? 'ប្រាក់ខែគោល (Basic Salary):' : 'Basic Salary:'}</span>
                 <span className="font-mono font-bold">${activePayslipModal.base_salary.toLocaleString()}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-600">ប្រាក់ឧបត្ថម្ភការងារ (Allowances):</span>
+                <span className="text-slate-600">{language === 'km' ? 'ប្រាក់ឧបត្ថម្ភការងារ (Allowances):' : 'Allowances:'}</span>
                 <span className="font-mono font-bold text-emerald-600">+${activePayslipModal.allowances.toLocaleString()}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-600">កាត់វិភាគទាន ប.ស.ស (NSSF Pension 2%):</span>
+                <span className="text-slate-600">{language === 'km' ? 'កាត់វិភាគទាន ប.ស.ស (NSSF Pension 2%):' : 'NSSF Pension Deduction:'}</span>
                 <span className="font-mono font-bold text-rose-600">-${activePayslipModal.nssf_deduction.toFixed(2)}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-600">កាត់ពន្ធលើប្រាក់បៀវត្សរ៍ (TOS GDT):</span>
+                <span className="text-slate-600">{language === 'km' ? 'កាត់ពន្ធលើប្រាក់បៀវត្សរ៍ (TOS GDT):' : 'Tax On Salary (TOS):'}</span>
                 <span className="font-mono font-bold text-rose-600">-${activePayslipModal.tax_deduction.toFixed(2)}</span>
               </div>
               <div className="flex justify-between pt-2 text-sm font-black text-slate-900 font-khmer">
-                <span>ប្រាក់បៀវត្សរ៍សុទ្ធទទួលបាន (Net Take-home):</span>
+                <span>{language === 'km' ? 'ប្រាក់បៀវត្សរ៍សុទ្ធទទួលបាន (Net Take-home):' : 'Net Take-Home Pay:'}</span>
                 <span className="font-mono text-indigo-700">${activePayslipModal.net_salary.toLocaleString()} USD</span>
               </div>
             </div>
@@ -700,14 +720,14 @@ export default function StaffPortalPage() {
                 className="py-2 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm"
               >
                 <Printer size={15} />
-                <span>បោះពុម្ពប័ណ្ណ (Print)</span>
+                <span>{language === 'km' ? 'បោះពុម្ពប័ណ្ណ (Print)' : 'Print'}</span>
               </button>
 
               <button
                 onClick={() => setActivePayslipModal(null)}
                 className="py-2 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs cursor-pointer"
               >
-                បិទ (Close)
+                {language === 'km' ? 'បិទ (Close)' : 'Close'}
               </button>
             </div>
           </div>

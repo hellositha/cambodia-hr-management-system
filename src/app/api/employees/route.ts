@@ -111,18 +111,17 @@ export async function POST(request: Request) {
       doc_others = '',
     } = body;
 
-    if (!first_name || !last_name || !email || !role || !department_id) {
+    if (!first_name || !last_name || !role || !department_id) {
       return NextResponse.json(
-        { error: 'first_name, last_name, email, role, and department_id are required' },
+        { error: 'first_name, last_name, role, and department_id are required' },
         { status: 400 }
       );
     }
 
-    // Default avatar if none provided (self-contained SVG data URL, no external links)
-    const defaultAvatar =
-      avatar && avatar.trim()
-        ? avatar.trim()
-        : `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 24 24" fill="%236366f1"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>`;
+    const finalEmail = email && typeof email === 'string' && email.trim() ? email.trim() : null;
+
+    // Only use uploaded photo, no default avatar
+    const finalAvatar = avatar && typeof avatar === 'string' && avatar.trim() ? avatar.trim() : '';
 
     const id = customId && customId.trim() ? customId.trim() : `emp-${Date.now()}`;
     const createdAt = new Date().toISOString();
@@ -159,7 +158,7 @@ export async function POST(request: Request) {
       id,
       first_name,
       last_name,
-      email,
+      finalEmail,
       phone,
       role,
       department_id,
@@ -169,7 +168,7 @@ export async function POST(request: Request) {
       Number(salary) || 0,
       join_date,
       manager_id || null,
-      defaultAvatar,
+      finalAvatar,
       location,
       bio,
       emergency_contact_name,
@@ -228,7 +227,12 @@ export async function POST(request: Request) {
     const userRole = (role && (role.toLowerCase().includes('manager') || role.toLowerCase().includes('head') || role.toLowerCase().includes('director'))) 
       ? 'Manager' 
       : 'Employee';
-    const existingUser = db.prepare('SELECT id FROM users WHERE employee_id = ? OR LOWER(email) = LOWER(?)').get(id, email.toLowerCase());
+    const existingUser = db.prepare(`
+      SELECT id FROM users 
+      WHERE employee_id = ? 
+         OR (? IS NOT NULL AND LOWER(email) = LOWER(?))
+    `).get(id, finalEmail, finalEmail);
+
     if (!existingUser) {
       db.prepare(`
         INSERT INTO users (id, username, name, email, role, status, employee_id, department_name, avatar, two_factor_enabled, permissions, password, last_login, created_at)
@@ -237,11 +241,11 @@ export async function POST(request: Request) {
         `usr-${Date.now().toString().slice(-6)}`,
         calculatedUsername,
         `${first_name} ${last_name}`,
-        email,
+        finalEmail,
         userRole,
         id,
-        newEmployee?.department_name || 'ទូទៅ (General)',
-        defaultAvatar,
+        newEmployee?.department_name || 'General',
+        finalAvatar,
         createdAt.split('T')[0]
       );
     } else {

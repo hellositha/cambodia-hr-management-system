@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
+import { formatLocalizedText } from '@/lib/translations';
 import {
   BarChart3,
   FileSpreadsheet,
@@ -349,10 +350,10 @@ export default function ReportsPage() {
                 onChange={(e) => setSelectedMonth(e.target.value)}
                 className="appearance-none pl-8 pr-8 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 cursor-pointer"
               >
-                <option value="2026-09">ខែកញ្ញា ២០២៦ (Sep 2026)</option>
-                <option value="2026-08">ខែសីហា ២០២៦ (Aug 2026)</option>
-                <option value="2026-07">ខែកក្កដា ២០២៦ (Jul 2026)</option>
-                <option value="2026-06">ខែមិថុនា ២០២៦ (Jun 2026)</option>
+                <option value="2026-09">{language === 'km' ? 'ខែកញ្ញា ២០២៦ (Sep 2026)' : 'September 2026'}</option>
+                <option value="2026-08">{language === 'km' ? 'ខែសីហា ២០២៦ (Aug 2026)' : 'August 2026'}</option>
+                <option value="2026-07">{language === 'km' ? 'ខែកក្កដា ២០២៦ (Jul 2026)' : 'July 2026'}</option>
+                <option value="2026-06">{language === 'km' ? 'ខែមិថុនា ២០២៦ (Jun 2026)' : 'June 2026'}</option>
               </select>
               <Calendar size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             </div>
@@ -372,7 +373,7 @@ export default function ReportsPage() {
                 <option value="all">{language === 'km' ? 'គ្រប់ផ្នែកទាំងអស់ (All Departments)' : 'All Departments'}</option>
                 {reportData?.departments.map((d) => (
                   <option key={d.id} value={d.id}>
-                    {d.name}
+                    {formatLocalizedText(d.name, language)}
                   </option>
                 ))}
               </select>
@@ -408,12 +409,12 @@ export default function ReportsPage() {
               </span>
             </div>
             <div className="text-2xl font-black text-slate-900 my-1 font-mono">
-              {reportData.kpis.totalHeadcount} <span className="text-xs font-sans text-slate-500 font-semibold">នាក់</span>
+              {reportData.kpis.totalHeadcount} <span className="text-xs font-sans text-slate-500 font-semibold">{language === 'km' ? 'នាក់' : 'staff'}</span>
             </div>
             <div className="text-[11px] text-slate-500 flex items-center gap-1 font-khmer">
-              <span className="text-emerald-600 font-bold">{reportData.kpis.activeHeadcount} កំពុងបម្រើការ</span>
+              <span className="text-emerald-600 font-bold">{reportData.kpis.activeHeadcount} {language === 'km' ? 'កំពុងបម្រើការ' : 'Active'}</span>
               <span>&bull;</span>
-              <span>{reportData.kpis.onLeaveHeadcount} សុំច្បាប់</span>
+              <span>{reportData.kpis.onLeaveHeadcount} {language === 'km' ? 'សុំច្បាប់' : 'On Leave'}</span>
             </div>
           </div>
 
@@ -431,7 +432,7 @@ export default function ReportsPage() {
               {reportData.kpis.companyAttendanceRate}%
             </div>
             <div className="text-[11px] text-slate-500 font-khmer">
-              គិតបញ្ចូលការមកទាន់ពេល & ធ្វើការពីផ្ទះ (WFH)
+              {language === 'km' ? 'គិតបញ្ចូលការមកទាន់ពេល & ធ្វើការពីផ្ទះ (WFH)' : 'Includes on-time office & approved WFH'}
             </div>
           </div>
 
@@ -467,7 +468,7 @@ export default function ReportsPage() {
               ${reportData.kpis.totalNssfContributions.toFixed(2)}
             </div>
             <div className="text-[11px] text-slate-500 font-khmer">
-              សោធននិវត្តន៍ + ថែទាំសុខភាព + ហានិភ័យ
+              {language === 'km' ? 'សោធននិវត្តន៍ + ថែទាំសុខភាព + ហានិភ័យ' : 'Pension + Health Care + Occupational Risk'}
             </div>
           </div>
         </div>
@@ -479,8 +480,8 @@ export default function ReportsPage() {
           onClick={() => setActiveTab('attendance')}
           className={`px-4 py-2.5 rounded-t-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'attendance'
-              ? 'bg-white border-t-2 border-indigo-600 text-indigo-600 shadow-2xs'
-              : 'text-slate-500 hover:text-slate-800'
+              ? 'bg-white border-x border-t border-slate-200 text-indigo-600 -mb-px shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
           }`}
         >
           <Clock size={15} />
@@ -491,8 +492,8 @@ export default function ReportsPage() {
           onClick={() => setActiveTab('payroll')}
           className={`px-4 py-2.5 rounded-t-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'payroll'
-              ? 'bg-white border-t-2 border-indigo-600 text-indigo-600 shadow-2xs'
-              : 'text-slate-500 hover:text-slate-800'
+              ? 'bg-white border-x border-t border-slate-200 text-indigo-600 -mb-px shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
           }`}
         >
           <CreditCard size={15} />
@@ -503,8 +504,8 @@ export default function ReportsPage() {
           onClick={() => setActiveTab('nssf')}
           className={`px-4 py-2.5 rounded-t-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'nssf'
-              ? 'bg-white border-t-2 border-indigo-600 text-indigo-600 shadow-2xs'
-              : 'text-slate-500 hover:text-slate-800'
+              ? 'bg-white border-x border-t border-slate-200 text-indigo-600 -mb-px shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
           }`}
         >
           <Shield size={15} />
@@ -515,11 +516,11 @@ export default function ReportsPage() {
           onClick={() => setActiveTab('workforce')}
           className={`px-4 py-2.5 rounded-t-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'workforce'
-              ? 'bg-white border-t-2 border-indigo-600 text-indigo-600 shadow-2xs'
-              : 'text-slate-500 hover:text-slate-800'
+              ? 'bg-white border-x border-t border-slate-200 text-indigo-600 -mb-px shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
           }`}
         >
-          <Building2 size={15} />
+          <BarChart3 size={15} />
           <span>{language === 'km' ? '៤. ស្ថិតិកម្លាំងពលកម្ម (Workforce Demographics)' : '4. Workforce Demographics'}</span>
         </button>
 
@@ -527,11 +528,11 @@ export default function ReportsPage() {
           onClick={() => setActiveTab('leaves')}
           className={`px-4 py-2.5 rounded-t-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'leaves'
-              ? 'bg-white border-t-2 border-indigo-600 text-indigo-600 shadow-2xs'
-              : 'text-slate-500 hover:text-slate-800'
+              ? 'bg-white border-x border-t border-slate-200 text-indigo-600 -mb-px shadow-xs'
+              : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
           }`}
         >
-          <FileText size={15} />
+          <Briefcase size={15} />
           <span>{language === 'km' ? '៥. សមតុល្យច្បាប់ឈប់សម្រាក (Leave Balances)' : '5. Leave Balances'}</span>
         </button>
       </div>
@@ -540,7 +541,7 @@ export default function ReportsPage() {
       {loading ? (
         <div className="bg-white p-12 rounded-3xl border border-slate-200/90 text-center">
           <div className="inline-block animate-spin w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full mb-3"></div>
-          <p className="text-xs text-slate-500 font-khmer">កំពុងប្រមូលទិន្នន័យរបាយការណ៍... (Loading Report Data)</p>
+          <p className="text-xs text-slate-500 font-khmer">{language === 'km' ? 'កំពុងប្រមូលទិន្នន័យរបាយការណ៍... (Loading Report Data)' : 'Aggregating report data...'}</p>
         </div>
       ) : reportData ? (
         <div className="space-y-6">
@@ -554,7 +555,7 @@ export default function ReportsPage() {
                   </h3>
                   <p className="text-[11px] text-slate-500 font-khmer">
                     {language === 'km'
-                      ? `ខែ ${selectedMonth} &bull; បង្ហាញវត្តមាន មកការិយាល័យ ធ្វើការពីផ្ទះ យឺត និងម៉ោងបន្ថែម`
+                      ? `ខែ ${selectedMonth} • បង្ហាញវត្តមាន មកការិយាល័យ ធ្វើការពីផ្ទះ យឺត និងម៉ោងបន្ថែម`
                       : `Period: ${selectedMonth} • Summary of Present, WFH, Late, Absent, and Overtime`}
                   </p>
                 </div>
@@ -571,15 +572,15 @@ export default function ReportsPage() {
                 <table className="w-full text-left text-xs text-slate-700">
                   <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] border-b border-slate-100">
                     <tr>
-                      <th className="py-3 px-4">បុគ្គលិក (Employee)</th>
-                      <th className="py-3 px-4">ផ្នែក (Department)</th>
-                      <th className="py-3 px-3 text-center">មកការិយាល័យ</th>
-                      <th className="py-3 px-3 text-center">WFH (ផ្ទះ)</th>
-                      <th className="py-3 px-3 text-center">យឺត (Late)</th>
-                      <th className="py-3 px-3 text-center">អវត្តមាន</th>
-                      <th className="py-3 px-3 text-right">ម៉ោងសរុប</th>
-                      <th className="py-3 px-3 text-right">ម៉ោងបន្ថែម (OT)</th>
-                      <th className="py-3 px-4 text-center">អត្រាវត្តមាន</th>
+                      <th className="py-3 px-4">{language === 'km' ? 'បុគ្គលិក (Employee)' : 'Employee'}</th>
+                      <th className="py-3 px-4">{language === 'km' ? 'ផ្នែក (Department)' : 'Department'}</th>
+                      <th className="py-3 px-3 text-center">{language === 'km' ? 'មកការិយាល័យ' : 'Office'}</th>
+                      <th className="py-3 px-3 text-center">{language === 'km' ? 'WFH (ផ្ទះ)' : 'WFH'}</th>
+                      <th className="py-3 px-3 text-center">{language === 'km' ? 'យឺត (Late)' : 'Late'}</th>
+                      <th className="py-3 px-3 text-center">{language === 'km' ? 'អវត្តមាន' : 'Absent'}</th>
+                      <th className="py-3 px-3 text-right">{language === 'km' ? 'ម៉ោងសរុប' : 'Total Hours'}</th>
+                      <th className="py-3 px-3 text-right">{language === 'km' ? 'ម៉ោងបន្ថែម (OT)' : 'Overtime'}</th>
+                      <th className="py-3 px-4 text-center">{language === 'km' ? 'អត្រាវត្តមាន' : 'Rate'}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-khmer">
@@ -591,10 +592,10 @@ export default function ReportsPage() {
                         return (
                           <tr key={att.id} className="hover:bg-slate-50/80 transition-colors">
                             <td className="py-3 px-4">
-                              <div className="font-bold text-slate-900">{att.name}</div>
-                              <div className="text-[11px] text-slate-400">{att.role}</div>
+                              <div className="font-bold text-slate-900">{formatLocalizedText(att.name, language)}</div>
+                              <div className="text-[11px] text-slate-400">{formatLocalizedText(att.role, language)}</div>
                             </td>
-                            <td className="py-3 px-4 text-[11px] text-slate-600">{att.department}</td>
+                            <td className="py-3 px-4 text-[11px] text-slate-600">{formatLocalizedText(att.department, language)}</td>
                             <td className="py-3 px-3 text-center font-mono font-bold text-emerald-600">{att.present}</td>
                             <td className="py-3 px-3 text-center font-mono font-bold text-blue-600">{att.remote}</td>
                             <td className="py-3 px-3 text-center font-mono font-bold text-amber-600">{att.late}</td>
@@ -678,9 +679,9 @@ export default function ReportsPage() {
               <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
                 <div className="p-4 border-b border-slate-100 flex items-center justify-between">
                   <div className="text-xs font-bold text-slate-700 font-khmer">
-                    {bankFormat === 'aba' && 'ឯកសារផ្ទេរតាម ABA Bank Corporate (ABA Bulk Transfer Format)'}
-                    {bankFormat === 'acleda' && 'ឯកសារផ្ទេរតាម ACLEDA Bank Corporate Payout Format'}
-                    {bankFormat === 'master' && 'បញ្ជីទូទាត់បៀវត្សរ៍រួម (Full Master Compensation Roster)'}
+                    {bankFormat === 'aba' && (language === 'km' ? 'ឯកសារផ្ទេរតាម ABA Bank Corporate (ABA Bulk Transfer Format)' : 'ABA Bank Corporate Bulk Transfer Format')}
+                    {bankFormat === 'acleda' && (language === 'km' ? 'ឯកសារផ្ទេរតាម ACLEDA Bank Corporate Payout Format' : 'ACLEDA Bank Corporate Payout Format')}
+                    {bankFormat === 'master' && (language === 'km' ? 'បញ្ជីទូទាត់បៀវត្សរ៍រួម (Full Master Compensation Roster)' : 'Full Master Compensation & Disbursement Roster')}
                   </div>
                   <button
                     onClick={handleExportAbaCsv}
@@ -696,15 +697,15 @@ export default function ReportsPage() {
                     <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] border-b border-slate-100">
                       <tr>
                         <th className="py-3 px-4">
-                          {bankFormat === 'aba' ? 'លេខគណនី ABA (Account)' : bankFormat === 'acleda' ? 'លេខគណនី ACLEDA' : 'បុគ្គលិក'}
+                          {bankFormat === 'aba' ? (language === 'km' ? 'លេខគណនី ABA (Account)' : 'ABA Account') : bankFormat === 'acleda' ? (language === 'km' ? 'លេខគណនី ACLEDA' : 'ACLEDA Account') : (language === 'km' ? 'បុគ្គលិក' : 'Employee')}
                         </th>
-                        <th className="py-3 px-4">ឈ្មោះម្ចាស់គណនី (Beneficiary)</th>
-                        <th className="py-3 px-4">ផ្នែក (Department)</th>
-                        <th className="py-3 px-4 text-right">ប្រាក់ខែដើម (Base)</th>
-                        <th className="py-3 px-4 text-right">ពន្ធ & ប.ស.ស</th>
-                        <th className="py-3 px-4 text-right">ប្រាក់ត្រូវផ្ទេរ (USD)</th>
-                        <th className="py-3 px-4 text-right">ប្រាក់រៀល (KHR)</th>
-                        <th className="py-3 px-4 text-center">ស្ថានភាព</th>
+                        <th className="py-3 px-4">{language === 'km' ? 'ឈ្មោះម្ចាស់គណនី (Beneficiary)' : 'Beneficiary Name'}</th>
+                        <th className="py-3 px-4">{language === 'km' ? 'ផ្នែក (Department)' : 'Department'}</th>
+                        <th className="py-3 px-4 text-right">{language === 'km' ? 'ប្រាក់ខែដើម (Base)' : 'Base Salary'}</th>
+                        <th className="py-3 px-4 text-right">{language === 'km' ? 'ពន្ធ & ប.ស.ស' : 'Tax & NSSF'}</th>
+                        <th className="py-3 px-4 text-right">{language === 'km' ? 'ប្រាក់ត្រូវផ្ទេរ (USD)' : 'Disbursement (USD)'}</th>
+                        <th className="py-3 px-4 text-right">{language === 'km' ? 'ប្រាក់រៀល (KHR)' : 'Disbursement (KHR)'}</th>
+                        <th className="py-3 px-4 text-center">{language === 'km' ? 'ស្ថានភាព' : 'Status'}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 font-khmer">
@@ -716,10 +717,10 @@ export default function ReportsPage() {
                               {bankFormat === 'aba' ? pay.bank_account_aba : bankFormat === 'acleda' ? pay.bank_account_acleda : pay.employee_id}
                             </td>
                             <td className="py-3 px-4">
-                              <div className="font-bold text-slate-900">{pay.employee_name}</div>
+                              <div className="font-bold text-slate-900">{formatLocalizedText(pay.employee_name, language)}</div>
                               <div className="text-[11px] text-slate-400 font-sans">{pay.phone}</div>
                             </td>
-                            <td className="py-3 px-4 text-[11px] text-slate-600">{pay.department}</td>
+                            <td className="py-3 px-4 text-[11px] text-slate-600">{formatLocalizedText(pay.department, language)}</td>
                             <td className="py-3 px-4 text-right font-mono">${pay.base_salary.toLocaleString()}</td>
                             <td className="py-3 px-4 text-right font-mono text-rose-600">
                               -${(pay.tax_withholding + pay.nssf_employee).toFixed(2)}
@@ -728,11 +729,11 @@ export default function ReportsPage() {
                               ${pay.net_salary_usd.toLocaleString()}
                             </td>
                             <td className="py-3 px-4 text-right font-mono font-semibold text-slate-700">
-                              {pay.net_salary_khr.toLocaleString()} ៛
+                              {pay.net_salary_khr.toLocaleString()} {language === 'km' ? '៛' : 'KHR'}
                             </td>
                             <td className="py-3 px-4 text-center">
                               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                {pay.status === 'Paid' ? 'បានបើក ✓' : 'រង់ចាំផ្ទេរ'}
+                                {pay.status === 'Paid' ? (language === 'km' ? 'បានបើក ✓' : 'Disbursed ✓') : (language === 'km' ? 'រង់ចាំផ្ទេរ' : 'Pending')}
                               </span>
                             </td>
                           </tr>
@@ -755,11 +756,20 @@ export default function ReportsPage() {
                   </div>
                   <div>
                     <h3 className="text-sm font-black text-slate-900 font-khmer">
-                      របាយការណ៍បង់ភាគទានរបបសន្តិសុខសង្គម ប.ស.ស (ទម្រង់ ១-០២)
+                      {language === 'km' ? 'របាយការណ៍បង់ភាគទានរបបសន្តិសុខសង្គម ប.ស.ស (ទម្រង់ ១-០២)' : 'National Social Security Fund (NSSF) Contribution Declaration (Form 1-02)'}
                     </h3>
                     <p className="text-xs text-slate-600 mt-1 font-khmer leading-relaxed">
-                      ស្របតាមច្បាប់ស្តីពីរបបសន្តិសុខសង្គម៖ ប្រាក់ជាប់ភាគទានអតិបរិមាត្រឹម <span className="font-bold text-slate-900 font-mono">១,២០០,០០០ រៀល (~$292.68)</span>។
-                      ភាគទានសោធននិវត្តន៍ ៤% (និយោជិត ២% + និយោជក ២%), ថែទាំសុខភាព ២.៦% (និយោជក), និងហានិភ័យការងារ ០.៨% (និយោជក)។
+                      {language === 'km' ? (
+                        <>
+                          ស្របតាមច្បាប់ស្តីពីរបបសន្តិសុខសង្គម៖ ប្រាក់ជាប់ភាគទានអតិបរិមាត្រឹម <span className="font-bold text-slate-900 font-mono">១,២០០,០០០ រៀល (~$292.68)</span>។
+                          ភាគទានសោធននិវត្តន៍ ៤% (និយោជិត ២% + និយោជក ២%), ថែទាំសុខភាព ២.៦% (និយោជក), និងហានិភ័យការងារ ០.៨% (និយោជក)។
+                        </>
+                      ) : (
+                        <>
+                          Pursuant to Cambodia Social Security Law: Maximum contributory wage capped at <span className="font-bold text-slate-900 font-mono">1,200,000 KHR (~$292.68)</span>.
+                          Pension Scheme 4% (Employee 2% + Employer 2%), Health Care 2.6% (Employer), and Occupational Risk 0.8% (Employer).
+                        </>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -770,14 +780,14 @@ export default function ReportsPage() {
                     className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-2 shadow-sm transition-all cursor-pointer"
                   >
                     <Download size={14} />
-                    <span>ទាញយកទម្រង់ ១-០២ (CSV)</span>
+                    <span>{language === 'km' ? 'ទាញយកទម្រង់ ១-០២ (CSV)' : 'Export Form 1-02 (CSV)'}</span>
                   </button>
                   <button
                     onClick={handlePrint}
                     className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold flex items-center gap-2 transition-all cursor-pointer"
                   >
                     <Printer size={14} />
-                    <span>បោះពុម្ព</span>
+                    <span>{language === 'km' ? 'បោះពុម្ព' : 'Print'}</span>
                   </button>
                 </div>
               </div>
@@ -788,15 +798,15 @@ export default function ReportsPage() {
                   <table className="w-full text-left text-xs text-slate-700">
                     <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] border-b border-slate-100">
                       <tr>
-                        <th className="py-3 px-4">លេខសម្គាល់ ប.ស.ស</th>
-                        <th className="py-3 px-4">ឈ្មោះនិយោជិត (Name)</th>
-                        <th className="py-3 px-4 text-right">ប្រាក់ឈ្នួលជាក់ស្តែង</th>
-                        <th className="py-3 px-4 text-right">ប្រាក់ឈ្នួលជាប់ភាគទាន (គិតកម្រិតពិដាន)</th>
-                        <th className="py-3 px-3 text-right">សោធននិវត្តន៍ (២% EE)</th>
-                        <th className="py-3 px-3 text-right">សោធននិវត្តន៍ (២% ER)</th>
-                        <th className="py-3 px-3 text-right">ថែទាំសុខភាព (២.៦% ER)</th>
-                        <th className="py-3 px-3 text-right">ហានិភ័យការងារ (០.៨% ER)</th>
-                        <th className="py-3 px-4 text-right">ភាគទានសរុប (Total)</th>
+                        <th className="py-3 px-4">{language === 'km' ? 'លេខសម្គាល់ ប.ស.ស' : 'NSSF Member ID'}</th>
+                        <th className="py-3 px-4">{language === 'km' ? 'ឈ្មោះនិយោជិត (Name)' : 'Employee Name'}</th>
+                        <th className="py-3 px-4 text-right">{language === 'km' ? 'ប្រាក់ឈ្នួលជាក់ស្តែង' : 'Gross Wage'}</th>
+                        <th className="py-3 px-4 text-right">{language === 'km' ? 'ប្រាក់ឈ្នួលជាប់ភាគទាន (គិតកម្រិតពិដាន)' : 'Contributory Wage (Capped)'}</th>
+                        <th className="py-3 px-3 text-right">{language === 'km' ? 'សោធននិវត្តន៍ (២% EE)' : 'Pension (2% EE)'}</th>
+                        <th className="py-3 px-3 text-right">{language === 'km' ? 'សោធននិវត្តន៍ (២% ER)' : 'Pension (2% ER)'}</th>
+                        <th className="py-3 px-3 text-right">{language === 'km' ? 'ថែទាំសុខភាព (២.៦% ER)' : 'Health Care (2.6% ER)'}</th>
+                        <th className="py-3 px-3 text-right">{language === 'km' ? 'ហានិភ័យការងារ (០.៨% ER)' : 'Occupational Risk (0.8% ER)'}</th>
+                        <th className="py-3 px-4 text-right">{language === 'km' ? 'ភាគទានសរុប (Total)' : 'Total Payable'}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 font-khmer">
@@ -805,10 +815,10 @@ export default function ReportsPage() {
                         .map((pay) => (
                           <tr key={pay.id} className="hover:bg-slate-50/80 transition-colors">
                             <td className="py-3 px-4 font-mono font-bold text-blue-600">{pay.nssf_member_id}</td>
-                            <td className="py-3 px-4 font-bold text-slate-900">{pay.employee_name}</td>
+                            <td className="py-3 px-4 font-bold text-slate-900">{formatLocalizedText(pay.employee_name, language)}</td>
                             <td className="py-3 px-4 text-right font-mono">${pay.base_salary.toLocaleString()}</td>
                             <td className="py-3 px-4 text-right font-mono font-bold text-slate-900">
-                              {pay.contributory_wage_khr.toLocaleString()} ៛
+                              {pay.contributory_wage_khr.toLocaleString()} {language === 'km' ? '៛' : 'KHR'}
                               <div className="text-[10px] text-slate-400 font-normal">(${pay.contributory_wage_usd})</div>
                             </td>
                             <td className="py-3 px-3 text-right font-mono text-slate-700">${pay.pension_employee.toFixed(2)}</td>
@@ -824,7 +834,7 @@ export default function ReportsPage() {
                     <tfoot className="bg-slate-50 font-bold border-t border-slate-200">
                       <tr>
                         <td colSpan={8} className="py-3 px-4 text-right font-khmer text-slate-700">
-                          ទឹកប្រាក់ភាគទានសរុបត្រូវបង់ចូល ប.ស.ស (Total Payable):
+                          {language === 'km' ? 'ទឹកប្រាក់ភាគទានសរុបត្រូវបង់ចូល ប.ស.ស (Total Payable):' : 'Total NSSF Statutory Contribution Due:'}
                         </td>
                         <td className="py-3 px-4 text-right font-mono text-sm text-blue-700">
                           ${reportData.kpis.totalNssfContributions.toFixed(2)}
@@ -853,9 +863,9 @@ export default function ReportsPage() {
                   {reportData.departmentsSummary.map((dept) => (
                     <div key={dept.id} className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/50">
                       <div className="flex items-center justify-between text-xs mb-1.5 font-khmer">
-                        <span className="font-bold text-slate-800">{dept.name}</span>
+                        <span className="font-bold text-slate-800">{formatLocalizedText(dept.name, language)}</span>
                         <span className="font-mono font-bold text-slate-700">
-                          {dept.employeeCount} នាក់ ({dept.sharePercent}%)
+                          {dept.employeeCount} {language === 'km' ? 'នាក់' : 'staff'} ({dept.sharePercent}%)
                         </span>
                       </div>
                       <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden mb-2">
@@ -868,8 +878,8 @@ export default function ReportsPage() {
                         ></div>
                       </div>
                       <div className="flex items-center justify-between text-[11px] text-slate-500 font-khmer">
-                        <span>ថវិកាបៀវត្សរ៍ប្រចាំខែ៖</span>
-                        <span className="font-mono font-bold text-slate-900">${dept.monthlySalaryBudget.toLocaleString()} / ខែ</span>
+                        <span>{language === 'km' ? 'ថវិកាបៀវត្សរ៍ប្រចាំខែ៖' : 'Monthly Salary Budget:'}</span>
+                        <span className="font-mono font-bold text-slate-900">${dept.monthlySalaryBudget.toLocaleString()} / {language === 'km' ? 'ខែ' : 'mo'}</span>
                       </div>
                     </div>
                   ))}
@@ -889,32 +899,32 @@ export default function ReportsPage() {
                   <div className="grid grid-cols-2 gap-3 mb-4">
                     <div className="p-4 rounded-xl bg-emerald-50/80 border border-emerald-100">
                       <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block font-khmer">
-                        អត្រារក្សាបុគ្គលិក (Retention)
+                        {language === 'km' ? 'អត្រារក្សាបុគ្គលិក (Retention)' : 'Retention Rate'}
                       </span>
                       <div className="text-2xl font-black text-emerald-700 my-1 font-mono">94.8%</div>
-                      <span className="text-[10px] text-emerald-600 font-khmer">ខ្ពស់ជាងស្តង់ដារទីផ្សារកម្ពុជា</span>
+                      <span className="text-[10px] text-emerald-600 font-khmer">{language === 'km' ? 'ខ្ពស់ជាងស្តង់ដារទីផ្សារកម្ពុជា' : 'Above regional market baseline'}</span>
                     </div>
 
                     <div className="p-4 rounded-xl bg-indigo-50/80 border border-indigo-100">
                       <span className="text-[10px] font-bold text-indigo-800 uppercase tracking-wider block font-khmer">
-                        អាយុកាលការងារមធ្យម (Tenure)
+                        {language === 'km' ? 'អាយុកាលការងារមធ្យម (Tenure)' : 'Average Tenure'}
                       </span>
-                      <div className="text-2xl font-black text-indigo-700 my-1 font-mono">2.4 ឆ្នាំ</div>
-                      <span className="text-[10px] text-indigo-600 font-khmer">បទពិសោធន៍រឹងមាំក្នុងស្ថាប័ន</span>
+                      <div className="text-2xl font-black text-indigo-700 my-1 font-mono">2.4 {language === 'km' ? 'ឆ្នាំ' : 'years'}</div>
+                      <span className="text-[10px] text-indigo-600 font-khmer">{language === 'km' ? 'បទពិសោធន៍រឹងមាំក្នុងស្ថាប័ន' : 'Solid institutional stability'}</span>
                     </div>
                   </div>
 
                   <div className="space-y-2.5 text-xs text-slate-600 font-khmer">
                     <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100">
-                      <span>បុគ្គលិកពេញសិទ្ធិ (Full-Time Staff):</span>
-                      <span className="font-mono font-bold text-slate-900">16 នាក់ (88.9%)</span>
+                      <span>{language === 'km' ? 'បុគ្គលិកពេញសិទ្ធិ (Full-Time Staff):' : 'Full-Time Staff (UDC):'}</span>
+                      <span className="font-mono font-bold text-slate-900">16 {language === 'km' ? 'នាក់' : 'staff'} (88.9%)</span>
                     </div>
                     <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100">
-                      <span>បុគ្គលិកសាកល្បង (Probationary Staff):</span>
-                      <span className="font-mono font-bold text-slate-900">2 នាក់ (11.1%)</span>
+                      <span>{language === 'km' ? 'បុគ្គលិកសាកល្បង (Probationary Staff):' : 'Probationary Staff:'}</span>
+                      <span className="font-mono font-bold text-slate-900">2 {language === 'km' ? 'នាក់' : 'staff'} (11.1%)</span>
                     </div>
                     <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100">
-                      <span>អត្រាបុគ្គលិកលាឈប់ (Annual Turnover):</span>
+                      <span>{language === 'km' ? 'អត្រាបុគ្គលិកលាឈប់ (Annual Turnover):' : 'Annual Turnover Rate:'}</span>
                       <span className="font-mono font-bold text-emerald-600">&lt; 5.2%</span>
                     </div>
                   </div>
@@ -922,7 +932,7 @@ export default function ReportsPage() {
 
                 <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                   <Link href="/employees" className="text-indigo-600 font-bold hover:underline flex items-center gap-1 font-khmer">
-                    <span>មើលបញ្ជីឈ្មោះបុគ្គលិកទាំងអស់</span>
+                    <span>{language === 'km' ? 'មើលបញ្ជីឈ្មោះបុគ្គលិកទាំងអស់' : 'View Full Employee Directory'}</span>
                     <ChevronRight size={14} />
                   </Link>
                 </div>
@@ -955,14 +965,14 @@ export default function ReportsPage() {
                 <table className="w-full text-left text-xs text-slate-700">
                   <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] border-b border-slate-100">
                     <tr>
-                      <th className="py-3 px-4">បុគ្គលិក (Employee)</th>
-                      <th className="py-3 px-4">ផ្នែក (Department)</th>
-                      <th className="py-3 px-3 text-center">ច្បាប់ប្រចាំឆ្នាំ សរុប</th>
-                      <th className="py-3 px-3 text-center">បានប្រើ</th>
-                      <th className="py-3 px-3 text-center">នៅសល់</th>
-                      <th className="py-3 px-3 text-center">ច្បាប់ឈឺបានប្រើ</th>
-                      <th className="py-3 px-3 text-center">ច្បាប់ធុរៈបានប្រើ</th>
-                      <th className="py-3 px-4 text-center">ស្ថានភាពសមតុល្យ</th>
+                      <th className="py-3 px-4">{language === 'km' ? 'បុគ្គលិក (Employee)' : 'Employee'}</th>
+                      <th className="py-3 px-4">{language === 'km' ? 'ផ្នែក (Department)' : 'Department'}</th>
+                      <th className="py-3 px-3 text-center">{language === 'km' ? 'ច្បាប់ប្រចាំឆ្នាំ សរុប' : 'Annual Total'}</th>
+                      <th className="py-3 px-3 text-center">{language === 'km' ? 'បានប្រើ' : 'Used'}</th>
+                      <th className="py-3 px-3 text-center">{language === 'km' ? 'នៅសល់' : 'Balance'}</th>
+                      <th className="py-3 px-3 text-center">{language === 'km' ? 'ច្បាប់ឈឺបានប្រើ' : 'Sick Used'}</th>
+                      <th className="py-3 px-3 text-center">{language === 'km' ? 'ច្បាប់ធុរៈបានប្រើ' : 'Casual Used'}</th>
+                      <th className="py-3 px-4 text-center">{language === 'km' ? 'ស្ថានភាពសមតុល្យ' : 'Status'}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-khmer">
@@ -973,15 +983,15 @@ export default function ReportsPage() {
                         return (
                           <tr key={l.id} className="hover:bg-slate-50/80 transition-colors">
                             <td className="py-3 px-4 font-bold text-slate-900">
-                              {l.first_name} {l.last_name}
-                              <div className="text-[11px] font-normal text-slate-400">{l.role}</div>
+                              {formatLocalizedText(`${l.first_name} ${l.last_name}`, language)}
+                              <div className="text-[11px] font-normal text-slate-400">{formatLocalizedText(l.role, language)}</div>
                             </td>
-                            <td className="py-3 px-4 text-[11px] text-slate-600">{l.department_name || 'General'}</td>
-                            <td className="py-3 px-3 text-center font-mono">{l.annual_total} ថ្ងៃ</td>
-                            <td className="py-3 px-3 text-center font-mono text-rose-600">{l.annual_used} ថ្ងៃ</td>
-                            <td className="py-3 px-3 text-center font-mono font-bold text-emerald-600">{rem} ថ្ងៃ</td>
-                            <td className="py-3 px-3 text-center font-mono text-amber-600">{l.sick_used} / 10 ថ្ងៃ</td>
-                            <td className="py-3 px-3 text-center font-mono text-slate-700">{l.casual_used} / 5 ថ្ងៃ</td>
+                            <td className="py-3 px-4 text-[11px] text-slate-600">{formatLocalizedText(l.department_name || 'General', language)}</td>
+                            <td className="py-3 px-3 text-center font-mono">{l.annual_total} {language === 'km' ? 'ថ្ងៃ' : 'days'}</td>
+                            <td className="py-3 px-3 text-center font-mono text-rose-600">{l.annual_used} {language === 'km' ? 'ថ្ងៃ' : 'days'}</td>
+                            <td className="py-3 px-3 text-center font-mono font-bold text-emerald-600">{rem} {language === 'km' ? 'ថ្ងៃ' : 'days'}</td>
+                            <td className="py-3 px-3 text-center font-mono text-amber-600">{l.sick_used} / 10 {language === 'km' ? 'ថ្ងៃ' : 'days'}</td>
+                            <td className="py-3 px-3 text-center font-mono text-slate-700">{l.casual_used} / 5 {language === 'km' ? 'ថ្ងៃ' : 'days'}</td>
                             <td className="py-3 px-4 text-center">
                               <span
                                 className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
@@ -992,7 +1002,7 @@ export default function ReportsPage() {
                                     : 'bg-amber-50 text-amber-700 border border-amber-200'
                                 }`}
                               >
-                                {rem >= 10 ? 'សមតុល្យល្អ' : rem >= 5 ? 'មធ្យម' : 'ជិតអស់'}
+                                {rem >= 10 ? (language === 'km' ? 'សមតុល្យល្អ' : 'Healthy') : rem >= 5 ? (language === 'km' ? 'មធ្យម' : 'Moderate') : (language === 'km' ? 'ជិតអស់' : 'Low')}
                               </span>
                             </td>
                           </tr>

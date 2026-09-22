@@ -36,14 +36,42 @@ import {
   FolderOpen,
   IdCard,
   User,
+  UploadCloud,
+  Printer,
 } from 'lucide-react';
+import EmployeeImportModal from '@/components/EmployeeImportModal';
+import EmployeePrintModal from '@/components/EmployeePrintModal';
+import EmployeeEditModal from '@/components/EmployeeEditModal';
 
 export default function EmployeesPage() {
   const { openModal, showToast, triggerRefresh, refreshKey, language, t } = useApp();
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [printModalOpen, setPrintModalOpen] = useState(false);
+  const [printModalMode, setPrintModalMode] = useState<'dossier' | 'roster'>('roster');
+  const [employeeToPrint, setEmployeeToPrint] = useState<any | null>(null);
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Print Handlers
+  const handlePrintRoster = () => {
+    setPrintModalMode('roster');
+    setPrintModalOpen(true);
+  };
+
+  const handlePrintEmployeeDossier = (emp: any) => {
+    setEmployeeToPrint(emp);
+    setPrintModalMode('dossier');
+    setPrintModalOpen(true);
+  };
+
+  const handleEditEmployee = (emp: any) => {
+    setEditingEmployee(emp);
+    setIsEditModalOpen(true);
+  };
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -139,36 +167,46 @@ export default function EmployeesPage() {
     showToast('Employee roster exported to CSV successfully!', 'success');
   };
 
+  // Delete Employee state
+  const [deletingEmployee, setDeletingEmployee] = useState<Employee | null>(null);
+
   // Terminate Employee
   const handleTerminate = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to mark ${name} as Terminated?`)) return;
+    if (!confirm(language === 'km' ? `តើអ្នកប្រាកដជាចង់កំណត់ ${name} ជា "បញ្ចប់ការងារ (Terminated)" មែនទេ?` : `Are you sure you want to mark ${name} as Terminated?`)) return;
     try {
-      const res = await fetch(`/api/employees/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/employees/${id}?action=terminate`, { method: 'DELETE' });
       if (res.ok) {
-        showToast(`Employee ${name} set to Terminated`, 'info');
+        showToast(language === 'km' ? `បុគ្គលិក ${name} ត្រូវបានកំណត់ជាបញ្ចប់ការងារ` : `Employee ${name} set to Terminated`, 'info');
         triggerRefresh();
         if (activeEmployeeId === id) setActiveEmployeeId(null);
       }
     } catch {
-      showToast('Failed to terminate employee', 'error');
+      showToast(language === 'km' ? 'បរាជ័យក្នុងការបញ្ចប់ការងារ' : 'Failed to terminate employee', 'error');
     }
   };
 
-  // Clear All Employees
-  const handleClearAll = async () => {
-    if (!confirm('Are you sure you want to remove all employees? This will clear all employee profiles, attendance, leaves, and payroll records.')) return;
+  // Permanently Delete Employee
+  const confirmDeleteEmployee = async () => {
+    if (!deletingEmployee) return;
     try {
-      const res = await fetch('/api/employees', { method: 'DELETE' });
-      const data = await res.json();
+      const res = await fetch(`/api/employees/${deletingEmployee.id}`, { method: 'DELETE' });
       if (res.ok) {
-        showToast(data.message || 'All employees have been removed.', 'info');
+        const empName = `${deletingEmployee.first_name} ${deletingEmployee.last_name}`;
+        showToast(
+          language === 'km'
+            ? `បានលុបបុគ្គលិក ${empName} ចេញពីប្រព័ន្ធជោគជ័យ`
+            : `Employee ${empName} deleted successfully`,
+          'info'
+        );
         triggerRefresh();
-        setActiveEmployeeId(null);
+        if (activeEmployeeId === deletingEmployee.id) setActiveEmployeeId(null);
+        setDeletingEmployee(null);
       } else {
-        showToast(data.error || 'Failed to clear employees', 'error');
+        const data = await res.json();
+        showToast(data.error || (language === 'km' ? 'បរាជ័យក្នុងការលុបបុគ្គលិក' : 'Failed to delete employee'), 'error');
       }
     } catch {
-      showToast('Network error clearing employees', 'error');
+      showToast(language === 'km' ? 'កំហុសបណ្តាញក្នុងការលុបបុគ្គលិក' : 'Network error deleting employee', 'error');
     }
   };
 
@@ -187,17 +225,24 @@ export default function EmployeesPage() {
         </div>
         <div className="flex items-center gap-2.5">
           <button
-            onClick={handleClearAll}
-            className="px-3.5 py-2 rounded-xl bg-white border border-rose-200 text-xs font-semibold text-rose-600 hover:bg-rose-50 flex items-center gap-2 shadow-2xs transition-colors cursor-pointer"
-            title={language === 'km' ? 'លុបបុគ្គលិកទាំងអស់ចេញពីប្រព័ន្ធ' : 'Clear all employee records'}
+            onClick={() => setIsImportModalOpen(true)}
+            className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-indigo-300 hover:text-indigo-600 flex items-center gap-2 shadow-2xs transition-colors cursor-pointer"
+            title={language === 'km' ? 'នាំចូលទិន្នន័យពី CSV ឬ Excel' : 'Import employees from CSV or Excel'}
           >
-            <Trash2 size={15} /> {t('emp_clear_btn')}
+            <UploadCloud size={15} className="text-indigo-600" /> {t('emp_import_csv')}
           </button>
           <button
             onClick={handleExportCSV}
             className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2 shadow-2xs transition-colors cursor-pointer"
           >
             <Download size={15} /> {t('emp_export_csv')}
+          </button>
+          <button
+            onClick={handlePrintRoster}
+            className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:border-indigo-300 hover:text-indigo-600 flex items-center gap-2 shadow-2xs transition-colors cursor-pointer"
+            title={language === 'km' ? 'បោះពុម្ពបញ្ជីរាយនាមបុគ្គលិកសរុប (A4)' : 'Print Workforce Roster Report (A4)'}
+          >
+            <Printer size={15} className="text-slate-600" /> {t('emp_print_roster')}
           </button>
           <button
             onClick={() => openModal('add-employee')}
@@ -308,17 +353,31 @@ export default function EmployeesPage() {
           <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
             Try adjusting your search query or filters, or onboard a new employee.
           </p>
-          <button
-            onClick={() => {
-              setSearchQuery('');
-              setSelectedDept('all');
-              setSelectedStatus('all');
-              setSelectedType('all');
-            }}
-            className="mt-4 px-4 py-2 bg-indigo-50 text-indigo-600 text-xs font-semibold rounded-lg hover:bg-indigo-100"
-          >
-            Clear Filters
-          </button>
+          <div className="mt-5 flex items-center justify-center gap-2.5 flex-wrap">
+            <button
+              onClick={() => setIsImportModalOpen(true)}
+              className="px-4 py-2 bg-white border border-slate-200 text-indigo-600 text-xs font-bold rounded-xl hover:bg-slate-50 flex items-center gap-1.5 shadow-2xs cursor-pointer"
+            >
+              <UploadCloud size={14} /> {t('emp_import_csv')}
+            </button>
+            <button
+              onClick={() => openModal('add-employee')}
+              className="px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-xl hover:bg-indigo-700 flex items-center gap-1.5 shadow-xs cursor-pointer"
+            >
+              <Plus size={14} /> {t('emp_add_staff')}
+            </button>
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedDept('all');
+                setSelectedStatus('all');
+                setSelectedType('all');
+              }}
+              className="px-4 py-2 bg-slate-100 text-slate-600 text-xs font-semibold rounded-xl hover:bg-slate-200 cursor-pointer"
+            >
+              {language === 'km' ? 'សម្អាតការច្រោះ' : 'Clear Filters'}
+            </button>
+          </div>
         </div>
       ) : viewMode === 'grid' ? (
         /* GRID VIEW */
@@ -332,11 +391,17 @@ export default function EmployeesPage() {
               <div>
                 <div className="flex items-start justify-between gap-3">
                   <div className="relative">
-                    <img
-                      src={emp.avatar}
-                      alt={emp.first_name}
-                      className="w-14 h-14 rounded-2xl object-cover ring-2 ring-slate-100 group-hover:ring-indigo-200 transition-all shadow-2xs"
-                    />
+                    {emp.avatar ? (
+                      <img
+                        src={emp.avatar}
+                        alt={emp.first_name}
+                        className="w-14 h-14 rounded-2xl object-cover ring-2 ring-slate-100 group-hover:ring-indigo-200 transition-all shadow-2xs"
+                      />
+                    ) : (
+                      <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-bold flex items-center justify-center text-base border border-indigo-100 dark:border-indigo-800/50 shadow-2xs">
+                        {(emp.first_name?.[0] || 'E') + (emp.last_name?.[0] || '')}
+                      </div>
+                    )}
                     <span
                       className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full ring-2 ring-white ${
                         emp.status === 'Active'
@@ -352,27 +417,27 @@ export default function EmployeesPage() {
                   </div>
                   <div className="flex flex-col items-end">
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                      {emp.department_name || 'Operations'}
+                      {formatLocalizedText(emp.department_name || 'Operations', language)}
                     </span>
-                    <span className="text-[10px] text-slate-400 mt-1">{emp.employment_type}</span>
+                    <span className="text-[10px] text-slate-400 mt-1">{formatLocalizedText(emp.employment_type, language)}</span>
                   </div>
                 </div>
 
                 <div className="mt-4">
                   <h3 className="text-base font-extrabold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                    {emp.first_name} {emp.last_name}
+                    {formatLocalizedText(emp.first_name, language)} {formatLocalizedText(emp.last_name, language)}
                   </h3>
-                  <p className="text-xs font-medium text-slate-500">{emp.role}</p>
+                  <p className="text-xs font-medium text-slate-500">{formatLocalizedText(emp.role, language)}</p>
                 </div>
 
                 <div className="mt-4 space-y-1.5 text-xs text-slate-600 pt-3 border-t border-slate-100">
                   <div className="flex items-center gap-2 truncate">
                     <Mail size={13} className="text-slate-400 shrink-0" />
-                    <span className="truncate">{emp.email}</span>
+                    <span className="truncate">{emp.email || (language === 'km' ? 'គ្មានអ៊ីមែល' : 'No email')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <MapPin size={13} className="text-slate-400 shrink-0" />
-                    <span className="truncate">{emp.location}</span>
+                    <span className="truncate">{formatLocalizedText(emp.location, language)}</span>
                   </div>
                 </div>
               </div>
@@ -384,9 +449,41 @@ export default function EmployeesPage() {
                     ${emp.salary.toLocaleString()}
                   </span>
                 </div>
-                <span className="text-xs font-bold text-indigo-600 group-hover:translate-x-1 transition-transform flex items-center gap-0.5">
-                  View Profile <ChevronRight size={14} />
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEditEmployee(emp);
+                    }}
+                    title={language === 'km' ? 'កែប្រែព័ត៌មានបុគ្គលិក' : 'Edit Employee'}
+                    className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer"
+                  >
+                    <Edit2 size={15} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePrintEmployeeDossier(emp);
+                    }}
+                    title={language === 'km' ? 'បោះពុម្ពប្រវត្តិរូប (A4)' : 'Print Dossier (A4)'}
+                    className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer"
+                  >
+                    <Printer size={15} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeletingEmployee(emp);
+                    }}
+                    title={language === 'km' ? 'លុបបុគ្គលិក' : 'Delete Employee'}
+                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                  <span className="text-xs font-bold text-indigo-600 group-hover:translate-x-1 transition-transform flex items-center gap-0.5 ml-1">
+                    View Profile <ChevronRight size={14} />
+                  </span>
+                </div>
               </div>
             </div>
           ))}
@@ -415,20 +512,26 @@ export default function EmployeesPage() {
                     className="hover:bg-slate-50/80 cursor-pointer transition-colors"
                   >
                     <td className="px-5 py-3 flex items-center gap-3">
-                      <img
-                        src={emp.avatar}
-                        alt={emp.first_name}
-                        className="w-9 h-9 rounded-xl object-cover ring-1 ring-slate-200 shrink-0"
-                      />
+                      {emp.avatar ? (
+                        <img
+                          src={emp.avatar}
+                          alt={emp.first_name}
+                          className="w-9 h-9 rounded-xl object-cover ring-1 ring-slate-200 shrink-0"
+                        />
+                      ) : (
+                        <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center justify-center border border-indigo-100 dark:border-indigo-800/50 shrink-0">
+                          {(emp.first_name?.[0] || 'E') + (emp.last_name?.[0] || '')}
+                        </div>
+                      )}
                       <div>
                         <div className="font-bold text-slate-900">
-                          {emp.first_name} {emp.last_name}
+                          {formatLocalizedText(emp.first_name, language)} {formatLocalizedText(emp.last_name, language)}
                         </div>
-                        <div className="text-[11px] text-slate-400">{emp.role}</div>
+                        <div className="text-[11px] text-slate-400">{formatLocalizedText(emp.role, language)}</div>
                       </div>
                     </td>
                     <td className="px-5 py-3 font-medium text-slate-700">
-                      {emp.department_name}
+                      {formatLocalizedText(emp.department_name, language)}
                     </td>
                     <td className="px-5 py-3">
                       <span
@@ -442,24 +545,56 @@ export default function EmployeesPage() {
                             : 'bg-rose-50 text-rose-700 border border-rose-200'
                         }`}
                       >
-                        {emp.status}
+                        {formatLocalizedText(emp.status, language)}
                       </span>
                     </td>
-                    <td className="px-5 py-3">{emp.employment_type}</td>
-                    <td className="px-5 py-3 text-slate-500">{emp.location}</td>
+                    <td className="px-5 py-3">{formatLocalizedText(emp.employment_type, language)}</td>
+                    <td className="px-5 py-3 text-slate-500">{formatLocalizedText(emp.location, language)}</td>
                     <td className="px-5 py-3 font-bold text-slate-800">
                       ${emp.salary.toLocaleString()}
                     </td>
                     <td className="px-5 py-3 text-right">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveEmployeeId(emp.id);
-                        }}
-                        className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg font-semibold text-xs"
-                      >
-                        Details
-                      </button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handlePrintEmployeeDossier(emp);
+                          }}
+                          title={language === 'km' ? 'បោះពុម្ពប្រវត្តិរូប (A4)' : 'Print Dossier (A4)'}
+                          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer"
+                        >
+                          <Printer size={15} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditEmployee(emp);
+                          }}
+                          title={language === 'km' ? 'កែប្រែព័ត៌មានបុគ្គលិក' : 'Edit Employee'}
+                          className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors cursor-pointer"
+                        >
+                          <Edit2 size={15} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveEmployeeId(emp.id);
+                          }}
+                          className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg font-semibold text-xs cursor-pointer"
+                        >
+                          {language === 'km' ? 'លម្អិត' : 'Details'}
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeletingEmployee(emp);
+                          }}
+                          title={language === 'km' ? 'លុបបុគ្គលិក' : 'Delete Employee'}
+                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -485,29 +620,51 @@ export default function EmployeesPage() {
                 </div>
               ) : (
                 <div className="flex items-center gap-4">
-                  <img
-                    src={drawerDetails.employee.avatar}
-                    alt={drawerDetails.employee.first_name}
-                    className="w-16 h-16 rounded-2xl object-cover ring-2 ring-indigo-400/50 shadow-md"
-                  />
+                  {drawerDetails.employee.avatar ? (
+                    <img
+                      src={drawerDetails.employee.avatar}
+                      alt={drawerDetails.employee.first_name}
+                      className="w-16 h-16 rounded-2xl object-cover ring-2 ring-indigo-400/50 shadow-md"
+                    />
+                  ) : (
+                    <div className="w-16 h-16 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 font-bold text-xl flex items-center justify-center shadow-md">
+                      {(drawerDetails.employee.first_name?.[0] || 'E') + (drawerDetails.employee.last_name?.[0] || '')}
+                    </div>
+                  )}
                   <div>
                     <div className="flex items-center gap-2">
                       <h2 className="text-xl font-bold">
-                        {drawerDetails.employee.first_name} {drawerDetails.employee.last_name}
+                        {formatLocalizedText(drawerDetails.employee.first_name, language)} {formatLocalizedText(drawerDetails.employee.last_name, language)}
                       </h2>
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30">
-                        {drawerDetails.employee.status}
+                        {formatLocalizedText(drawerDetails.employee.status, language)}
                       </span>
                     </div>
-                    <p className="text-xs text-indigo-300">{drawerDetails.employee.role}</p>
+                    <p className="text-xs text-indigo-300">{formatLocalizedText(drawerDetails.employee.role, language)}</p>
                     <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-2">
-                      <span>{drawerDetails.employee.department_name}</span> &bull;{' '}
-                      <span>{drawerDetails.employee.location}</span>
+                      <span>{formatLocalizedText(drawerDetails.employee.department_name, language)}</span> &bull;{' '}
+                      <span>{formatLocalizedText(drawerDetails.employee.location, language)}</span>
                     </p>
                   </div>
                 </div>
               )}
               <div className="flex items-center gap-2">
+                <button
+                  onClick={() => handleEditEmployee(drawerDetails.employee)}
+                  className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                  title={language === 'km' ? 'កែប្រែព័ត៌មានបុគ្គលិក' : 'Edit employee profile'}
+                >
+                  <Edit2 size={14} />
+                  <span>{language === 'km' ? 'កែប្រែ' : 'Edit'}</span>
+                </button>
+                <button
+                  onClick={() => handlePrintEmployeeDossier(drawerDetails.employee)}
+                  className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer border border-slate-700"
+                  title={language === 'km' ? 'បោះពុម្ពទម្រង់ព័ត៌មានបុគ្គលិក (A4)' : 'Print official employee dossier'}
+                >
+                  <Printer size={14} className="text-indigo-400" />
+                  <span>{t('emp_print_profile')}</span>
+                </button>
                 <Link
                   href="/tools?tab=letters"
                   className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
@@ -593,7 +750,7 @@ export default function EmployeesPage() {
                             {language === 'km' ? 'អ៊ីមែលការងារ' : 'Work Email'}
                           </span>
                           <span className="font-semibold text-slate-800 truncate block">
-                            {drawerDetails.employee.email}
+                            {drawerDetails.employee.email || (language === 'km' ? 'គ្មានអ៊ីមែល' : 'No email')}
                           </span>
                         </div>
                         <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-1">
@@ -660,16 +817,38 @@ export default function EmployeesPage() {
                         </div>
                       </div>
 
-                      <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                        <button
-                          onClick={() => handleTerminate(drawerDetails.employee.id, `${drawerDetails.employee.first_name} ${drawerDetails.employee.last_name}`)}
-                          className="px-3 py-2 rounded-lg text-rose-600 hover:bg-rose-50 font-semibold flex items-center gap-1.5 cursor-pointer"
-                        >
-                          <UserX size={15} /> {language === 'km' ? 'បញ្ចប់ការងារ' : 'Terminate Employee'}
-                        </button>
+                      <div className="pt-4 border-t border-slate-100 flex items-center justify-between flex-wrap gap-2">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleEditEmployee(drawerDetails.employee)}
+                            className="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                            title={language === 'km' ? 'កែប្រែព័ត៌មានបុគ្គលិក' : 'Edit Employee'}
+                          >
+                            <Edit2 size={15} /> {language === 'km' ? 'កែប្រែព័ត៌មាន' : 'Edit Employee'}
+                          </button>
+                          <button
+                            onClick={() => handlePrintEmployeeDossier(drawerDetails.employee)}
+                            className="px-3 py-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                            title={language === 'km' ? 'បោះពុម្ពទម្រង់ព័ត៌មានបុគ្គលិក (A4)' : 'Print official employee dossier'}
+                          >
+                            <Printer size={15} /> {t('emp_print_profile')}
+                          </button>
+                          <button
+                            onClick={() => handleTerminate(drawerDetails.employee.id, `${drawerDetails.employee.first_name} ${drawerDetails.employee.last_name}`)}
+                            className="px-3 py-2 rounded-lg text-amber-600 hover:bg-amber-50 font-semibold text-xs flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <UserX size={15} /> {language === 'km' ? 'បញ្ចប់ការងារ' : 'Terminate'}
+                          </button>
+                          <button
+                            onClick={() => setDeletingEmployee(drawerDetails.employee)}
+                            className="px-3 py-2 rounded-lg text-rose-600 hover:bg-rose-50 font-semibold text-xs flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <Trash2 size={15} /> {language === 'km' ? 'លុបបុគ្គលិក' : 'Delete'}
+                          </button>
+                        </div>
                         <button
                           onClick={() => setDrawerTab('hr_profile')}
-                          className="px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-bold text-xs flex items-center gap-1 cursor-pointer"
+                          className="px-3 py-1.5 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 font-bold text-xs flex items-center gap-1 cursor-pointer"
                         >
                           <span>{t('emp_view_7_sections')}</span>
                         </button>
@@ -785,7 +964,7 @@ export default function EmployeesPage() {
                             <span className="text-[10px] text-slate-400 block uppercase font-semibold">
                               {language === 'km' ? 'អ៊ីមែលការងារ' : 'Work Email'}
                             </span>
-                            <span className="font-semibold text-slate-800">{drawerDetails.employee.email}</span>
+                            <span className="font-semibold text-slate-800">{drawerDetails.employee.email || (language === 'km' ? 'មិនមាន' : 'N/A')}</span>
                           </div>
                           <div className="col-span-3">
                             <span className="text-[10px] text-slate-400 block uppercase font-semibold">
@@ -1227,6 +1406,79 @@ export default function EmployeesPage() {
           </div>
         </div>
       )}
+
+      {/* DELETE EMPLOYEE CONFIRMATION MODAL */}
+      {deletingEmployee && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 p-6 text-center">
+            <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <h3 className="text-base font-bold text-slate-900">
+              {language === 'km' ? 'បញ្ជាក់ការលុបបុគ្គលិក?' : 'Confirm Delete Employee?'}
+            </h3>
+            <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+              {language === 'km'
+                ? `តើអ្នកប្រាកដជាចង់លុបបុគ្គលិក "${deletingEmployee.first_name} ${deletingEmployee.last_name}" (${deletingEmployee.id}) ចេញពីប្រព័ន្ធមែនទេ? រាល់កំណត់ត្រាវត្តមាន ច្បាប់ឈប់សម្រាក និងប្រាក់បៀវត្សរ៍នឹងត្រូវលុបចេញទាំងស្រុង។`
+                : `Are you sure you want to permanently delete employee "${formatLocalizedText(deletingEmployee.first_name, language)} ${formatLocalizedText(deletingEmployee.last_name, language)}" (${deletingEmployee.id})? All associated attendance, leave, and payroll records will be permanently removed.`}
+            </p>
+            <div className="mt-6 flex items-center justify-center gap-3">
+              <button
+                onClick={() => setDeletingEmployee(null)}
+                className="px-4 py-2 border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-colors text-xs cursor-pointer"
+              >
+                {language === 'km' ? 'ទេ, បោះបង់' : 'Cancel'}
+              </button>
+              <button
+                onClick={confirmDeleteEmployee}
+                className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl shadow-xs transition-colors text-xs cursor-pointer"
+              >
+                {language === 'km' ? 'បាទ/ចាស, លុបបុគ្គលិក' : 'Delete Employee'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Employee Import Modal */}
+      <EmployeeImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onSuccess={() => triggerRefresh()}
+      />
+
+      {/* Printable Preview & Execution Modal */}
+      <EmployeePrintModal
+        isOpen={printModalOpen}
+        onClose={() => setPrintModalOpen(false)}
+        mode={printModalMode}
+        employee={employeeToPrint}
+        employees={employees}
+        language={language}
+        filterSummary={
+          selectedDept !== 'all' || selectedStatus !== 'all' || selectedType !== 'all'
+            ? `${selectedDept !== 'all' ? selectedDept : ''} ${selectedStatus !== 'all' ? selectedStatus : ''} ${selectedType !== 'all' ? selectedType : ''}`.trim()
+            : undefined
+        }
+      />
+
+      {/* Edit Employee Modal */}
+      <EmployeeEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingEmployee(null);
+        }}
+        employee={editingEmployee}
+        departments={departments}
+        onSuccess={(updatedEmp) => {
+          setEmployees((prev) => prev.map((e) => (e.id === updatedEmp.id ? updatedEmp : e)));
+          if (drawerDetails && drawerDetails.employee.id === updatedEmp.id) {
+            setDrawerDetails((prev: any) => (prev ? { ...prev, employee: updatedEmp } : prev));
+          }
+          triggerRefresh();
+        }}
+      />
     </div>
   );
 }

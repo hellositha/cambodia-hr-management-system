@@ -30,13 +30,13 @@ export function proxy(request: NextRequest) {
         pathname.startsWith('/api/recruitment/seed') ||
         (pathname.startsWith('/api/payroll') && request.method !== 'GET') ||
         (pathname.startsWith('/api/employees') && ['POST', 'PUT', 'DELETE'].includes(request.method)) ||
-        (pathname.startsWith('/api/departments') && ['POST', 'PUT', 'DELETE'].includes(request.method)) ||
+        (pathname.startsWith('/api/departments') && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(request.method)) ||
         (pathname.startsWith('/api/announcements') && ['POST', 'PUT', 'DELETE'].includes(request.method)) ||
         (pathname.startsWith('/api/leaves') && ['PATCH', 'PUT', 'DELETE'].includes(request.method))
       ) {
         return NextResponse.json(
           {
-            error: 'ការអនុញ្ញាតត្រូវបានបដិសេធ៖ តួនាទីបុគ្គលិកមិនមានសិទ្ធិចូលដំណើរការមុខងាររដ្ឋបាលនេះទេ (Forbidden: Employee role has limited permissions)',
+            error: 'Forbidden: Employee role has limited administrative permissions',
           },
           { status: 403 }
         );
@@ -69,7 +69,7 @@ export function proxy(request: NextRequest) {
 
   // Role-Based Access Control (RBAC) for Pages
   if (roleCookie === 'Employee') {
-    // Strictly restrict employees to Employee Self-Service (ESS), Leaves, Attendance, and public company notices
+    // Strictly restrict employees to Employee Self-Service (ESS), Leaves, Attendance, Departments directory, and public company notices
     const isAllowedForEmployee =
       pathname === '/portal/staff' ||
       pathname.startsWith('/portal/staff') ||
@@ -78,7 +78,9 @@ export function proxy(request: NextRequest) {
       pathname === '/leaves' ||
       pathname.startsWith('/leaves') ||
       pathname === '/announcements' ||
-      pathname.startsWith('/announcements');
+      pathname.startsWith('/announcements') ||
+      pathname === '/departments' ||
+      pathname.startsWith('/departments');
 
     if (!isAllowedForEmployee) {
       const redirectUrl = new URL('/portal/staff', request.url);

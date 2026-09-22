@@ -134,7 +134,7 @@ export async function POST(request: Request) {
             role,
             emp.id,
             emp.dept_name || 'ទូទៅ (General)',
-            emp.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces',
+            emp.avatar || '/avatars/khmer_female_1.jpg',
             nowStr
           );
 

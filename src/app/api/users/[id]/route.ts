@@ -75,12 +75,16 @@ export async function DELETE(
     const { id } = await params;
     const db = getDb();
 
-    // Protect primary admin from deletion
-    if (id === 'usr-1') {
-      return NextResponse.json(
-        { error: 'Cannot delete primary root administrator account' },
-        { status: 403 }
-      );
+    // Prevent deleting the last remaining active administrator account
+    const targetUser = db.prepare('SELECT * FROM users WHERE id = ?').get(id) as any;
+    if (targetUser && targetUser.role === 'Admin') {
+      const adminCount = db.prepare("SELECT COUNT(*) as count FROM users WHERE role = 'Admin' AND status = 'Active'").get() as { count: number };
+      if (adminCount.count <= 1) {
+        return NextResponse.json(
+          { error: 'Cannot delete the only remaining active Administrator account' },
+          { status: 403 }
+        );
+      }
     }
 
     const res = db.prepare('DELETE FROM users WHERE id = ?').run(id);

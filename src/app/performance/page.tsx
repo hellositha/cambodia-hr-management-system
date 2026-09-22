@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { PerformanceReview, Employee } from '@/lib/types';
+import { formatLocalizedText } from '@/lib/translations';
 import {
   Award,
   Star,
@@ -18,7 +19,7 @@ import {
 } from 'lucide-react';
 
 export default function PerformancePage() {
-  const { currentPersona, showToast, triggerRefresh, refreshKey } = useApp();
+  const { currentPersona, showToast, triggerRefresh, refreshKey, language } = useApp();
 
   const [reviews, setReviews] = useState<PerformanceReview[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -168,13 +169,13 @@ export default function PerformancePage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <img
-                        src={r.employee_avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces'}
+                        src={r.employee_avatar || '/avatars/khmer_female_1.jpg'}
                         alt={r.employee_name || 'Staff'}
                         className="w-12 h-12 rounded-2xl object-cover ring-2 ring-slate-100 shadow-2xs"
                       />
                       <div>
-                        <h3 className="font-extrabold text-sm text-slate-900">{r.employee_name}</h3>
-                        <p className="text-xs text-slate-500">{r.employee_role}</p>
+                        <h3 className="font-extrabold text-sm text-slate-900">{formatLocalizedText(r.employee_name, language)}</h3>
+                        <p className="text-xs text-slate-500">{formatLocalizedText(r.employee_role, language)}</p>
                         <span className="text-[10px] text-indigo-600 font-bold mt-0.5 block">
                           Cycle: {r.review_period}
                         </span>
@@ -210,7 +211,7 @@ export default function PerformancePage() {
                 </div>
 
                 <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-                  <span>Reviewed by: <strong className="text-slate-700">{r.reviewer_name}</strong></span>
+                  <span>Reviewed by: <strong className="text-slate-700">{formatLocalizedText(r.reviewer_name, language)}</strong></span>
                   <span className="text-emerald-600 font-bold flex items-center gap-1">
                     <CheckCircle2 size={13} /> {r.status}
                   </span>
@@ -236,7 +237,7 @@ export default function PerformancePage() {
                 >
                   {employees.map((e) => (
                     <option key={e.id} value={e.id}>
-                      {e.first_name} {e.last_name} ({e.role})
+                      {formatLocalizedText(`${e.first_name} ${e.last_name}`, language)} ({formatLocalizedText(e.role, language)})
                     </option>
                   ))}
                 </select>

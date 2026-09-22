@@ -4,6 +4,7 @@ import React, { Suspense, useState, useEffect, useMemo, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { Employee } from '@/lib/types';
+import { formatLocalizedText } from '@/lib/translations';
 import {
   Scale,
   FileText,
@@ -99,22 +100,22 @@ const CAMBODIA_PUBLIC_HOLIDAYS: PublicHoliday[] = [
   {
     id: 'hol-7',
     name_km: 'ព្រះរាជពិធីបុណ្យចម្រើនព្រះជន្ម ព្រះមហាក្សត្រ',
-    name_en: 'King Norodom Sihamoni\'s Birthday',
+    name_en: 'King Sihamoni\'s Birthday',
     date: '2026-05-14',
     days: 1,
     category: 'Royal',
-    description_km: 'ព្រះរាជពិធីចម្រើនព្រះជន្ម ព្រះករុណា ព្រះបាទសម្តេចព្រះបរមនាថ នរោត្តម សីហមុនី',
-    description_en: 'Official birthday of His Majesty King Norodom Sihamoni',
+    description_km: 'ព្រះរាជពិធីបុណ្យចម្រើនព្រះជន្ម ព្រះករុណា ព្រះបាទសម្តេច ព្រះបរមនាថ នរោត្តម សីហមុនី',
+    description_en: 'Official Birthday of His Majesty King Norodom Sihamoni',
   },
   {
     id: 'hol-8',
-    name_km: 'ទិវាជាតិនៃការចងចាំ',
-    name_en: 'National Day of Remembrance',
+    name_km: 'ពិធីបុណ្យវិសាខបូជា',
+    name_en: 'Visak Bochea Day',
     date: '2026-05-20',
     days: 1,
-    category: 'Memorial',
-    description_km: 'ទិវាគោរពវិញ្ញាណក្ខន្ធជនរងគ្រោះក្នុងរបបប្រល័យពូជសាសន៍',
-    description_en: 'Day of remembrance for victims of the Khmer Rouge regime',
+    category: 'Religious',
+    description_km: 'រំលឹកដល់ការប្រសូត ការត្រាស់ដឹង និងការបរិនិព្វានរបស់ព្រះសម្មាសម្ពុទ្ធ',
+    description_en: 'Birth, Enlightenment, and Passing of the Buddha',
   },
   {
     id: 'hol-9',
@@ -123,8 +124,8 @@ const CAMBODIA_PUBLIC_HOLIDAYS: PublicHoliday[] = [
     date: '2026-06-18',
     days: 1,
     category: 'Royal',
-    description_km: 'ព្រះរាជពិធីបុណ្យចម្រើនព្រះជន្ម សម្តេចព្រះមហាក្សត្រី នរោត្តម មុនិនាថ សីហនុ',
-    description_en: 'Official birthday of Her Majesty the Queen Mother Norodom Monineath Sihanouk',
+    description_km: 'ព្រះរាជពិធីចម្រើនព្រះជន្ម សម្តេចព្រះមហាក្សត្រី នរោត្តម មុនិនាថ សីហនុ',
+    description_en: 'Official Birthday of Her Majesty Queen Mother Norodom Monineath Sihanouk',
   },
   {
     id: 'hol-10',
@@ -133,18 +134,18 @@ const CAMBODIA_PUBLIC_HOLIDAYS: PublicHoliday[] = [
     date: '2026-09-24',
     days: 1,
     category: 'National',
-    description_km: 'រំលឹកខួបនៃការប្រកាសឱ្យប្រើរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា',
-    description_en: 'Commemoration of the formal promulgation of the Cambodian Constitution',
+    description_km: 'រំលឹកខួបនៃការប្រកាសឱ្យប្រើប្រាស់រដ្ឋធម្មនុញ្ញឆ្នាំ ១៩៩៣',
+    description_en: 'Commemoration of the adoption of the Constitution in 1993',
   },
   {
     id: 'hol-11',
     name_km: 'ពិធីបុណ្យភ្ជុំបិណ្ឌ',
     name_en: 'Pchum Ben Festival (Ancestors\' Day)',
-    date: '2026-10-10',
+    date: '2026-10-09',
     days: 3,
     category: 'Religious',
-    description_km: 'ពិធីបុណ្យសាសនាប្រពៃណីខ្មែរបូជាឧទ្ទិសកុសលជូនបុព្វការីជន (៣ ថ្ងៃ)',
-    description_en: 'Traditional 15-day religious ceremony culminating in 3 days of public holidays to honor ancestors',
+    description_km: 'ពិធីបុណ្យសាសនាប្រពៃណីរំលឹកគុណបុព្វការីជន (៣ ថ្ងៃ)',
+    description_en: 'Traditional festival paying respect to deceased ancestors and Buddhist monks (3 days)',
   },
   {
     id: 'hol-12',
@@ -211,31 +212,50 @@ function ToolsContent() {
   const [letterFields, setLetterFields] = useState({
     refNumber: 'HESTRA/HR/2026/0118',
     issueDate: '2026-10-24',
-    empName: 'សារ៉ាត់ (Sarath)',
+    empName: language === 'km' ? 'សារ៉ាត់ (Sarath)' : 'Sarath',
     empId: 'EMP-001',
-    role: 'ប្រធាននាយកដ្ឋានធនធានមនុស្ស (Head of HR)',
-    department: 'ផ្នែកធនធានមនុស្ស (People & Culture)',
+    role: language === 'km' ? 'ប្រធាននាយកដ្ឋានធនធានមនុស្ស (Head of HR)' : 'Head of HR',
+    department: language === 'km' ? 'ផ្នែកធនធានមនុស្ស (People & Culture)' : 'People & Culture',
     salary: 2500,
     joinDate: '2022-04-01',
-    purpose: 'សម្រាប់ដាក់ពាក្យស្នើសុំទិដ្ឋាការ / Visa Application',
-    signatoryName: 'សារ៉ាត់ (Sarath)',
-    signatoryTitle: 'ប្រធាននាយកដ្ឋានធនធានមនុស្ស (Head of HR)',
+    purpose: language === 'km' ? 'សម្រាប់ដាក់ពាក្យស្នើសុំទិដ្ឋាការ / Visa Application' : 'Visa Application',
+    signatoryName: language === 'km' ? 'សារ៉ាត់ (Sarath)' : 'Sarath',
+    signatoryTitle: language === 'km' ? 'ប្រធាននាយកដ្ឋានធនធានមនុស្ស (Head of HR)' : 'Head of HR',
   });
+
+  // Synchronize initial letter fields if language changes
+  useEffect(() => {
+    setLetterFields((prev) => ({
+      ...prev,
+      empName: formatLocalizedText(prev.empName, language),
+      role: formatLocalizedText(prev.role, language),
+      department: formatLocalizedText(prev.department, language),
+      purpose: language === 'km' ? 'សម្រាប់ដាក់ពាក្យស្នើសុំទិដ្ឋាការ / Visa Application' : 'Visa Application',
+      signatoryName: formatLocalizedText(prev.signatoryName, language),
+      signatoryTitle: formatLocalizedText(prev.signatoryTitle, language),
+    }));
+  }, [language]);
 
   const handleSelectEmployee = (empId: string) => {
     setSelectedEmpId(empId);
     const emp = employees.find((e) => e.id === empId);
     if (emp) {
+      const formattedName = `${emp.last_name} ${emp.first_name}`.trim();
       setLetterFields((prev) => ({
         ...prev,
-        empName: `${emp.last_name} ${emp.first_name}`.trim(),
+        empName: language === 'km' ? formattedName : formatLocalizedText(formattedName, 'en'),
         empId: emp.id.toUpperCase(),
-        role: emp.role,
-        department: emp.department_name || prev.department,
+        role: language === 'km' ? emp.role : formatLocalizedText(emp.role, 'en'),
+        department: language === 'km' ? (emp.department_name || prev.department) : formatLocalizedText(emp.department_name || prev.department, 'en'),
         salary: emp.salary,
         joinDate: emp.join_date,
       }));
-      showToast(`បានបញ្ចូលព័ត៌មានបុគ្គលិក៖ ${emp.last_name} ${emp.first_name}`, 'info');
+      showToast(
+        language === 'km'
+          ? `បានបញ្ចូលព័ត៌មានបុគ្គលិក៖ ${emp.last_name} ${emp.first_name}`
+          : `Loaded employee profile: ${formatLocalizedText(formattedName, 'en')}`,
+        'info'
+      );
     }
   };
 
@@ -247,7 +267,7 @@ function ToolsContent() {
 
   const handleCopyText = () => {
     if (typeof navigator !== 'undefined') {
-      const text = `
+      const text = language === 'km' ? `
 លិខិតបញ្ជាក់ / OFFICIAL CERTIFICATE
 លេខយោង / Ref: ${letterFields.refNumber}
 កាលបរិច្ឆេទ / Date: ${letterFields.issueDate}
@@ -264,11 +284,31 @@ function ToolsContent() {
 ${letterFields.signatoryName}
 ${letterFields.signatoryTitle}
 HESTRA HRM Cambodia Co., Ltd.
+      `.trim() : `
+OFFICIAL CERTIFICATE
+Ref: ${letterFields.refNumber}
+Date: ${letterFields.issueDate}
+
+HESTRA HRM CAMBODIA CO., LTD. hereby certifies that:
+Employee Name: ${formatLocalizedText(letterFields.empName, 'en')} (ID: ${letterFields.empId})
+Role: ${formatLocalizedText(letterFields.role, 'en')}
+Department: ${formatLocalizedText(letterFields.department, 'en')}
+Join Date: ${letterFields.joinDate}
+Base Salary: $${letterFields.salary.toLocaleString()}
+Purpose: ${formatLocalizedText(letterFields.purpose, 'en')}
+
+Signed by:
+${formatLocalizedText(letterFields.signatoryName, 'en')}
+${formatLocalizedText(letterFields.signatoryTitle, 'en')}
+HESTRA HRM Cambodia Co., Ltd.
       `.trim();
       navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-      showToast('បានចម្លងអត្ថបទលិខិតដោយជោគជ័យ!', 'success');
+      showToast(
+        language === 'km' ? 'បានចម្លងអត្ថបទលិខិតដោយជោគជ័យ!' : 'Certificate copied to clipboard!',
+        'success'
+      );
     }
   };
 
@@ -501,10 +541,18 @@ HESTRA HRM Cambodia Co., Ltd.
                 onChange={(e) => setLetterType(e.target.value as LetterType)}
                 className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:outline-hidden"
               >
-                <option value="employment_cert">លិខិតបញ្ជាក់ការងារ (Certificate of Employment)</option>
-                <option value="salary_cert">លិខិតបញ្ជាក់ប្រាក់បៀវត្សរ៍ (Salary & Tax Confirmation)</option>
-                <option value="probation_pass">លិខិតបញ្ជាក់ការបញ្ចប់សាកល្បងការងារ (Probation Passing)</option>
-                <option value="promotion_letter">លិខិតសរសើរ ឬតម្លើងតួនាទី (Commendation & Promotion)</option>
+                <option value="employment_cert">
+                  {language === 'km' ? 'លិខិតបញ្ជាក់ការងារ (Certificate of Employment)' : 'Certificate of Employment'}
+                </option>
+                <option value="salary_cert">
+                  {language === 'km' ? 'លិខិតបញ្ជាក់ប្រាក់បៀវត្សរ៍ (Salary & Tax Confirmation)' : 'Salary & Tax Confirmation'}
+                </option>
+                <option value="probation_pass">
+                  {language === 'km' ? 'លិខិតបញ្ជាក់ការបញ្ចប់សាកល្បងការងារ (Probation Passing)' : 'Confirmation of Probation Completion'}
+                </option>
+                <option value="promotion_letter">
+                  {language === 'km' ? 'លិខិតសរសើរ ឬតម្លើងតួនាទី (Commendation & Promotion)' : 'Promotion & Excellence Commendation'}
+                </option>
               </select>
             </div>
 
@@ -519,10 +567,10 @@ HESTRA HRM Cambodia Co., Ltd.
                   onChange={(e) => handleSelectEmployee(e.target.value)}
                   className="w-full px-3 py-1.5 bg-white border border-indigo-200 rounded-lg text-xs font-semibold text-slate-800 focus:outline-hidden"
                 >
-                  <option value="">-- ជ្រើសរើសបុគ្គលិកដើម្បីបញ្ចូលព័ត៌មាន --</option>
+                  <option value="">{language === 'km' ? '-- ជ្រើសរើសបុគ្គលិកដើម្បីបញ្ចូលព័ត៌មាន --' : '-- Select employee to autofill --'}</option>
                   {employees.map((emp) => (
                     <option key={emp.id} value={emp.id}>
-                      {emp.last_name} {emp.first_name} - {emp.role} ({emp.department_name})
+                      {formatLocalizedText(`${emp.last_name} ${emp.first_name}`, language)} - {formatLocalizedText(emp.role, language)} ({formatLocalizedText(emp.department_name || '', language)})
                     </option>
                   ))}
                 </select>
@@ -638,7 +686,7 @@ HESTRA HRM Cambodia Co., Ltd.
                 value={letterFields.purpose}
                 onChange={(e) => setLetterFields({ ...letterFields, purpose: e.target.value })}
                 className="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs"
-                placeholder="ឧ. សម្រាប់ដាក់ពាក្យស្នើសុំទិដ្ឋាការ / For Visa Application"
+                placeholder={language === 'km' ? "ឧ. សម្រាប់ដាក់ពាក្យស្នើសុំទិដ្ឋាការ / For Visa Application" : "e.g., For Visa Application / Official Verification"}
               />
             </div>
 
@@ -656,7 +704,7 @@ HESTRA HRM Cambodia Co., Ltd.
                 className="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 {copied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
-                <span>{copied ? 'បានចម្លង' : 'ចម្លងអត្ថបទ'}</span>
+                <span>{copied ? (language === 'km' ? 'បានចម្លង' : 'Copied!') : (language === 'km' ? 'ចម្លងអត្ថបទ' : 'Copy Text')}</span>
               </button>
             </div>
           </div>
@@ -684,7 +732,11 @@ HESTRA HRM Cambodia Co., Ltd.
                   </div>
                   <div>
                     <h2 className="text-base font-bold text-slate-900 font-khmer">HESTRA HRM CAMBODIA CO., LTD.</h2>
-                    <p className="text-[11px] text-slate-500 font-khmer">អគារ Exchange Square, មហាវិថីព្រះនរោត្តម, រាជធានីភ្នំពេញ</p>
+                    <p className="text-[11px] text-slate-500 font-khmer">
+                      {language === 'km' 
+                        ? 'អគារ Exchange Square, មហាវិថីព្រះនរោត្តម, រាជធានីភ្នំពេញ' 
+                        : 'Exchange Square Building, Preah Norodom Blvd, Phnom Penh, Cambodia'}
+                    </p>
                     <p className="text-[10px] text-slate-400 font-khmer">TIN: K009-90218928 &bull; NSSF: 1029482 &bull; Email: hr@hestra.kh</p>
                   </div>
                 </div>
@@ -694,7 +746,7 @@ HESTRA HRM Cambodia Co., Ltd.
                     Ref: {letterFields.refNumber}
                   </span>
                   <span className="text-[11px] text-slate-600 block mt-1 font-khmer">
-                    កាលបរិច្ឆេទ៖ {letterFields.issueDate}
+                    {language === 'km' ? 'កាលបរិច្ឆេទ៖' : 'Date:'} {letterFields.issueDate}
                   </span>
                 </div>
               </div>
@@ -702,101 +754,141 @@ HESTRA HRM Cambodia Co., Ltd.
               <div className="text-center my-8">
                 {letterType === 'employment_cert' && (
                   <>
-                    <h1 className="text-base sm:text-lg font-khmer-moul text-slate-900 block leading-relaxed">
-                      លិខិតបញ្ជាក់ការងារ
-                    </h1>
-                    <span className="text-xs uppercase font-extrabold tracking-widest text-slate-500 block mt-0.5">
+                    {language === 'km' && (
+                      <h1 className="text-base sm:text-lg font-khmer-moul text-slate-900 block leading-relaxed">
+                        លិខិតបញ្ជាក់ការងារ
+                      </h1>
+                    )}
+                    <span className="text-xs uppercase font-extrabold tracking-widest text-slate-700 block mt-0.5">
                       CERTIFICATE OF EMPLOYMENT
                     </span>
                   </>
                 )}
                 {letterType === 'salary_cert' && (
                   <>
-                    <h1 className="text-base sm:text-lg font-khmer-moul text-slate-900 block leading-relaxed">
-                      លិខិតបញ្ជាក់ប្រាក់បៀវត្សរ៍ និងតួនាទី
-                    </h1>
-                    <span className="text-xs uppercase font-extrabold tracking-widest text-slate-500 block mt-0.5">
+                    {language === 'km' && (
+                      <h1 className="text-base sm:text-lg font-khmer-moul text-slate-900 block leading-relaxed">
+                        លិខិតបញ្ជាក់ប្រាក់បៀវត្សរ៍ និងតួនាទី
+                      </h1>
+                    )}
+                    <span className="text-xs uppercase font-extrabold tracking-widest text-slate-700 block mt-0.5">
                       SALARY & EMPLOYMENT VERIFICATION LETTER
                     </span>
                   </>
                 )}
                 {letterType === 'probation_pass' && (
                   <>
-                    <h1 className="text-base sm:text-lg font-khmer-moul text-slate-900 block leading-relaxed">
-                      លិខិតបញ្ជាក់ការបញ្ចប់សាកល្បងការងារ
-                    </h1>
-                    <span className="text-xs uppercase font-extrabold tracking-widest text-slate-500 block mt-0.5">
+                    {language === 'km' && (
+                      <h1 className="text-base sm:text-lg font-khmer-moul text-slate-900 block leading-relaxed">
+                        លិខិតបញ្ជាក់ការបញ្ចប់សាកល្បងការងារ
+                      </h1>
+                    )}
+                    <span className="text-xs uppercase font-extrabold tracking-widest text-slate-700 block mt-0.5">
                       CONFIRMATION OF PROBATION COMPLETION
                     </span>
                   </>
                 )}
                 {letterType === 'promotion_letter' && (
                   <>
-                    <h1 className="text-base sm:text-lg font-khmer-moul text-slate-900 block leading-relaxed">
-                      លិខិតសរសើរ និងតម្លើងតួនាទី
-                    </h1>
-                    <span className="text-xs uppercase font-extrabold tracking-widest text-slate-500 block mt-0.5">
+                    {language === 'km' && (
+                      <h1 className="text-base sm:text-lg font-khmer-moul text-slate-900 block leading-relaxed">
+                        លិខិតសរសើរ និងតម្លើងតួនាទី
+                      </h1>
+                    )}
+                    <span className="text-xs uppercase font-extrabold tracking-widest text-slate-700 block mt-0.5">
                       PROMOTION & EXCELLENCE COMMENDATION
                     </span>
                   </>
                 )}
               </div>
 
-              <div className="space-y-4 text-xs leading-relaxed text-slate-700 font-khmer">
-                <p>
-                  នាយកដ្ឋានធនធានមនុស្ស នៃក្រុមហ៊ុន <strong>HESTRA HRM CAMBODIA CO., LTD.</strong> សូមបញ្ជាក់ជូនថា សាមីខ្លួនឈ្មោះ <strong>{letterFields.empName}</strong> (អត្តលេខបុគ្គលិក៖ <strong>{letterFields.empId}</strong>) ពិតជាបុគ្គលិកបម្រើការងារពេញម៉ោងក្នុងក្រុមហ៊ុនរបស់យើងខ្ញុំប្រាកដមែន ដោយមានព័ត៌មានលម្អិតដូចខាងក្រោម៖
-                </p>
+              <div className="space-y-4 text-xs leading-relaxed text-slate-700">
+                {language === 'km' ? (
+                  <p>
+                    នាយកដ្ឋានធនធានមនុស្ស នៃក្រុមហ៊ុន <strong>HESTRA HRM CAMBODIA CO., LTD.</strong> សូមបញ្ជាក់ជូនថា សាមីខ្លួនឈ្មោះ <strong>{formatLocalizedText(letterFields.empName, language)}</strong> (អត្តលេខបុគ្គលិក៖ <strong>{letterFields.empId}</strong>) ពិតជាបុគ្គលិកបម្រើការងារពេញម៉ោងក្នុងក្រុមហ៊ុនរបស់យើងខ្ញុំប្រាកដមែន ដោយមានព័ត៌មានលម្អិតដូចខាងក្រោម៖
+                  </p>
+                ) : (
+                  <p>
+                    The Human Resources Department of <strong>HESTRA HRM CAMBODIA CO., LTD.</strong> hereby certifies that <strong>{formatLocalizedText(letterFields.empName, language)}</strong> (Employee ID: <strong>{letterFields.empId}</strong>) is currently a full-time regular employee of the company with details as follows:
+                  </p>
+                )}
 
                 <div className="my-4 p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                   <div className="grid grid-cols-2 gap-3 text-xs">
                     <div>
-                      <span className="text-slate-400 block text-[10px] uppercase font-bold">មុខតំណែងបច្ចុប្បន្ន (Job Title):</span>
-                      <span className="font-bold text-slate-900">{letterFields.role}</span>
+                      <span className="text-slate-400 block text-[10px] uppercase font-bold">
+                        {language === 'km' ? 'មុខតំណែងបច្ចុប្បន្ន (Job Title):' : 'Current Job Title:'}
+                      </span>
+                      <span className="font-bold text-slate-900">{formatLocalizedText(letterFields.role, language)}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 block text-[10px] uppercase font-bold">នាយកដ្ឋាន / ផ្នែក (Department):</span>
-                      <span className="font-bold text-slate-900">{letterFields.department}</span>
+                      <span className="text-slate-400 block text-[10px] uppercase font-bold">
+                        {language === 'km' ? 'នាយកដ្ឋាន / ផ្នែក (Department):' : 'Department:'}
+                      </span>
+                      <span className="font-bold text-slate-900">{formatLocalizedText(letterFields.department, language)}</span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 text-xs pt-2 border-t border-slate-200">
                     <div>
-                      <span className="text-slate-400 block text-[10px] uppercase font-bold">កាលបរិច្ឆេទចូលបម្រើការ (Join Date):</span>
+                      <span className="text-slate-400 block text-[10px] uppercase font-bold">
+                        {language === 'km' ? 'កាលបរិច្ឆេទចូលបម្រើការ (Join Date):' : 'Date of Joining:'}
+                      </span>
                       <span className="font-bold text-slate-900">{letterFields.joinDate}</span>
                     </div>
                     <div>
-                      <span className="text-slate-400 block text-[10px] uppercase font-bold">ប្រាក់បៀវត្សរ៍មូលដ្ឋាន (Base Salary):</span>
-                      <span className="font-bold text-indigo-700 font-mono">${letterFields.salary.toLocaleString()} USD / ខែ</span>
+                      <span className="text-slate-400 block text-[10px] uppercase font-bold">
+                        {language === 'km' ? 'ប្រាក់បៀវត្សរ៍មូលដ្ឋាន (Base Salary):' : 'Base Monthly Salary:'}
+                      </span>
+                      <span className="font-bold text-indigo-700 font-mono">
+                        ${letterFields.salary.toLocaleString()} USD {language === 'km' ? '/ ខែ' : '/ month'}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 {letterType === 'employment_cert' && (
                   <p>
-                    លិខិតនេះត្រូវបានចេញជូនតាមការស្នើសុំរបស់សាមីខ្លួន សម្រាប់ប្រើប្រាស់ជាផ្លូវការក្នុងគោលបំណង៖ <strong>{letterFields.purpose}</strong>។ សាមីខ្លួនជាបុគ្គលិកដែលមានការទទួលខុសត្រូវខ្ពស់ និងគោរពបទបញ្ជាផ្ទៃក្នុងរបស់ក្រុមហ៊ុនយ៉ាងខ្ជាប់ខ្ជួន។
+                    {language === 'km'
+                      ? `លិខិតនេះត្រូវបានចេញជូនតាមការស្នើសុំរបស់សាមីខ្លួន សម្រាប់ប្រើប្រាស់ជាផ្លូវការក្នុងគោលបំណង៖ ${formatLocalizedText(letterFields.purpose, language)}។ សាមីខ្លួនជាបុគ្គលិកដែលមានការទទួលខុសត្រូវខ្ពស់ និងគោរពបទបញ្ជាផ្ទៃក្នុងរបស់ក្រុមហ៊ុនយ៉ាងខ្ជាប់ខ្ជួន។`
+                      : `This certificate is issued upon the employee's request for the official purpose of: ${formatLocalizedText(letterFields.purpose, language)}. The employee has consistently performed their duties with high responsibility and adhered strictly to company internal policies.`}
                   </p>
                 )}
 
                 {letterType === 'salary_cert' && (
                   <p>
-                    ក្រុមហ៊ុនសូមបញ្ជាក់ថា ប្រាក់បៀវត្សរ៍ខាងលើត្រូវបានទូទាត់ត្រឹមត្រូវតាមប្រព័ន្ធធនាគារ និងបានកាត់កងបង់វិភាគទានរបបសន្តិសុខសង្គម (ប.ស.ស) និងពន្ធលើប្រាក់បៀវត្សរ៍ស្របតាមច្បាប់ការងារ និងបទប្បញ្ញត្តិពន្ធដារនៃព្រះរាជាណាចក្រកម្ពុជា។
+                    {language === 'km'
+                      ? 'ក្រុមហ៊ុនសូមបញ្ជាក់ថា ប្រាក់បៀវត្សរ៍ខាងលើត្រូវបានទូទាត់ត្រឹមត្រូវតាមប្រព័ន្ធធនាគារ និងបានកាត់កងបង់វិភាគទានរបបសន្តិសុខសង្គម (ប.ស.ស) និងពន្ធលើប្រាក់បៀវត្សរ៍ស្របតាមច្បាប់ការងារ និងបទប្បញ្ញត្តិពន្ធដារនៃព្រះរាជាណាចក្រកម្ពុជា។'
+                      : 'The company hereby certifies that the aforementioned compensation is disbursed through direct bank transfer, and all statutory National Social Security Fund (NSSF) contributions as well as Tax on Salary have been duly remitted in full compliance with the laws of the Kingdom of Cambodia.'}
                   </p>
                 )}
 
                 {letterType === 'probation_pass' && (
                   <p>
-                    ផ្អែកលើលទ្ធផលវាយតម្លៃសមិទ្ធកម្មការងារក្នុងអំឡុងពេលសាកល្បង គណៈគ្រប់គ្រងក្រុមហ៊ុនសូមប្រកាសទទួលស្គាល់សាមីខ្លួនជា <strong>បុគ្គលិកពេញសិទ្ធិ (Regular Full-Time Employee)</strong> ចាប់ពីកាលបរិច្ឆេទនេះតទៅ ជាមួយនឹងអត្ថប្រយោជន៍ពេញលេញស្របតាមគោលនយោបាយក្រុមហ៊ុន។
+                    {language === 'km' ? (
+                      <>
+                        ផ្អែកលើលទ្ធផលវាយតម្លៃសមិទ្ធកម្មការងារក្នុងអំឡុងពេលសាកល្បង គណៈគ្រប់គ្រងក្រុមហ៊ុនសូមប្រកាសទទួលស្គាល់សាមីខ្លួនជា <strong>បុគ្គលិកពេញសិទ្ធិ (Regular Full-Time Employee)</strong> ចាប់ពីកាលបរិច្ឆេទនេះតទៅ ជាមួយនឹងអត្ថប្រយោជន៍ពេញលេញស្របតាមគោលនយោបាយក្រុមហ៊ុន។
+                      </>
+                    ) : (
+                      <>
+                        Based on commendable performance evaluation during the probationary evaluation period, the executive management officially confirms the employee as a <strong>Regular Full-Time Employee</strong> effective immediately, entitled to full benefits and statutory rights.
+                      </>
+                    )}
                   </p>
                 )}
 
                 {letterType === 'promotion_letter' && (
                   <p>
-                    ដើម្បីឆ្លើយតបនឹងការខិតខំប្រឹងប្រែង និងលទ្ធផលការងារឆ្នើម ក្រុមហ៊ុនសូមសម្តែងការអបអរសាទរយ៉ាងកក់ក្តៅ និងផ្តល់សេចក្តីទុកចិត្តក្នុងការប្រគល់ភារកិច្ចជាន់ខ្ពស់នេះជូន។
+                    {language === 'km'
+                      ? 'ដើម្បីឆ្លើយតបនឹងការខិតខំប្រឹងប្រែង និងលទ្ធផលការងារឆ្នើម ក្រុមហ៊ុនសូមសម្តែងការអបអរសាទរយ៉ាងកក់ក្តៅ និងផ្តល់សេចក្តីទុកចិត្តក្នុងការប្រគល់ភារកិច្ចជាន់ខ្ពស់នេះជូន។'
+                      : 'In sincere recognition of your hard work, dedication, and exemplary performance achievements, the company warmly congratulates you on this promotion and places full trust in your ongoing leadership.'}
                   </p>
                 )}
 
-                <p className="pt-2">
-                  អាស្រ័យហេតុនេះ សូមស្ថាប័នពាក់ព័ន្ធមេត្តាជ្រាប និងទទួលស្គាល់លិខិតបញ្ជាក់នេះជាផ្លូវការ។
+                <p className="pt-2 italic text-slate-500">
+                  {language === 'km'
+                    ? 'អាស្រ័យហេតុនេះ សូមស្ថាប័នពាក់ព័ន្ធមេត្តាជ្រាប និងទទួលស្គាល់លិខិតបញ្ជាក់នេះជាផ្លូវការ។'
+                    : 'This certificate is issued to serve as official verification for any relevant embassies, institutions, or authorities.'}
                 </p>
               </div>
 
@@ -809,13 +901,13 @@ HESTRA HRM Cambodia Co., Ltd.
 
                 <div className="text-right space-y-1">
                   <span className="text-[10px] text-slate-400 uppercase font-bold block">
-                    តំណាងគណៈគ្រប់គ្រងក្រុមហ៊ុន (Authorized Signatory)
+                    {language === 'km' ? 'តំណាងគណៈគ្រប់គ្រងក្រុមហ៊ុន (Authorized Signatory)' : 'Authorized Signatory'}
                   </span>
                   <div className="h-10 flex items-center justify-end">
                     <span className="font-serif italic text-lg text-indigo-900 opacity-90">Sarath</span>
                   </div>
-                  <span className="font-bold text-slate-900 block font-khmer">{letterFields.signatoryName}</span>
-                  <span className="text-[11px] text-slate-500 block font-khmer">{letterFields.signatoryTitle}</span>
+                  <span className="font-bold text-slate-900 block font-khmer">{formatLocalizedText(letterFields.signatoryName, language)}</span>
+                  <span className="text-[11px] text-slate-500 block font-khmer">{formatLocalizedText(letterFields.signatoryTitle, language)}</span>
                   <span className="text-[10px] text-slate-400 block">HESTRA HRM Cambodia Co., Ltd.</span>
                 </div>
               </div>
@@ -880,9 +972,9 @@ HESTRA HRM Cambodia Co., Ltd.
                   onChange={(e) => setCalcWorkingDays(Number(e.target.value))}
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-hidden"
                 >
-                  <option value={26}>២៦ ថ្ងៃ (ស្តង់ដារច្បាប់ការងារទូទៅ - 26 days)</option>
-                  <option value={22}>២២ ថ្ងៃ (ចន្ទ-សុក្រ ៥ ថ្ងៃ/សប្តាហ៍ - 22 days)</option>
-                  <option value={24}>២៤ ថ្ងៃ (ការិយាល័យពាក់កណ្តាល - 24 days)</option>
+                  <option value={26}>{language === 'km' ? '២៦ ថ្ងៃ (ស្តង់ដារច្បាប់ការងារទូទៅ - 26 days)' : '26 days (General labor standard)'}</option>
+                  <option value={22}>{language === 'km' ? '២២ ថ្ងៃ (ចន្ទ-សុក្រ ៥ ថ្ងៃ/សប្តាហ៍ - 22 days)' : '22 days (Mon-Fri 5 days/week)'}</option>
+                  <option value={24}>{language === 'km' ? '២៤ ថ្ងៃ (ការិយាល័យពាក់កណ្តាល - 24 days)' : '24 days (Alternate Saturdays)'}</option>
                 </select>
                 <span className="text-[10px] text-slate-400 block mt-1">
                   {language === 'km' ? 'មូលដ្ឋានគណនាប្រាក់ឈ្នួលប្រចាំថ្ងៃ' : 'Basis for daily average wage'}
@@ -902,7 +994,7 @@ HESTRA HRM Cambodia Co., Ltd.
                   className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold"
                 />
                 <span className="text-[10px] text-slate-400 block mt-1">
-                  -150,000 KHR / កូនម្នាក់
+                  {language === 'km' ? '-150,000 KHR / កូនម្នាក់' : '-150,000 KHR / child'}
                 </span>
               </div>
 
@@ -920,7 +1012,7 @@ HESTRA HRM Cambodia Co., Ltd.
                   <span>{language === 'km' ? 'សហព័ទ្ធគ្មានចំណូល' : 'Non-working spouse'}</span>
                 </label>
                 <span className="text-[10px] text-slate-400 block mt-1">
-                  -150,000 KHR កាត់បន្ថយពន្ធ
+                  {language === 'km' ? '-150,000 KHR កាត់បន្ថយពន្ធ' : '-150,000 KHR tax deduction'}
                 </span>
               </div>
             </div>
@@ -938,11 +1030,13 @@ HESTRA HRM Cambodia Co., Ltd.
                       <h4 className="text-xs font-bold text-slate-900">
                         {language === 'km' ? 'ប្រាក់បំណាច់អតីតភាពការងារ' : 'Seniority Indemnity'}
                       </h4>
-                      <span className="text-[10px] text-slate-400">ច្បាប់ការងារ មាត្រា ៨៩ & ប្រកាស ៤៤៣</span>
+                      <span className="text-[10px] text-slate-400">
+                        {language === 'km' ? 'ច្បាប់ការងារ មាត្រា ៨៩ & ប្រកាស ៤៤៣' : 'Labor Law Art. 89 & Prakas 443'}
+                      </span>
                     </div>
                   </div>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    លើកលែងពន្ធ 100%
+                    {language === 'km' ? 'លើកលែងពន្ធ 100%' : '100% Tax-Exempt'}
                   </span>
                 </div>
 
@@ -954,19 +1048,25 @@ HESTRA HRM Cambodia Co., Ltd.
 
                 <div className="my-4 space-y-2 text-xs">
                   <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
-                    <span className="text-slate-500">ប្រាក់ឈ្នួលមធ្យម ១ ថ្ងៃ៖</span>
+                    <span className="text-slate-500">
+                      {language === 'km' ? 'ប្រាក់ឈ្នួលមធ្យម ១ ថ្ងៃ៖' : 'Average Daily Wage:'}
+                    </span>
                     <span className="font-mono font-bold">${seniorityResults.dailyWage.toFixed(2)}</span>
                   </div>
 
                   <div className="flex items-center justify-between p-2 rounded-lg bg-amber-50/70 border border-amber-200/70">
-                    <span className="font-bold text-amber-900">ប្រាក់បំណាច់ ១ ឆមាស (៧.៥ ថ្ងៃ)៖</span>
+                    <span className="font-bold text-amber-900">
+                      {language === 'km' ? 'ប្រាក់បំណាច់ ១ ឆមាស (៧.៥ ថ្ងៃ)៖' : '1 Semester (7.5 days):'}
+                    </span>
                     <span className="font-mono font-black text-amber-700 text-sm">
                       ${seniorityResults.semesterSeniorityPay.toFixed(2)}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
-                    <span className="text-slate-500">សរុប ១ ឆ្នាំពេញ (១៥ ថ្ងៃ)៖</span>
+                    <span className="text-slate-500">
+                      {language === 'km' ? 'សរុប ១ ឆ្នាំពេញ (១៥ ថ្ងៃ)៖' : 'Full Year Total (15 days):'}
+                    </span>
                     <span className="font-mono font-bold text-slate-800">
                       ${seniorityResults.annualSeniorityPay.toFixed(2)}
                     </span>
@@ -975,7 +1075,7 @@ HESTRA HRM Cambodia Co., Ltd.
               </div>
 
               <div className="pt-3 border-t border-slate-100 text-[11px] text-slate-400">
-                💡 មិនត្រូវបានគិតបញ្ចូលក្នុងមូលដ្ឋានគិតពន្ធលើប្រាក់បៀវត្សរ៍ឡើយ (Tax-free benefit)
+                💡 {language === 'km' ? 'មិនត្រូវបានគិតបញ្ចូលក្នុងមូលដ្ឋានគិតពន្ធលើប្រាក់បៀវត្សរ៍ឡើយ (Tax-free benefit)' : 'Exempt from Tax on Salary (Statutory tax-free benefit)'}
               </div>
             </div>
 
@@ -990,7 +1090,9 @@ HESTRA HRM Cambodia Co., Ltd.
                       <h4 className="text-xs font-bold text-slate-900">
                         {language === 'km' ? 'វិភាគទាន ប.ស.ស (NSSF)' : 'NSSF Contributions'}
                       </h4>
-                      <span className="text-[10px] text-slate-400">ពិដានគិតត្រឹម ១,២០០,០០០ រៀល</span>
+                      <span className="text-[10px] text-slate-400">
+                        {language === 'km' ? 'ពិដានគិតត្រឹម ១,២០០,០០០ រៀល' : 'Capped at 1,200,000 KHR'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -998,22 +1100,22 @@ HESTRA HRM Cambodia Co., Ltd.
                 <div className="my-3 space-y-2 text-xs">
                   <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 space-y-1">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block">
-                      ក្រុមហ៊ុនបង់ជូន (Employer - 5.4%)
+                      {language === 'km' ? 'ក្រុមហ៊ុនបង់ជូន (Employer - 5.4%)' : 'Employer Share (5.4%)'}
                     </span>
                     <div className="flex justify-between text-[11px] text-slate-600">
-                      <span>• ថែទាំសុខភាព (Health 2.6%):</span>
+                      <span>{language === 'km' ? '• ថែទាំសុខភាព (Health 2.6%):' : '• Health Care (2.6%):'}</span>
                       <span className="font-mono font-bold">{(nssfResults.healthCareKHR).toLocaleString()} KHR</span>
                     </div>
                     <div className="flex justify-between text-[11px] text-slate-600">
-                      <span>• ហានិភ័យការងារ (Risk 0.8%):</span>
+                      <span>{language === 'km' ? '• ហានិភ័យការងារ (Risk 0.8%):' : '• Occupational Risk (0.8%):'}</span>
                       <span className="font-mono font-bold">{(nssfResults.occRiskKHR).toLocaleString()} KHR</span>
                     </div>
                     <div className="flex justify-between text-[11px] text-slate-600">
-                      <span>• សោធន (Pension 2.0%):</span>
+                      <span>{language === 'km' ? '• សោធន (Pension 2.0%):' : '• Pension (2.0%):'}</span>
                       <span className="font-mono font-bold">{(nssfResults.pensionEmployerKHR).toLocaleString()} KHR</span>
                     </div>
                     <div className="pt-1 border-t border-slate-200 flex justify-between font-bold text-indigo-700">
-                      <span>សរុបក្រុមហ៊ុន៖</span>
+                      <span>{language === 'km' ? 'សរុបក្រុមហ៊ុន៖' : 'Total Employer:'}</span>
                       <span className="font-mono">${nssfResults.totalEmployerUSD.toFixed(2)} USD</span>
                     </div>
                   </div>
@@ -1021,8 +1123,12 @@ HESTRA HRM Cambodia Co., Ltd.
                   <div className="p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-200/70">
                     <div className="flex justify-between items-center text-xs">
                       <div>
-                        <span className="font-bold text-indigo-900 block">និយោជិតត្រូវកាត់ (Employee - 2%)</span>
-                        <span className="text-[10px] text-indigo-600">បេឡាសោធននិវត្តន៍ (Pension)</span>
+                        <span className="font-bold text-indigo-900 block">
+                          {language === 'km' ? 'និយោជិតត្រូវកាត់ (Employee - 2%)' : 'Employee Deduction (2.0%)'}
+                        </span>
+                        <span className="text-[10px] text-indigo-600">
+                          {language === 'km' ? 'បេឡាសោធននិវត្តន៍ (Pension)' : 'Pension Scheme'}
+                        </span>
                       </div>
                       <span className="font-mono font-black text-indigo-700 text-sm">
                         ${nssfResults.totalEmployeeUSD.toFixed(2)} USD
@@ -1033,7 +1139,7 @@ HESTRA HRM Cambodia Co., Ltd.
               </div>
 
               <div className="pt-3 border-t border-slate-100 text-[11px] text-slate-400">
-                💡 ភាគទានបៀវត្សរ៍ ប.ស.ស ត្រូវបង់យ៉ាងយឺតត្រឹមថ្ងៃទី ១៥ នៃខែបន្ទាប់
+                💡 {language === 'km' ? 'ភាគទានបៀវត្សរ៍ ប.ស.ស ត្រូវបង់យ៉ាងយឺតត្រឹមថ្ងៃទី ១៥ នៃខែបន្ទាប់' : 'NSSF contributions must be declared and settled by the 15th of each month.'}
               </div>
             </div>
 
@@ -1048,7 +1154,9 @@ HESTRA HRM Cambodia Co., Ltd.
                       <h4 className="text-xs font-bold text-slate-900">
                         {language === 'km' ? 'ពន្ធលើប្រាក់បៀវត្សរ៍ (GDT Tax)' : 'Tax on Salary (TOS)'}
                       </h4>
-                      <span className="text-[10px] text-slate-400">អត្រាកើនតាមថ្នាក់ (Progressive Bands)</span>
+                      <span className="text-[10px] text-slate-400">
+                        {language === 'km' ? 'អត្រាកើនតាមថ្នាក់ (Progressive Bands)' : 'Progressive Tax Bands'}
+                      </span>
                     </div>
                   </div>
                   <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
@@ -1058,19 +1166,19 @@ HESTRA HRM Cambodia Co., Ltd.
 
                 <div className="my-3 space-y-2 text-xs">
                   <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
-                    <span className="text-slate-500">ចំណូលសរុប (Gross):</span>
+                    <span className="text-slate-500">{language === 'km' ? 'ចំណូលសរុប (Gross):' : 'Gross Salary:'}</span>
                     <span className="font-mono font-bold">${calcBaseSalary.toLocaleString()}</span>
                   </div>
 
                   <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
-                    <span className="text-slate-500">កាត់បន្ថយបន្ទុក (Relief):</span>
+                    <span className="text-slate-500">{language === 'km' ? 'កាត់បន្ថយបន្ទុក (Relief):' : 'Deductions (Relief):'}</span>
                     <span className="font-mono font-bold text-emerald-600">
                       -{(taxResults.totalDeductionsKHR).toLocaleString()} KHR
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between p-2 rounded-lg bg-slate-50">
-                    <span className="text-slate-500">មូលដ្ឋានគិតពន្ធ (Taxable):</span>
+                    <span className="text-slate-500">{language === 'km' ? 'មូលដ្ឋានគិតពន្ធ (Taxable):' : 'Taxable Base:'}</span>
                     <span className="font-mono font-bold">
                       {(taxResults.taxableBaseKHR).toLocaleString()} KHR
                     </span>
@@ -1078,7 +1186,7 @@ HESTRA HRM Cambodia Co., Ltd.
 
                   <div className="flex items-center justify-between p-2.5 rounded-xl bg-emerald-50/70 border border-emerald-200/70">
                     <div>
-                      <span className="font-bold text-emerald-900 block">ពន្ធត្រូវបង់ (Tax Payable):</span>
+                      <span className="font-bold text-emerald-900 block">{language === 'km' ? 'ពន្ធត្រូវបង់ (Tax Payable):' : 'Tax Payable:'}</span>
                       <span className="text-[10px] text-emerald-700 font-mono">
                         {(taxResults.taxKHR).toLocaleString()} KHR
                       </span>
@@ -1089,7 +1197,7 @@ HESTRA HRM Cambodia Co., Ltd.
                   </div>
 
                   <div className="flex items-center justify-between p-2 rounded-lg bg-indigo-50/60 font-bold text-indigo-900">
-                    <span>ប្រាក់ខែជាក់ស្តែងទទួលបាន (Net):</span>
+                    <span>{language === 'km' ? 'ប្រាក់ខែជាក់ស្តែងទទួលបាន (Net):' : 'Net Take-Home Pay:'}</span>
                     <span className="font-mono text-sm font-black text-indigo-700">
                       ${taxResults.netTakeHomeUSD.toFixed(2)}
                     </span>
@@ -1098,7 +1206,7 @@ HESTRA HRM Cambodia Co., Ltd.
               </div>
 
               <div className="pt-3 border-t border-slate-100 text-[11px] text-slate-400">
-                💡 ផុតកំណត់ប្រកាស និងបង់ពន្ធត្រឹមថ្ងៃទី ២៥ នៃខែបន្ទាប់
+                💡 {language === 'km' ? 'ផុតកំណត់ប្រកាស និងបង់ពន្ធត្រឹមថ្ងៃទី ២៥ នៃខែបន្ទាប់' : 'Tax on Salary declaration due by the 25th of the following month.'}
               </div>
             </div>
           </div>
@@ -1122,10 +1230,12 @@ HESTRA HRM Cambodia Co., Ltd.
                   </div>
 
                   <h2 className="text-xl sm:text-2xl font-black font-khmer text-white">
-                    {holidayStats.next.name_km}
+                    {language === 'km' ? holidayStats.next.name_km : holidayStats.next.name_en}
                   </h2>
                   <p className="text-xs sm:text-sm text-indigo-200">
-                    {holidayStats.next.name_en} &bull; {holidayStats.next.description_km}
+                    {language === 'km' 
+                      ? `${holidayStats.next.name_en} • ${holidayStats.next.description_km}`
+                      : holidayStats.next.description_en}
                   </p>
                 </div>
 
@@ -1158,7 +1268,7 @@ HESTRA HRM Cambodia Co., Ltd.
               </div>
 
               <span className="text-xs font-bold px-3 py-1 rounded-xl bg-slate-100 text-slate-700 shrink-0">
-                សរុប {holidayStats.totalDays} ថ្ងៃឈប់សម្រាក
+                {language === 'km' ? `សរុប ${holidayStats.totalDays} ថ្ងៃឈប់សម្រាក` : `Total ${holidayStats.totalDays} Public Holidays`}
               </span>
             </div>
 
@@ -1166,11 +1276,11 @@ HESTRA HRM Cambodia Co., Ltd.
               <table className="w-full text-left text-xs text-slate-700">
                 <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
                   <tr>
-                    <th className="py-3 px-4">កាលបរិច្ឆេទ (Date)</th>
-                    <th className="py-3 px-4">ឈ្មោះពិធីបុណ្យជាតិ (Holiday Name)</th>
-                    <th className="py-3 px-4">ចំនួនថ្ងៃ (Days)</th>
-                    <th className="py-3 px-4">ប្រភេទ (Category)</th>
-                    <th className="py-3 px-4">ស្ថានភាព (Status)</th>
+                    <th className="py-3 px-4">{language === 'km' ? 'កាលបរិច្ឆេទ (Date)' : 'Date'}</th>
+                    <th className="py-3 px-4">{language === 'km' ? 'ឈ្មោះពិធីបុណ្យជាតិ (Holiday Name)' : 'Holiday Name'}</th>
+                    <th className="py-3 px-4">{language === 'km' ? 'ចំនួនថ្ងៃ (Days)' : 'Duration'}</th>
+                    <th className="py-3 px-4">{language === 'km' ? 'ប្រភេទ (Category)' : 'Category'}</th>
+                    <th className="py-3 px-4">{language === 'km' ? 'ស្ថានភាព (Status)' : 'Status'}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-khmer">
@@ -1186,12 +1296,12 @@ HESTRA HRM Cambodia Co., Ltd.
                           {h.date}
                         </td>
                         <td className="py-3 px-4">
-                          <span className="font-bold text-slate-900 block">{h.name_km}</span>
-                          <span className="text-[11px] text-slate-400 font-sans">{h.name_en}</span>
+                          <span className="font-bold text-slate-900 block">{language === 'km' ? h.name_km : h.name_en}</span>
+                          <span className="text-[11px] text-slate-400 font-sans">{language === 'km' ? h.name_en : h.description_en}</span>
                         </td>
                         <td className="py-3 px-4">
                           <span className="font-bold font-mono px-2 py-0.5 rounded-md bg-slate-100 text-slate-700">
-                            {h.days} ថ្ងៃ
+                            {h.days} {language === 'km' ? 'ថ្ងៃ' : 'days'}
                           </span>
                         </td>
                         <td className="py-3 px-4">
@@ -1208,11 +1318,11 @@ HESTRA HRM Cambodia Co., Ltd.
                           {isUpcoming ? (
                             <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 rounded-full">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                              នៅសល់ {diffDays} ថ្ងៃ
+                              {language === 'km' ? `នៅសល់ ${diffDays} ថ្ងៃ` : `In ${diffDays} days`}
                             </span>
                           ) : (
                             <span className="text-[11px] text-slate-400">
-                              បានឆ្លងផុត
+                              {language === 'km' ? 'បានឆ្លងផុត' : 'Passed'}
                             </span>
                           )}
                         </td>
@@ -1236,7 +1346,7 @@ HESTRA HRM Cambodia Co., Ltd.
               </div>
               <div>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                  សាកល្បងការងារ (Probation)
+                  {language === 'km' ? 'សាកល្បងការងារ (Probation)' : 'Probationary Staff'}
                 </span>
                 <span className="text-xl font-black text-slate-900">
                   {employees.filter((e) => {
@@ -1244,9 +1354,11 @@ HESTRA HRM Cambodia Co., Ltd.
                     const now = new Date('2026-10-24').getTime();
                     const diffDays = (now - join) / (1000 * 60 * 60 * 24);
                     return diffDays >= 0 && diffDays <= 90;
-                  }).length} នាក់
+                  }).length} {language === 'km' ? 'នាក់' : 'staff'}
                 </span>
-                <p className="text-[10px] text-slate-500">ស្តង់ដារ ៣ ខែតាមច្បាប់ការងារ</p>
+                <p className="text-[10px] text-slate-500">
+                  {language === 'km' ? 'ស្តង់ដារ ៣ ខែតាមច្បាប់ការងារ' : 'Standard 3 months MLVT duration'}
+                </p>
               </div>
             </div>
 
@@ -1256,12 +1368,14 @@ HESTRA HRM Cambodia Co., Ltd.
               </div>
               <div>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                  កិច្ចសន្យាកំណត់ (FDC)
+                  {language === 'km' ? 'កិច្ចសន្យាកំណត់ (FDC)' : 'Fixed Duration (FDC)'}
                 </span>
                 <span className="text-xl font-black text-slate-900">
-                  {employees.filter((e) => e.employment_type === 'Contract').length} នាក់
+                  {employees.filter((e) => e.employment_type === 'Contract').length} {language === 'km' ? 'នាក់' : 'staff'}
                 </span>
-                <p className="text-[10px] text-slate-500">ប្រាក់បំណាច់ ៥% ពេលចប់</p>
+                <p className="text-[10px] text-slate-500">
+                  {language === 'km' ? 'ប្រាក់បំណាច់ ៥% ពេលចប់' : '5% severance upon completion'}
+                </p>
               </div>
             </div>
 
@@ -1271,12 +1385,14 @@ HESTRA HRM Cambodia Co., Ltd.
               </div>
               <div>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                  កិច្ចសន្យាមិនកំណត់ (UDC)
+                  {language === 'km' ? 'កិច្ចសន្យាមិនកំណត់ (UDC)' : 'Undetermined (UDC)'}
                 </span>
                 <span className="text-xl font-black text-slate-900">
-                  {employees.filter((e) => e.employment_type === 'Full-Time').length} នាក់
+                  {employees.filter((e) => e.employment_type === 'Full-Time').length} {language === 'km' ? 'នាក់' : 'staff'}
                 </span>
-                <p className="text-[10px] text-slate-500">ទទួលបានប្រាក់អតីតភាព ១៥ ថ្ងៃ/ឆ្នាំ</p>
+                <p className="text-[10px] text-slate-500">
+                  {language === 'km' ? 'ទទួលបានប្រាក់អតីតភាព ១៥ ថ្ងៃ/ឆ្នាំ' : 'Seniority indemnity 15 days/yr'}
+                </p>
               </div>
             </div>
           </div>
@@ -1298,9 +1414,11 @@ HESTRA HRM Cambodia Co., Ltd.
                 <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
                   <Users size={24} />
                 </div>
-                <h4 className="text-xs font-bold text-slate-700">ពុំទាន់មានបុគ្គលិកក្នុងបញ្ជីនៅឡើយ</h4>
+                <h4 className="text-xs font-bold text-slate-700">
+                  {language === 'km' ? 'ពុំទាន់មានបុគ្គលិកក្នុងបញ្ជីនៅឡើយ' : 'No staff members recorded'}
+                </h4>
                 <p className="text-[11px] text-slate-400 mt-1">
-                  សូមបញ្ចូលបុគ្គលិកថ្មី ឬទាញទិន្នន័យគំរូដើម្បីតាមដានកិច្ចសន្យាការងារ។
+                  {language === 'km' ? 'សូមបញ្ចូលបុគ្គលិកថ្មី ឬទាញទិន្នន័យគំរូដើម្បីតាមដានកិច្ចសន្យាការងារ។' : 'Please register staff or load seed data to track contracts.'}
                 </p>
               </div>
             ) : (
@@ -1308,12 +1426,12 @@ HESTRA HRM Cambodia Co., Ltd.
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-[10px]">
                     <tr>
-                      <th className="py-2.5 px-3">បុគ្គលិក (Employee)</th>
-                      <th className="py-2.5 px-3">មុខតំណែង (Role)</th>
-                      <th className="py-2.5 px-3">ប្រភេទកិច្ចសន្យា</th>
-                      <th className="py-2.5 px-3">កាលបរិច្ឆេទចូល</th>
-                      <th className="py-2.5 px-3">ស្ថានភាព</th>
-                      <th className="py-2.5 px-3 text-right">សកម្មភាព</th>
+                      <th className="py-2.5 px-3">{language === 'km' ? 'បុគ្គលិក (Employee)' : 'Employee'}</th>
+                      <th className="py-2.5 px-3">{language === 'km' ? 'មុខតំណែង (Role)' : 'Role'}</th>
+                      <th className="py-2.5 px-3">{language === 'km' ? 'ប្រភេទកិច្ចសន្យា' : 'Contract Type'}</th>
+                      <th className="py-2.5 px-3">{language === 'km' ? 'កាលបរិច្ឆេទចូល' : 'Join Date'}</th>
+                      <th className="py-2.5 px-3">{language === 'km' ? 'ស្ថានភាព' : 'Status'}</th>
+                      <th className="py-2.5 px-3 text-right">{language === 'km' ? 'សកម្មភាព' : 'Action'}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 font-khmer">
@@ -1326,24 +1444,24 @@ HESTRA HRM Cambodia Co., Ltd.
                       return (
                         <tr key={emp.id} className="hover:bg-slate-50">
                           <td className="py-3 px-3">
-                            <span className="font-bold text-slate-900 block">{emp.last_name} {emp.first_name}</span>
+                            <span className="font-bold text-slate-900 block">{formatLocalizedText(`${emp.last_name} ${emp.first_name}`, language)}</span>
                             <span className="text-[10px] text-slate-400 font-mono">{emp.id}</span>
                           </td>
-                          <td className="py-3 px-3 text-slate-600">{emp.role}</td>
+                          <td className="py-3 px-3 text-slate-600">{formatLocalizedText(emp.role, language)}</td>
                           <td className="py-3 px-3">
                             <span className="px-2 py-0.5 rounded-md font-bold text-[10px] bg-slate-100 text-slate-700">
-                              {emp.employment_type}
+                              {formatLocalizedText(emp.employment_type, language)}
                             </span>
                           </td>
                           <td className="py-3 px-3 font-mono">{emp.join_date}</td>
                           <td className="py-3 px-3">
                             {isProbation ? (
                               <span className="px-2 py-0.5 rounded-full font-bold text-[10px] bg-amber-50 text-amber-700 border border-amber-200">
-                                សាកល្បង ({Math.max(0, 90 - Math.round(diffDays))} ថ្ងៃទៀត)
+                                {language === 'km' ? `សាកល្បង (${Math.max(0, 90 - Math.round(diffDays))} ថ្ងៃទៀត)` : `Probation (${Math.max(0, 90 - Math.round(diffDays))} days left)`}
                               </span>
                             ) : (
                               <span className="px-2 py-0.5 rounded-full font-bold text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                ពេញសិទ្ធិ (Regular)
+                                {language === 'km' ? 'ពេញសិទ្ធិ (Regular)' : 'Regular (Confirmed)'}
                               </span>
                             )}
                           </td>
@@ -1355,7 +1473,7 @@ HESTRA HRM Cambodia Co., Ltd.
                               }}
                               className="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] font-bold cursor-pointer transition-colors"
                             >
-                              ចេញលិខិត
+                              {language === 'km' ? 'ចេញលិខិត' : 'Draft Letter'}
                             </button>
                           </td>
                         </tr>
@@ -1373,8 +1491,9 @@ HESTRA HRM Cambodia Co., Ltd.
 }
 
 export default function HRToolsPage() {
+  const { language } = useApp();
   return (
-    <Suspense fallback={<div className="p-8 text-center text-xs text-slate-400">កំពុងដំណើរការឧបករណ៍ធនធានមនុស្ស...</div>}>
+    <Suspense fallback={<div className="p-8 text-center text-xs text-slate-400">{language === 'km' ? 'កំពុងដំណើរការឧបករណ៍ធនធានមនុស្ស...' : 'Loading HR Toolkit...'}</div>}>
       <ToolsContent />
     </Suspense>
   );

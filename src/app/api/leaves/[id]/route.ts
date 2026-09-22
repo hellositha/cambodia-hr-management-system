@@ -152,7 +152,7 @@ export async function PATCH(
         lr.*,
         COALESCE(e.first_name || ' ' || e.last_name, u.name, 'Staff Member') as employee_name,
         COALESCE(e.role, u.role, 'Employee') as employee_role,
-        COALESCE(e.avatar, u.avatar, 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=256&h=256&fit=crop&crop=faces') as employee_avatar,
+        COALESCE(e.avatar, u.avatar, '/avatars/khmer_female_1.jpg') as employee_avatar,
         COALESCE(lm.first_name || ' ' || lm.last_name, lmu.name) as line_manager_name,
         COALESCE(adm.first_name || ' ' || adm.last_name, admu.name) as admin_reviewer_name,
         COALESCE(r.first_name || ' ' || r.last_name, ru.name) as reviewer_name
