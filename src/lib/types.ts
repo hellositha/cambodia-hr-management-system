@@ -59,6 +59,13 @@ export interface Employee {
   bank_name?: string;
   bank_account_name?: string;
   bank_account_number?: string;
+  transport_allowance?: number;
+  meal_allowance?: number;
+  housing_allowance?: number;
+  attendance_allowance?: number;
+  seniority_bonus?: number;
+  pay_grade?: string;
+  last_salary_review?: string;
   // 5. NSSF Information
   nssf_member?: string;
   nssf_number?: string;
@@ -344,3 +351,35 @@ export interface UserAccount {
   last_login?: string;
   created_at: string;
 }
+
+export interface SalaryAdjustment {
+  id: string;
+  employee_id: string;
+  employee_name?: string;
+  employee_role?: string;
+  employee_avatar?: string;
+  department_name?: string;
+  previous_salary: number;
+  new_salary: number;
+  increase_amount: number;
+  increase_percentage: number;
+  effective_date: string;
+  adjustment_type: string;
+  currency: string;
+  reason?: string;
+  approved_by?: string;
+  created_at: string;
+}
+
+export interface SalaryOverview {
+  totalMonthlySalary: number;
+  totalAllowances: number;
+  averageSalary: number;
+  minSalary: number;
+  maxSalary: number;
+  compliantCount: number;
+  nonCompliantCount: number;
+  totalEmployees: number;
+  minWageStandard: number;
+}
+

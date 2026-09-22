@@ -260,6 +260,21 @@ function initDatabase(db: Database.Database) {
       key TEXT PRIMARY KEY,
       value TEXT
     );
+
+    CREATE TABLE IF NOT EXISTS salary_adjustments (
+      id TEXT PRIMARY KEY,
+      employee_id TEXT NOT NULL,
+      previous_salary REAL NOT NULL,
+      new_salary REAL NOT NULL,
+      increase_amount REAL NOT NULL,
+      increase_percentage REAL NOT NULL,
+      effective_date TEXT NOT NULL,
+      adjustment_type TEXT NOT NULL,
+      currency TEXT DEFAULT 'USD ($)',
+      reason TEXT,
+      approved_by TEXT,
+      created_at TEXT NOT NULL
+    );
   `);
 
   // Ensure password and username columns exist if table was created previously
@@ -458,6 +473,13 @@ function initDatabase(db: Database.Database) {
       ['doc_passport', 'TEXT'],
       ['doc_contract', 'TEXT'],
       ['doc_others', 'TEXT'],
+      ['transport_allowance', 'REAL DEFAULT 0'],
+      ['meal_allowance', 'REAL DEFAULT 0'],
+      ['housing_allowance', 'REAL DEFAULT 0'],
+      ['attendance_allowance', 'REAL DEFAULT 0'],
+      ['seniority_bonus', 'REAL DEFAULT 0'],
+      ['pay_grade', 'TEXT DEFAULT "Grade 2"'],
+      ['last_salary_review', 'TEXT'],
     ];
 
     for (const [col, colDef] of newEmpCols) {
