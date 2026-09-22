@@ -113,6 +113,11 @@ export default function EmployeeEditModal({
   // Populate form when employee changes
   useEffect(() => {
     if (employee && isOpen) {
+      const matchedDept = departments.find(
+        (d) => d.id === employee.department_id || d.name === employee.department_id || d.name === employee.department_name
+      );
+      const resolvedDeptId = matchedDept ? matchedDept.id : (employee.department_id || departments[0]?.id || '');
+
       setFormData({
         last_name: employee.last_name || '',
         first_name: employee.first_name || '',
@@ -132,7 +137,7 @@ export default function EmployeeEditModal({
         commune_sangkat: employee.commune_sangkat || '',
         village: employee.village || '',
 
-        department_id: employee.department_id || (departments[0]?.id ?? ''),
+        department_id: resolvedDeptId,
         role: employee.role || '',
         employment_type: employee.employment_type || 'ពេញម៉ោង (Full-Time)',
         employee_type: employee.employee_type || 'បុគ្គលិកពេញសិទ្ធិ (Regular / Permanent)',
@@ -745,19 +750,26 @@ export default function EmployeeEditModal({
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                    {language === 'km' ? 'នាយកដ្ឋាន (Department) *' : 'Department *'}
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center justify-between">
+                    <span>{language === 'km' ? 'ផ្នែក / នាយកដ្ឋាន' : 'Department'} *</span>
+                    <Building2 className="w-3.5 h-3.5 text-indigo-500" />
                   </label>
                   <select
                     value={formData.department_id}
                     onChange={(e) => handleInputChange('department_id', e.target.value)}
-                    className="w-full text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200"
+                    className="w-full text-xs font-semibold px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-800 dark:text-slate-200 focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer"
                   >
+                    <option value="">{language === 'km' ? '-- ជ្រើសរើសនាយកដ្ឋាន --' : '-- Select Department --'}</option>
                     {departments.map((dept) => (
                       <option key={dept.id} value={dept.id}>
                         {formatLocalizedText(dept.name, language)}
                       </option>
                     ))}
+                    {formData.department_id && !departments.some((d) => d.id === formData.department_id || d.name === formData.department_id) && (
+                      <option value={formData.department_id}>
+                        {formatLocalizedText(formData.department_id, language)}
+                      </option>
+                    )}
                   </select>
                 </div>
               </div>

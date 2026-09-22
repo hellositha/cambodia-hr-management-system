@@ -916,14 +916,16 @@ export default function GlobalModals() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-slate-700 mb-1">
-                        {language === 'km' ? 'ផ្នែក/នាយកដ្ឋាន (Department) *' : 'Department *'}
+                      <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center justify-between">
+                        <span>{language === 'km' ? 'ផ្នែក / នាយកដ្ឋាន' : 'Department'} *</span>
+                        <Building2 className="w-3.5 h-3.5 text-indigo-500" />
                       </label>
                       <select
                         value={empForm.department_id}
                         onChange={(e) => setEmpForm({ ...empForm, department_id: e.target.value })}
-                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold focus:bg-white focus:ring-2 focus:ring-indigo-500 focus:outline-hidden cursor-pointer"
                       >
+                        <option value="">{language === 'km' ? '-- ជ្រើសរើសនាយកដ្ឋាន --' : '-- Select Department --'}</option>
                         {departments.map((d) => (
                           <option key={d.id} value={d.id}>
                             {formatLocalizedText(d.name, language)}

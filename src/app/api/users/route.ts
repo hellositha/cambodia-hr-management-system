@@ -93,6 +93,13 @@ export async function POST(request: Request) {
       createdAt
     );
 
+    if (employee_id && department_name) {
+      const dept = db.prepare('SELECT id FROM departments WHERE name = ? OR id = ?').get(department_name, department_name) as any;
+      if (dept) {
+        db.prepare('UPDATE employees SET department_id = ? WHERE id = ?').run(dept.id, employee_id);
+      }
+    }
+
     const newUser = db.prepare('SELECT * FROM users WHERE id = ?').get(id);
     return NextResponse.json(newUser, { status: 201 });
   } catch (error) {

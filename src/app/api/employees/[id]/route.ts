@@ -160,6 +160,14 @@ export async function PUT(
     const hasManager = manager_id !== undefined;
     const finalManagerId = (manager_id && typeof manager_id === 'string' && manager_id.trim()) ? manager_id.trim() : null;
 
+    let finalDeptId = department_id;
+    if (department_id) {
+      const deptRow = db.prepare('SELECT id, name FROM departments WHERE id = ? OR name = ?').get(department_id, department_id) as any;
+      if (deptRow) {
+        finalDeptId = deptRow.id;
+      }
+    }
+
     db.prepare(`
       UPDATE employees SET
         first_name = COALESCE(?, first_name),
@@ -215,7 +223,7 @@ export async function PUT(
       finalEmail,
       phone !== undefined ? phone : null,
       role !== undefined ? role : null,
-      department_id !== undefined ? department_id : null,
+      finalDeptId !== undefined ? finalDeptId : null,
       employment_type !== undefined ? employment_type : null,
       status !== undefined ? status : null,
       salary !== undefined ? Number(salary) : null,
@@ -284,6 +292,14 @@ export async function PUT(
 
     if (!updated) {
       return NextResponse.json({ error: 'Employee not found' }, { status: 404 });
+    }
+
+    // Keep corresponding user account strictly in sync with employee
+    if (updated.department_name) {
+      db.prepare('UPDATE users SET department_name = ? WHERE employee_id = ?').run(updated.department_name, id);
+    }
+    if (first_name !== undefined || last_name !== undefined) {
+      db.prepare('UPDATE users SET name = ? WHERE employee_id = ?').run(`${updated.first_name} ${updated.last_name}`.trim(), id);
     }
 
     return NextResponse.json({

@@ -123,6 +123,14 @@ export async function POST(request: Request) {
     // Only use uploaded photo, no default avatar
     const finalAvatar = avatar && typeof avatar === 'string' && avatar.trim() ? avatar.trim() : '';
 
+    let finalDeptId = department_id;
+    if (department_id) {
+      const deptRow = db.prepare('SELECT id, name FROM departments WHERE id = ? OR name = ?').get(department_id, department_id) as any;
+      if (deptRow) {
+        finalDeptId = deptRow.id;
+      }
+    }
+
     const id = customId && customId.trim() ? customId.trim() : `emp-${Date.now()}`;
     const createdAt = new Date().toISOString();
 
@@ -161,7 +169,7 @@ export async function POST(request: Request) {
       finalEmail,
       phone,
       role,
-      department_id,
+      finalDeptId,
       employment_type,
       employee_type,
       status,
@@ -240,16 +248,21 @@ export async function POST(request: Request) {
       `).run(
         `usr-${Date.now().toString().slice(-6)}`,
         calculatedUsername,
-        `${first_name} ${last_name}`,
+        `${first_name} ${last_name}`.trim(),
         finalEmail,
         userRole,
         id,
-        newEmployee?.department_name || 'General',
+        newEmployee?.department_name || 'ទូទៅ (General)',
         finalAvatar,
         createdAt.split('T')[0]
       );
     } else {
-      db.prepare('UPDATE users SET username = ? WHERE employee_id = ?').run(calculatedUsername, id);
+      db.prepare('UPDATE users SET username = ?, department_name = ?, name = ? WHERE employee_id = ?').run(
+        calculatedUsername,
+        newEmployee?.department_name || 'ទូទៅ (General)',
+        `${first_name} ${last_name}`.trim(),
+        id
+      );
     }
 
     return NextResponse.json(newEmployee, { status: 201 });

@@ -18,6 +18,7 @@ import {
   MapPin,
   Briefcase,
   Building,
+  Building2,
   Calendar,
   DollarSign,
   ChevronRight,
@@ -416,8 +417,9 @@ export default function EmployeesPage() {
                     ></span>
                   </div>
                   <div className="flex flex-col items-end">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
-                      {formatLocalizedText(emp.department_name || 'Operations', language)}
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700">
+                      <Building2 className="w-3 h-3 text-slate-400" />
+                      {formatLocalizedText(emp.department_name || (language === 'km' ? 'ទូទៅ (General)' : 'General'), language)}
                     </span>
                     <span className="text-[10px] text-slate-400 mt-1">{formatLocalizedText(emp.employment_type, language)}</span>
                   </div>
@@ -530,8 +532,11 @@ export default function EmployeesPage() {
                         <div className="text-[11px] text-slate-400">{formatLocalizedText(emp.role, language)}</div>
                       </div>
                     </td>
-                    <td className="px-5 py-3 font-medium text-slate-700">
-                      {formatLocalizedText(emp.department_name, language)}
+                    <td className="px-5 py-3">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-700">
+                        <Building2 className="w-3 h-3 text-slate-400" />
+                        {formatLocalizedText(emp.department_name || (language === 'km' ? 'ទូទៅ (General)' : 'General'), language)}
+                      </span>
                     </td>
                     <td className="px-5 py-3">
                       <span
@@ -642,7 +647,10 @@ export default function EmployeesPage() {
                     </div>
                     <p className="text-xs text-indigo-300">{formatLocalizedText(drawerDetails.employee.role, language)}</p>
                     <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-2">
-                      <span>{formatLocalizedText(drawerDetails.employee.department_name, language)}</span> &bull;{' '}
+                      <span className="inline-flex items-center gap-1">
+                        <Building2 className="w-3 h-3 text-indigo-400" />
+                        {formatLocalizedText(drawerDetails.employee.department_name || (language === 'km' ? 'ទូទៅ (General)' : 'General'), language)}
+                      </span> &bull;{' '}
                       <span>{formatLocalizedText(drawerDetails.employee.location, language)}</span>
                     </p>
                   </div>
@@ -1026,8 +1034,9 @@ export default function EmployeesPage() {
                             <span className="text-[10px] text-slate-400 block uppercase font-semibold">
                               {language === 'km' ? 'ដេប៉ាតឺម៉ង់' : 'Department'}
                             </span>
-                            <span className="font-bold text-slate-800">
-                              {formatLocalizedText(drawerDetails.employee.department_name, language)}
+                            <span className="font-bold text-slate-800 flex items-center gap-1.5 mt-0.5">
+                              <Building2 className="w-3.5 h-3.5 text-indigo-500" />
+                              {formatLocalizedText(drawerDetails.employee.department_name || (language === 'km' ? 'ទូទៅ (General)' : 'General'), language)}
                             </span>
                           </div>
                           <div>
