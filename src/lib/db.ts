@@ -9,6 +9,7 @@ import {
   INITIAL_ANNOUNCEMENTS,
   INITIAL_PERFORMANCE_REVIEWS,
 } from './seed-data';
+import { CompanySettings, DEFAULT_COMPANY_SETTINGS } from './types';
 
 const DB_DIR = path.join(process.cwd(), 'data');
 if (!fs.existsSync(DB_DIR)) {
@@ -928,3 +929,42 @@ export function seedDutyRoster(_db: Database.Database) {
 export function seedOvertimeRequests(_db: Database.Database) {
   // Demo auto-seeding removed for production
 }
+
+export function getCompanySettings(): CompanySettings {
+  const db = getDb();
+  try {
+    const row = db.prepare('SELECT value FROM system_meta WHERE key = ?').get('company_settings') as { value: string } | undefined;
+    if (row && row.value) {
+      const parsed = JSON.parse(row.value);
+      return { ...DEFAULT_COMPANY_SETTINGS, ...parsed };
+    }
+  } catch (err) {
+    console.error('Error reading company_settings from system_meta:', err);
+  }
+  return DEFAULT_COMPANY_SETTINGS;
+}
+
+export function updateCompanySettings(settings: Partial<CompanySettings>): CompanySettings {
+  const db = getDb();
+  const current = getCompanySettings();
+  const updated: CompanySettings = {
+    ...current,
+    ...settings,
+  };
+  db.prepare(`
+    INSERT INTO system_meta (key, value)
+    VALUES ('company_settings', ?)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value
+  `).run(JSON.stringify(updated));
+
+  if (updated.name) {
+    db.prepare(`
+      INSERT INTO system_meta (key, value)
+      VALUES ('company_name', ?)
+      ON CONFLICT(key) DO UPDATE SET value = excluded.value
+    `).run(updated.name);
+  }
+
+  return updated;
+}
+

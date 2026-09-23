@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 
 export default function PayrollPage() {
-  const { openModal, showToast, triggerRefresh, refreshKey, language } = useApp();
+  const { openModal, showToast, triggerRefresh, refreshKey, language, companySettings } = useApp();
 
   const currentMonthPeriod = useMemo(() => {
     return new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
@@ -364,10 +364,10 @@ export default function PayrollPage() {
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-slate-900 font-khmer">
-                      {language === 'km' ? 'HESTRA HRM កម្ពុជា (HESTRA HRM Cambodia Co., Ltd.)' : 'HESTRA HRM Cambodia Co., Ltd.'}
+                      {companySettings?.name || (language === 'km' ? 'HESTRA HRM កម្ពុជា (HESTRA HRM Cambodia Co., Ltd.)' : 'HESTRA HRM Cambodia Co., Ltd.')}
                     </h2>
                     <p className="text-[11px] text-slate-500 font-khmer">
-                      {language === 'km' ? 'អគារ Exchange Square, មហាវិថីព្រះនរោត្តម, រាជធានីភ្នំពេញ' : 'Exchange Square Building, Norodom Blvd, Phnom Penh'}
+                      {companySettings?.address || (language === 'km' ? 'អគារ Exchange Square, មហាវិថីព្រះនរោត្តម, រាជធានីភ្នំពេញ' : 'Exchange Square Building, Norodom Blvd, Phnom Penh')}
                     </p>
                     <p className="text-[11px] text-slate-500 font-khmer">
                       {language === 'km' ? 'លេខសារពើពន្ធ TIN: K009-90218928 • លេខបញ្ជិកា ប.ស.ស (NSSF): 1029482' : 'Tax TIN: K009-90218928 • NSSF Reg: 1029482'}

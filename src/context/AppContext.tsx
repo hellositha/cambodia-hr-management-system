@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Language, TRANSLATIONS, formatLocalizedText } from '@/lib/translations';
-import { Theme } from '@/lib/types';
+import { Theme, CompanySettings, DEFAULT_COMPANY_SETTINGS } from '@/lib/types';
 
 export interface Persona {
   id: string;
@@ -56,6 +56,8 @@ interface AppContextType {
   toggleLanguage: () => void;
   theme: Theme;
   setTheme: (theme: Theme) => void;
+  companySettings: CompanySettings;
+  updateCompanySettingsContext: (newSettings: Partial<CompanySettings>) => Promise<boolean>;
   t: (key: keyof typeof TRANSLATIONS['km']) => string;
 }
 
@@ -72,6 +74,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const [language, setLanguageState] = useState<Language>('en');
   const [theme, setThemeState] = useState<Theme>('nordic');
+  const [companySettings, setCompanySettings] = useState<CompanySettings>(DEFAULT_COMPANY_SETTINGS);
 
   const showToast = useCallback(
     (message: string, type: 'success' | 'error' | 'info' = 'success') => {
@@ -95,9 +98,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (savedTheme === 'nordic' || savedTheme === 'midnight' || savedTheme === 'indigo') {
         setThemeState(savedTheme);
       }
+      const cachedComp = localStorage.getItem('hestra_company_settings');
+      if (cachedComp) {
+        setCompanySettings((prev) => ({ ...prev, ...JSON.parse(cachedComp) }));
+      }
     } catch {
       // localStorage may fail in SSR or restricted environments
     }
+
+    fetch('/api/settings')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.name) {
+          setCompanySettings(data);
+          try {
+            localStorage.setItem('hestra_company_settings', JSON.stringify(data));
+          } catch {}
+        }
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -328,6 +347,41 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const toggleMobileMenu = () => setMobileMenuOpen((v) => !v);
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
+  const updateCompanySettingsContext = useCallback(
+    async (newSettings: Partial<CompanySettings>): Promise<boolean> => {
+      try {
+        const merged = { ...companySettings, ...newSettings };
+        setCompanySettings(merged);
+        try {
+          localStorage.setItem('hestra_company_settings', JSON.stringify(merged));
+        } catch {}
+
+        const res = await fetch('/api/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newSettings),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.settings) {
+            setCompanySettings(data.settings);
+            try {
+              localStorage.setItem('hestra_company_settings', JSON.stringify(data.settings));
+            } catch {}
+          }
+          triggerRefresh();
+          return true;
+        }
+        return false;
+      } catch (err) {
+        console.error('Error updating company settings:', err);
+        return false;
+      }
+    },
+    [companySettings, triggerRefresh]
+  );
+
   return (
     <AppContext.Provider
       value={{
@@ -351,6 +405,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         mobileMenuOpen,
         toggleMobileMenu,
         closeMobileMenu,
+        companySettings,
+        updateCompanySettingsContext,
         language,
         setLanguage,
         toggleLanguage,

@@ -432,3 +432,22 @@ export interface ApprovalRequest {
   updated_at: string;
 }
 
+export interface CompanySettings {
+  name: string;
+  address: string;
+  currency: string;
+  workHours: string;
+  timezone: string;
+  fiscalYearStart: string;
+}
+
+export const DEFAULT_COMPANY_SETTINGS: CompanySettings = {
+  name: 'HESTRA HRM Technologies Inc.',
+  address: 'Exchange Square, Norodom Blvd, Phnom Penh, Cambodia',
+  currency: 'USD ($) & KHR (៛)',
+  workHours: '8.0',
+  timezone: 'Asia/Phnom_Penh (GMT+7)',
+  fiscalYearStart: 'January 1st',
+};
+
+

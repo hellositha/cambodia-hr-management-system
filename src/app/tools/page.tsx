@@ -183,7 +183,7 @@ function ToolsContent() {
   const searchParams = useSearchParams();
   const initialTab = (searchParams.get('tab') as ToolTab) || 'letters';
 
-  const { language, t, showToast } = useApp();
+  const { language, t, showToast, companySettings } = useApp();
   const [activeTab, setActiveTab] = useState<ToolTab>(initialTab);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [copied, setCopied] = useState(false);
@@ -731,11 +731,13 @@ HESTRA HRM Cambodia Co., Ltd.
                     <img src="/hestra-logo.svg" alt="HESTRA HRM" className="w-full h-full object-contain" />
                   </div>
                   <div>
-                    <h2 className="text-base font-bold text-slate-900 font-khmer">HESTRA HRM CAMBODIA CO., LTD.</h2>
+                    <h2 className="text-base font-bold text-slate-900 font-khmer">
+                      {companySettings?.name || 'HESTRA HRM CAMBODIA CO., LTD.'}
+                    </h2>
                     <p className="text-[11px] text-slate-500 font-khmer">
-                      {language === 'km' 
+                      {companySettings?.address || (language === 'km' 
                         ? 'អគារ Exchange Square, មហាវិថីព្រះនរោត្តម, រាជធានីភ្នំពេញ' 
-                        : 'Exchange Square Building, Preah Norodom Blvd, Phnom Penh, Cambodia'}
+                        : 'Exchange Square Building, Preah Norodom Blvd, Phnom Penh, Cambodia')}
                     </p>
                     <p className="text-[10px] text-slate-400 font-khmer">TIN: K009-90218928 &bull; NSSF: 1029482 &bull; Email: hr@hestra.kh</p>
                   </div>
