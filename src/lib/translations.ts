@@ -51,6 +51,11 @@ export const TRANSLATIONS = {
     nav_reports: 'របាយការណ៍ & ស្ថិតិ HR',
     nav_users: 'គ្រប់គ្រងគណនី',
     nav_settings: 'ការកំណត់ប្រព័ន្ធ',
+    nav_sec_overview: 'ទិដ្ឋភាពទូទៅ',
+    nav_sec_workforce: 'កម្លាំងពលកម្ម',
+    nav_sec_attendance: 'វត្តមាន & ម៉ោងការងារ',
+    nav_sec_compensation: 'បៀវត្សរ៍ & ជ្រើសរើស',
+    nav_sec_admin: 'ប្រព័ន្ធ & របាយការណ៍',
 
     // Tools & Calculators
     action_hr_letter: 'បង្កើតលិខិតផ្លូវការ',
@@ -243,6 +248,11 @@ export const TRANSLATIONS = {
     nav_reports: 'Reports & Analytics',
     nav_users: 'User Management',
     nav_settings: 'System Settings',
+    nav_sec_overview: 'Overview',
+    nav_sec_workforce: 'Workforce',
+    nav_sec_attendance: 'Time & Attendance',
+    nav_sec_compensation: 'Compensation & ATS',
+    nav_sec_admin: 'Administration',
 
     // Tools & Calculators
     action_hr_letter: 'Generate HR Letter',

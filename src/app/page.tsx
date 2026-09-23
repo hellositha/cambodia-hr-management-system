@@ -113,22 +113,22 @@ export default function StyledDashboardPage() {
   // Theme-specific styling tokens
   const themeClasses = {
     midnight: {
-      wrapper: 'bg-zinc-950 text-zinc-100 min-h-screen p-2 sm:p-4 rounded-3xl border border-zinc-900',
-      hero: 'bg-gradient-to-br from-zinc-900 via-zinc-900/90 to-zinc-950 border border-zinc-800 text-white shadow-2xl',
-      card: 'bg-zinc-900/80 border border-zinc-800/80 text-zinc-200 hover:border-zinc-700 shadow-sm',
+      wrapper: 'space-y-6 text-zinc-100',
+      hero: 'relative overflow-hidden rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-zinc-900 via-zinc-900/95 to-zinc-950 border border-zinc-800 text-white shadow-2xl',
+      card: 'bg-zinc-900/80 border border-zinc-800/80 text-zinc-200 hover:border-zinc-700 shadow-sm hover-lift',
       cardHighlight: 'bg-zinc-900/90 border border-indigo-500/30 text-zinc-100',
       textMuted: 'text-zinc-400',
-      subtleBox: 'bg-zinc-900 border border-zinc-800',
+      subtleBox: 'bg-zinc-900/90 border border-zinc-800',
       badge: 'bg-zinc-800 text-zinc-300 border border-zinc-700',
       accentText: 'text-indigo-400',
       pillActive: 'bg-indigo-600 text-white shadow-sm',
       pillInactive: 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800',
     },
     nordic: {
-      wrapper: 'bg-slate-50/70 text-slate-900 min-h-screen p-2 sm:p-5 rounded-3xl border border-slate-200/80',
-      hero: 'bg-gradient-to-br from-indigo-50/70 via-white to-blue-50/30 border border-slate-200/90 text-slate-900 shadow-sm shadow-slate-200/60',
-      card: 'bg-white border border-slate-200/80 text-slate-800 hover:border-indigo-300 shadow-xs hover:shadow-md transition-all',
-      cardHighlight: 'bg-indigo-50/40 border border-indigo-200/70 text-slate-900 shadow-2xs',
+      wrapper: 'space-y-6 text-slate-900',
+      hero: 'relative overflow-hidden rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border border-slate-800/90 text-white shadow-xl shadow-slate-900/10',
+      card: 'bg-white border border-slate-200/80 text-slate-800 hover:border-indigo-400/80 shadow-xs hover:shadow-lg hover-lift transition-all',
+      cardHighlight: 'bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 border border-indigo-200/80 text-slate-900 shadow-xs',
       textMuted: 'text-slate-500',
       subtleBox: 'bg-slate-50/90 border border-slate-200/70',
       badge: 'bg-slate-100 text-slate-700 border border-slate-200',
@@ -137,9 +137,9 @@ export default function StyledDashboardPage() {
       pillInactive: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
     },
     indigo: {
-      wrapper: 'bg-slate-900 text-slate-100 min-h-screen p-2 sm:p-4 rounded-3xl border border-indigo-950',
-      hero: 'bg-gradient-to-r from-indigo-900 via-indigo-950 to-purple-950 border border-indigo-800/60 text-white shadow-2xl shadow-indigo-950/40',
-      card: 'bg-slate-800/80 border border-slate-700/70 text-slate-200 hover:border-indigo-500/40 shadow-sm',
+      wrapper: 'space-y-6 text-slate-100',
+      hero: 'relative overflow-hidden rounded-3xl p-6 sm:p-8 bg-gradient-to-r from-indigo-950 via-slate-900 to-purple-950 border border-indigo-800/60 text-white shadow-2xl shadow-indigo-950/40',
+      card: 'bg-slate-900/80 border border-slate-800/80 text-slate-200 hover:border-indigo-500/40 shadow-sm hover-lift',
       cardHighlight: 'bg-indigo-950/60 border border-indigo-500/40 text-white',
       textMuted: 'text-slate-400',
       subtleBox: 'bg-slate-800/90 border border-slate-700',
@@ -160,42 +160,42 @@ export default function StyledDashboardPage() {
       {/* 1. HERO BENTO BANNER */}
       <div className={`relative overflow-hidden rounded-3xl p-6 sm:p-8 transition-all ${themeClasses.hero}`}>
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-3 max-w-2xl">
+          <div className="space-y-3.5 max-w-2xl">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-600">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 border border-emerald-500/40 text-emerald-300">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span>{t('all_systems_operational')}</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-mono bg-indigo-500/10 border border-indigo-500/30 text-indigo-600">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold font-mono bg-indigo-500/20 border border-indigo-500/40 text-indigo-300">
                 <Clock size={13} />
                 <span>{t('cambodia_time')}: {currentTime || '08:30:00 AM'}</span>
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-purple-500/10 border border-purple-500/30 text-purple-600">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-purple-500/20 border border-purple-500/40 text-purple-300">
                 <Sparkles size={12} />
                 <span>{t('q4_fiscal')}</span>
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-4xl font-black tracking-tight">
+            <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
               {greeting}, {formatLocalizedText(currentPersona.name, language)}!
             </h1>
 
-            <p className={`text-xs sm:text-sm leading-relaxed max-w-xl ${themeClasses.textMuted}`}>
+            <p className="text-xs sm:text-sm leading-relaxed max-w-xl text-slate-300">
               {language === 'km' ? (
                 <>
                   កំពុងដំណើរការក្នុងតួនាទី{' '}
-                  <strong className="text-current font-bold">{currentPersona.role}</strong> ({formatLocalizedText(currentPersona.title || '', language)})។
+                  <strong className="text-white font-bold">{currentPersona.role}</strong> ({formatLocalizedText(currentPersona.title || '', language)})។
                   {stats.totalEmployees > 0 ? (
-                    <> បុគ្គលិកសរុបមានចំនួន <strong className="text-current">{stats.totalEmployees} នាក់</strong> ជាមួយនឹង <span className="text-emerald-600 font-bold">អត្រាវត្តមាន {stats.attendanceToday.percentage}%</span> ថ្ងៃនេះ។</>
+                    <> បុគ្គលិកសរុបមានចំនួន <strong className="text-white">{stats.totalEmployees} នាក់</strong> ជាមួយនឹង <span className="text-emerald-400 font-bold">អត្រាវត្តមាន {stats.attendanceToday.percentage}%</span> ថ្ងៃនេះ។</>
                   ) : (
                     <> បញ្ជីបុគ្គលិកបច្ចុប្បន្នទំនេរ។ លោកអ្នកអាចចាប់ផ្តើមចុះឈ្មោះបុគ្គលិកដំបូង។</>
                   )}
                 </>
               ) : (
                 <>
-                  Operating in <strong className="text-current font-bold">{currentPersona.role}</strong> role ({formatLocalizedText(currentPersona.title || '', language)}).
+                  Operating in <strong className="text-white font-bold">{currentPersona.role}</strong> role ({formatLocalizedText(currentPersona.title || '', language)}).
                   {stats.totalEmployees > 0 ? (
-                    <> Total active workforce of <strong className="text-current">{stats.totalEmployees} colleagues</strong> with <span className="text-emerald-600 font-bold">{stats.attendanceToday.percentage}% attendance</span> today.</>
+                    <> Total active workforce of <strong className="text-white">{stats.totalEmployees} colleagues</strong> with <span className="text-emerald-400 font-bold">{stats.attendanceToday.percentage}% attendance</span> today.</>
                   ) : (
                     <> Workforce directory is currently empty. You can start by onboarding your team members.</>
                   )}
@@ -214,9 +214,7 @@ export default function StyledDashboardPage() {
             </button>
             <button
               onClick={() => openModal('request-leave')}
-              className={`px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                theme === 'nordic' ? 'bg-slate-100 hover:bg-slate-200 text-slate-800' : 'bg-white/10 hover:bg-white/20 text-white'
-              }`}
+              className="px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer bg-white/10 hover:bg-white/20 text-white border border-white/15"
             >
               <CalendarCheck size={15} /> {t('request_leave')}
             </button>
@@ -230,7 +228,7 @@ export default function StyledDashboardPage() {
         </div>
 
         {/* Ambient Subtle Gradients */}
-        <div className="absolute -bottom-16 -right-16 w-80 h-80 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute -bottom-16 -right-16 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
       </div>
 
       {/* ZERO EMPLOYEES ONBOARDING PROMPT (If empty) */}
@@ -338,13 +336,13 @@ export default function StyledDashboardPage() {
         {/* Card 1: Total Headcount */}
         <Link
           href="/employees"
-          className={`group rounded-2xl p-5 transition-all duration-200 flex flex-col justify-between ${themeClasses.card}`}
+          className={`group rounded-2xl p-5 transition-all duration-200 flex flex-col justify-between relative overflow-hidden before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-blue-500 before:to-indigo-500 ${themeClasses.card}`}
         >
           <div className="flex items-center justify-between">
-            <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-500 group-hover:scale-110 transition-transform">
+            <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 group-hover:scale-110 transition-transform">
               <Users size={20} />
             </div>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center gap-1">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 border border-blue-500/20 flex items-center gap-1">
               <TrendingUp size={11} /> {t('nav_employees')}
             </span>
           </div>
@@ -370,13 +368,13 @@ export default function StyledDashboardPage() {
         {/* Card 2: Attendance Rate */}
         <Link
           href="/attendance"
-          className={`group rounded-2xl p-5 transition-all duration-200 flex flex-col justify-between ${themeClasses.card}`}
+          className={`group rounded-2xl p-5 transition-all duration-200 flex flex-col justify-between relative overflow-hidden before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-emerald-500 before:to-teal-500 ${themeClasses.card}`}
         >
           <div className="flex items-center justify-between">
-            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-500 group-hover:scale-110 transition-transform">
+            <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 group-hover:scale-110 transition-transform">
               <Clock size={20} />
             </div>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
               {language === 'km' ? 'វត្តមានជាក់ស្តែង' : 'Real-time telemetry'}
             </span>
           </div>
@@ -402,13 +400,13 @@ export default function StyledDashboardPage() {
         {/* Card 3: Pending Approvals */}
         <Link
           href="/leaves"
-          className={`group rounded-2xl p-5 transition-all duration-200 flex flex-col justify-between ${themeClasses.card}`}
+          className={`group rounded-2xl p-5 transition-all duration-200 flex flex-col justify-between relative overflow-hidden before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-amber-500 before:to-orange-500 ${themeClasses.card}`}
         >
           <div className="flex items-center justify-between">
-            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500 group-hover:scale-110 transition-transform">
+            <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-600 group-hover:scale-110 transition-transform">
               <CalendarCheck size={20} />
             </div>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20">
               {language === 'km' ? 'រង់ចាំអនុម័ត' : 'Awaiting Review'}
             </span>
           </div>
@@ -434,13 +432,13 @@ export default function StyledDashboardPage() {
         {/* Card 4: Monthly Payroll */}
         <Link
           href="/payroll"
-          className={`group rounded-2xl p-5 transition-all duration-200 flex flex-col justify-between ${themeClasses.card}`}
+          className={`group rounded-2xl p-5 transition-all duration-200 flex flex-col justify-between relative overflow-hidden before:absolute before:top-0 before:left-0 before:right-0 before:h-1 before:bg-gradient-to-r before:from-purple-500 before:to-pink-500 ${themeClasses.card}`}
         >
           <div className="flex items-center justify-between">
-            <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-500 group-hover:scale-110 transition-transform">
+            <div className="p-2.5 rounded-xl bg-purple-500/10 text-purple-600 group-hover:scale-110 transition-transform">
               <CreditCard size={20} />
             </div>
-            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-600 border border-purple-500/20">
               {language === 'km' ? 'ខែតុលា ២០២៦' : 'October 2026'}
             </span>
           </div>

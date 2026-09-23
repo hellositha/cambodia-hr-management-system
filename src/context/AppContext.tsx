@@ -48,6 +48,9 @@ interface AppContextType {
   triggerRefresh: () => void;
   sidebarCollapsed: boolean;
   toggleSidebar: () => void;
+  mobileMenuOpen: boolean;
+  toggleMobileMenu: () => void;
+  closeMobileMenu: () => void;
   language: Language;
   setLanguage: (lang: Language) => void;
   toggleLanguage: () => void;
@@ -66,6 +69,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState<number>(0);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
   const [language, setLanguageState] = useState<Language>('en');
   const [theme, setThemeState] = useState<Theme>('nordic');
 
@@ -321,6 +325,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const openModal = (modalName: string) => setActiveModal(modalName);
   const closeModal = () => setActiveModal(null);
   const toggleSidebar = () => setSidebarCollapsed((v) => !v);
+  const toggleMobileMenu = () => setMobileMenuOpen((v) => !v);
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
     <AppContext.Provider
@@ -342,6 +348,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         triggerRefresh,
         sidebarCollapsed,
         toggleSidebar,
+        mobileMenuOpen,
+        toggleMobileMenu,
+        closeMobileMenu,
         language,
         setLanguage,
         toggleLanguage,
