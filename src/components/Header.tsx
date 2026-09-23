@@ -33,6 +33,9 @@ import {
   Menu,
   ChevronRight,
   Shield,
+  CheckCheck,
+  BellOff,
+  Trash2,
 } from 'lucide-react';
 import { formatLocalizedText } from '@/lib/translations';
 
@@ -52,12 +55,19 @@ export default function Header() {
     theme,
     setTheme,
     logout,
+    notifications,
+    unreadNotificationsCount,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
+    deleteNotificationItem,
+    clearAllNotificationsContext,
     t,
   } = useApp();
 
   const [personaOpen, setPersonaOpen] = useState(false);
   const [quickActionOpen, setQuickActionOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [notifFilter, setNotifFilter] = useState<'all' | 'unread'>('all');
   const [langOpen, setLangOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -138,35 +148,82 @@ export default function Header() {
 
   const pageInfo = getPageInfo();
 
-  const notifications = [
-    {
-      id: 1,
-      title: language === 'km' ? 'សំណើសុំច្បាប់ ៣ កំពុងរង់ចាំ (3 Leave Requests)' : '3 Leave Requests Pending',
-      time: language === 'km' ? '10m មុន' : '10m ago',
-      unread: true,
-      href: '/leaves',
-      icon: CalendarPlus,
-      color: 'text-amber-600 bg-amber-50',
-    },
-    {
-      id: 2,
-      title: language === 'km' ? 'បេក្ខជនដល់វគ្គផ្តល់ការងារ: ឌី វុទ្ធី (Offer Stage)' : 'Candidate reached Offer stage: Dy Vuthey',
-      time: language === 'km' ? '1h មុន' : '1h ago',
-      unread: true,
-      href: '/recruitment',
-      icon: Briefcase,
-      color: 'text-indigo-600 bg-indigo-50',
-    },
-    {
-      id: 3,
-      title: language === 'km' ? 'ព្រាងបញ្ជីប្រាក់បៀវត្សរ៍ខែនេះរួចរាល់ (Payroll Ready)' : 'Monthly payroll draft is ready',
-      time: language === 'km' ? '3h មុន' : '3h ago',
-      unread: false,
-      href: '/payroll',
-      icon: DollarSign,
-      color: 'text-emerald-600 bg-emerald-50',
-    },
-  ];
+  function formatTimeAgo(isoString: string, lang: 'en' | 'km'): string {
+    if (!isoString) return '';
+    try {
+      const now = Date.now();
+      const date = new Date(isoString).getTime();
+      const diffSec = Math.floor((now - date) / 1000);
+
+      if (diffSec < 60) {
+        return lang === 'km' ? 'ទើបតែឥឡូវ' : 'Just now';
+      }
+      const diffMin = Math.floor(diffSec / 60);
+      if (diffMin < 60) {
+        return lang === 'km' ? `${diffMin} នាទីមុន` : `${diffMin}m ago`;
+      }
+      const diffHour = Math.floor(diffMin / 60);
+      if (diffHour < 24) {
+        return lang === 'km' ? `${diffHour} ម៉ោងមុន` : `${diffHour}h ago`;
+      }
+      const diffDay = Math.floor(diffHour / 24);
+      if (diffDay < 7) {
+        return lang === 'km' ? `${diffDay} ថ្ងៃមុន` : `${diffDay}d ago`;
+      }
+      return new Date(isoString).toLocaleDateString(lang === 'km' ? 'km-KH' : 'en-US', {
+        month: 'short',
+        day: 'numeric',
+      });
+    } catch {
+      return '';
+    }
+  }
+
+  function getNotificationIcon(type: string) {
+    switch (type) {
+      case 'request':
+        return {
+          icon: FileText,
+          color: 'text-amber-600 bg-amber-50',
+        };
+      case 'leave':
+        return {
+          icon: CalendarPlus,
+          color: 'text-blue-600 bg-blue-50',
+        };
+      case 'overtime':
+        return {
+          icon: Clock,
+          color: 'text-sky-600 bg-sky-50',
+        };
+      case 'recruitment':
+        return {
+          icon: Briefcase,
+          color: 'text-purple-600 bg-purple-50',
+        };
+      case 'payroll':
+        return {
+          icon: DollarSign,
+          color: 'text-emerald-600 bg-emerald-50',
+        };
+      case 'announcement':
+        return {
+          icon: Megaphone,
+          color: 'text-pink-600 bg-pink-50',
+        };
+      case 'system':
+      default:
+        return {
+          icon: Sparkles,
+          color: 'text-indigo-600 bg-indigo-50',
+        };
+    }
+  }
+
+  const displayedNotifications =
+    notifFilter === 'unread'
+      ? notifications.filter((n) => !n.is_read)
+      : notifications;
 
   return (
     <header
@@ -428,45 +485,174 @@ export default function Header() {
           <button
             onClick={() => setNotificationsOpen(!notificationsOpen)}
             className="p-2 rounded-xl border border-slate-200/80 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 relative transition-colors shadow-2xs cursor-pointer"
+            title={language === 'km' ? 'ការជូនដំណឹង' : 'Notifications'}
           >
             <Bell size={16} />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white"></span>
+            {unreadNotificationsCount > 0 && (
+              <>
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-rose-400 animate-ping opacity-30"></span>
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white shadow-xs">
+                  {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
+                </span>
+              </>
+            )}
           </button>
 
           {notificationsOpen && (
-            <div className="absolute right-0 mt-2 w-80 glass-dropdown rounded-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-              <div className="flex items-center justify-between px-4 py-2 border-b border-slate-100">
-                <span className="font-bold text-xs text-slate-900">
-                  {language === 'km' ? 'ការជូនដំណឹង (Notifications)' : 'Notifications'}
-                </span>
-                <span className="text-[10px] font-semibold text-indigo-600 hover:underline cursor-pointer">
-                  {language === 'km' ? 'សម្គាល់ថាបានអានទាំងអស់' : 'Mark all as read'}
-                </span>
+            <div className="absolute right-0 mt-2 w-84 sm:w-96 glass-dropdown rounded-2xl shadow-xl border border-slate-200/80 p-0 z-50 animate-in fade-in slide-in-from-top-2 duration-150 overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50/60">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-xs text-slate-900">
+                    {language === 'km' ? 'ការជូនដំណឹង (Notifications)' : 'Notifications'}
+                  </span>
+                  {unreadNotificationsCount > 0 && (
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/60">
+                      {unreadNotificationsCount} {language === 'km' ? 'ថ្មី' : 'new'}
+                    </span>
+                  )}
+                </div>
+                {unreadNotificationsCount > 0 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      markAllNotificationsAsRead();
+                    }}
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 transition-colors cursor-pointer"
+                  >
+                    <CheckCheck size={13} />
+                    <span>{t('mark_all_read')}</span>
+                  </button>
+                )}
               </div>
-              <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto">
-                {notifications.map((n) => {
-                  const Icon = n.icon;
-                  return (
-                    <Link
-                      key={n.id}
-                      href={n.href}
-                      onClick={() => setNotificationsOpen(false)}
-                      className="flex items-start gap-3 px-4 py-2.5 hover:bg-slate-100/60 transition-colors"
-                    >
-                      <div className={`p-2 rounded-xl shrink-0 ${n.color}`}>
-                        <Icon size={15} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-slate-800 truncate">{n.title}</p>
-                        <p className="text-[10px] text-slate-400 mt-0.5">{n.time}</p>
-                      </div>
-                      {n.unread && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-indigo-600 mt-1.5 shrink-0"></span>
-                      )}
-                    </Link>
-                  );
-                })}
+
+              {/* Filter Tabs */}
+              <div className="flex items-center gap-1 px-4 py-1.5 border-b border-slate-100/80 bg-white">
+                <button
+                  onClick={() => setNotifFilter('all')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                    notifFilter === 'all'
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
+                  }`}
+                >
+                  {t('all_notifications')} ({notifications.length})
+                </button>
+                <button
+                  onClick={() => setNotifFilter('unread')}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                    notifFilter === 'unread'
+                      ? 'bg-indigo-600 text-white shadow-xs'
+                      : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
+                  }`}
+                >
+                  {t('unread_notifications')} ({unreadNotificationsCount})
+                </button>
               </div>
+
+              {/* List */}
+              <div className="divide-y divide-slate-100/80 max-h-80 overflow-y-auto">
+                {displayedNotifications.length === 0 ? (
+                  <div className="py-8 px-4 text-center">
+                    <div className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-400 mx-auto mb-2">
+                      <BellOff size={18} />
+                    </div>
+                    <p className="text-xs font-semibold text-slate-700">{t('no_notifications')}</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">{t('caught_up_message')}</p>
+                  </div>
+                ) : (
+                  displayedNotifications.map((n) => {
+                    const iconConfig = getNotificationIcon(n.type);
+                    const Icon = iconConfig.icon;
+                    const itemTitle = language === 'km' && n.title_km ? n.title_km : n.title;
+                    const itemMessage = language === 'km' && n.message_km ? n.message_km : n.message;
+                    const timeAgo = formatTimeAgo(n.created_at, language);
+
+                    return (
+                      <div
+                        key={n.id}
+                        className={`group relative flex items-start gap-3 px-4 py-2.5 transition-colors cursor-pointer ${
+                          !n.is_read
+                            ? 'bg-indigo-50/20 hover:bg-indigo-50/40'
+                            : 'hover:bg-slate-50'
+                        }`}
+                      >
+                        <Link
+                          href={n.link || '/'}
+                          onClick={() => {
+                            if (!n.is_read) {
+                              markNotificationAsRead(n.id, true);
+                            }
+                            setNotificationsOpen(false);
+                          }}
+                          className="flex items-start gap-3 flex-1 min-w-0"
+                        >
+                          <div className={`p-2 rounded-xl shrink-0 mt-0.5 ${iconConfig.color}`}>
+                            <Icon size={15} />
+                          </div>
+                          <div className="flex-1 min-w-0 pr-12">
+                            <p className={`text-xs leading-snug truncate ${!n.is_read ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>
+                              {itemTitle}
+                            </p>
+                            {itemMessage && (
+                              <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">
+                                {itemMessage}
+                              </p>
+                            )}
+                            <p className="text-[10px] text-slate-400 mt-1 font-medium">
+                              {timeAgo}
+                            </p>
+                          </div>
+                        </Link>
+
+                        {/* Unread dot & hover action buttons */}
+                        <div className="absolute right-3 top-3 flex items-center gap-1">
+                          {!n.is_read && (
+                            <span className="w-2 h-2 rounded-full bg-indigo-600 group-hover:hidden shrink-0"></span>
+                          )}
+                          <div className="hidden group-hover:flex items-center gap-1 bg-white/90 shadow-2xs rounded-lg p-0.5 border border-slate-200/60">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                markNotificationAsRead(n.id, !n.is_read);
+                              }}
+                              className="p-1 rounded-md text-slate-400 hover:text-indigo-600 hover:bg-slate-100 transition-colors"
+                              title={n.is_read ? t('mark_as_unread') || 'Mark unread' : t('mark_as_read') || 'Mark read'}
+                            >
+                              <Check size={12} className={n.is_read ? 'text-slate-300' : 'text-indigo-600'} />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                deleteNotificationItem(n.id);
+                              }}
+                              className="p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                              title={t('delete_notification') || 'Delete'}
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Footer */}
+              {notifications.length > 0 && (
+                <div className="flex items-center justify-between px-4 py-2 border-t border-slate-100 bg-slate-50/70 text-[11px]">
+                  <button
+                    onClick={() => clearAllNotificationsContext()}
+                    className="text-slate-400 hover:text-rose-600 transition-colors cursor-pointer font-medium"
+                  >
+                    {t('clear_all_notifications')}
+                  </button>
+                  <span className="text-slate-400 text-[10px]">
+                    HESTRA HRM Notification Center
+                  </span>
+                </div>
+              )}
             </div>
           )}
         </div>

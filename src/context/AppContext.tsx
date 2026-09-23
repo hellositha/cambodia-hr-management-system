@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Language, TRANSLATIONS, formatLocalizedText } from '@/lib/translations';
-import { Theme, CompanySettings, DEFAULT_COMPANY_SETTINGS } from '@/lib/types';
+import { Theme, CompanySettings, DEFAULT_COMPANY_SETTINGS, NotificationItem } from '@/lib/types';
 
 export interface Persona {
   id: string;
@@ -58,6 +58,14 @@ interface AppContextType {
   setTheme: (theme: Theme) => void;
   companySettings: CompanySettings;
   updateCompanySettingsContext: (newSettings: Partial<CompanySettings>) => Promise<boolean>;
+  notifications: NotificationItem[];
+  unreadNotificationsCount: number;
+  loadingNotifications: boolean;
+  fetchNotifications: () => Promise<void>;
+  markNotificationAsRead: (id: string, isRead?: boolean) => Promise<void>;
+  markAllNotificationsAsRead: () => Promise<void>;
+  deleteNotificationItem: (id: string) => Promise<void>;
+  clearAllNotificationsContext: () => Promise<void>;
   t: (key: keyof typeof TRANSLATIONS['km']) => string;
 }
 
@@ -75,6 +83,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>('en');
   const [theme, setThemeState] = useState<Theme>('nordic');
   const [companySettings, setCompanySettings] = useState<CompanySettings>(DEFAULT_COMPANY_SETTINGS);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState<number>(0);
+  const [loadingNotifications, setLoadingNotifications] = useState<boolean>(false);
 
   const showToast = useCallback(
     (message: string, type: 'success' | 'error' | 'info' = 'success') => {
@@ -382,6 +393,123 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [companySettings, triggerRefresh]
   );
 
+  const fetchNotifications = useCallback(async () => {
+    try {
+      setLoadingNotifications(true);
+      const res = await fetch('/api/notifications');
+      if (res.ok) {
+        const data = await res.json();
+        setNotifications(data.notifications || []);
+        setUnreadNotificationsCount(data.unreadCount || 0);
+      }
+    } catch (err) {
+      console.error('Error fetching notifications:', err);
+    } finally {
+      setLoadingNotifications(false);
+    }
+  }, []);
+
+  const markNotificationAsRead = useCallback(
+    async (id: string, isRead: boolean = true) => {
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_read: isRead } : n))
+      );
+      setUnreadNotificationsCount((prev) =>
+        isRead ? Math.max(0, prev - 1) : prev + 1
+      );
+
+      try {
+        const res = await fetch('/api/notifications', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, is_read: isRead }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (typeof data.unreadCount === 'number') {
+            setUnreadNotificationsCount(data.unreadCount);
+          }
+        }
+      } catch (err) {
+        console.error('Error marking notification as read:', err);
+        fetchNotifications();
+      }
+    },
+    [fetchNotifications]
+  );
+
+  const markAllNotificationsAsRead = useCallback(async () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    setUnreadNotificationsCount(0);
+
+    try {
+      const res = await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ all: true }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (typeof data.unreadCount === 'number') {
+          setUnreadNotificationsCount(data.unreadCount);
+        }
+        showToast(
+          language === 'km'
+            ? 'បានសម្គាល់ការជូនដំណឹងទាំងអស់ថាបានអាន ✓'
+            : 'All notifications marked as read ✓',
+          'success'
+        );
+      }
+    } catch (err) {
+      console.error('Error marking all notifications as read:', err);
+      fetchNotifications();
+    }
+  }, [fetchNotifications, language, showToast]);
+
+  const deleteNotificationItem = useCallback(
+    async (id: string) => {
+      const target = notifications.find((n) => n.id === id);
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+      if (target && !target.is_read) {
+        setUnreadNotificationsCount((prev) => Math.max(0, prev - 1));
+      }
+
+      try {
+        const res = await fetch(`/api/notifications?id=${encodeURIComponent(id)}`, {
+          method: 'DELETE',
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (typeof data.unreadCount === 'number') {
+            setUnreadNotificationsCount(data.unreadCount);
+          }
+        }
+      } catch (err) {
+        console.error('Error deleting notification:', err);
+        fetchNotifications();
+      }
+    },
+    [notifications, fetchNotifications]
+  );
+
+  const clearAllNotificationsContext = useCallback(async () => {
+    setNotifications([]);
+    setUnreadNotificationsCount(0);
+
+    try {
+      await fetch('/api/notifications?all=true', { method: 'DELETE' });
+    } catch (err) {
+      console.error('Error clearing notifications:', err);
+      fetchNotifications();
+    }
+  }, [fetchNotifications]);
+
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 25000);
+    return () => clearInterval(interval);
+  }, [fetchNotifications, refreshKey, currentPersona.id]);
+
   return (
     <AppContext.Provider
       value={{
@@ -407,6 +535,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         closeMobileMenu,
         companySettings,
         updateCompanySettingsContext,
+        notifications,
+        unreadNotificationsCount,
+        loadingNotifications,
+        fetchNotifications,
+        markNotificationAsRead,
+        markAllNotificationsAsRead,
+        deleteNotificationItem,
+        clearAllNotificationsContext,
         language,
         setLanguage,
         toggleLanguage,

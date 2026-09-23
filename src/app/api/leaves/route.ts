@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getDb, createNotification } from '@/lib/db';
 import { LeaveRequest } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -123,7 +123,21 @@ export async function POST(request: Request) {
       LEFT JOIN employees e ON e.id = lr.employee_id
       LEFT JOIN users u ON (u.id = lr.employee_id OR u.employee_id = lr.employee_id)
       WHERE lr.id = ?
-    `).get(id);
+    `).get(id) as any;
+
+    try {
+      createNotification({
+        title: `Leave request submitted: ${record?.employee_name || 'Staff Member'}`,
+        title_km: `សំណើសុំច្បាប់ត្រូវបានបញ្ជូន៖ ${record?.employee_name || 'បុគ្គលិក'}`,
+        message: `${leave_type} leave (${calculatedDays} days): ${start_date} to ${end_date}`,
+        message_km: `ច្បាប់ប្រភេទ ${leave_type} (${calculatedDays} ថ្ងៃ)៖ ពី ${start_date} ដល់ ${end_date}`,
+        type: 'leave',
+        link: '/leaves',
+        role: 'All',
+      });
+    } catch (err) {
+      console.error('Error creating leave notification:', err);
+    }
 
     return NextResponse.json(record, { status: 201 });
   } catch (error: any) {

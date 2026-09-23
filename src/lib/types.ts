@@ -450,4 +450,21 @@ export const DEFAULT_COMPANY_SETTINGS: CompanySettings = {
   fiscalYearStart: 'January 1st',
 };
 
+export type NotificationType = 'request' | 'leave' | 'overtime' | 'announcement' | 'recruitment' | 'payroll' | 'system';
+
+export interface NotificationItem {
+  id: string;
+  user_id?: string | null;
+  role: 'All' | 'Admin' | 'Manager' | 'Employee';
+  title: string;
+  title_km?: string;
+  message?: string;
+  message_km?: string;
+  type: NotificationType;
+  link: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+
 

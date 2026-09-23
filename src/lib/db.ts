@@ -9,7 +9,7 @@ import {
   INITIAL_ANNOUNCEMENTS,
   INITIAL_PERFORMANCE_REVIEWS,
 } from './seed-data';
-import { CompanySettings, DEFAULT_COMPANY_SETTINGS } from './types';
+import { CompanySettings, DEFAULT_COMPANY_SETTINGS, NotificationItem, NotificationType } from './types';
 
 const DB_DIR = path.join(process.cwd(), 'data');
 if (!fs.existsSync(DB_DIR)) {
@@ -313,6 +313,23 @@ function initDatabase(db: Database.Database) {
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS notifications (
+      id TEXT PRIMARY KEY,
+      user_id TEXT,
+      role TEXT DEFAULT 'All',
+      title TEXT NOT NULL,
+      title_km TEXT,
+      message TEXT,
+      message_km TEXT,
+      type TEXT NOT NULL,
+      link TEXT NOT NULL DEFAULT '/',
+      is_read INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_notifications_user_role ON notifications(user_id, role, is_read);
+    CREATE INDEX IF NOT EXISTS idx_notifications_created ON notifications(created_at DESC);
   `);
 
   // Ensure password and username columns exist if table was created previously
@@ -572,6 +589,13 @@ function initDatabase(db: Database.Database) {
   const meta = db.prepare("SELECT value FROM system_meta WHERE key = 'initialized'").get() as { value: string } | undefined;
   if (!meta) {
     db.prepare("INSERT OR REPLACE INTO system_meta (key, value) VALUES ('initialized', 'true')").run();
+  }
+
+  // Seed initial notification items if table is empty
+  try {
+    seedInitialNotificationsIfEmpty(db);
+  } catch (err) {
+    console.error('Error seeding initial notifications:', err);
   }
 }
 
@@ -966,5 +990,292 @@ export function updateCompanySettings(settings: Partial<CompanySettings>): Compa
   }
 
   return updated;
+}
+
+export function getNotifications(options?: {
+  userId?: string | null;
+  role?: string;
+  limit?: number;
+  unreadOnly?: boolean;
+}): NotificationItem[] {
+  const db = getDb();
+  let sql = 'SELECT * FROM notifications WHERE 1=1';
+  const params: any[] = [];
+
+  if (options?.role && options.role !== 'All') {
+    if (options.userId) {
+      sql += ' AND (user_id IS NULL OR user_id = ? OR role = "All" OR role = ?)';
+      params.push(options.userId, options.role);
+    } else {
+      sql += ' AND (role = "All" OR role = ?)';
+      params.push(options.role);
+    }
+  } else if (options?.userId) {
+    sql += ' AND (user_id IS NULL OR user_id = ?)';
+    params.push(options.userId);
+  }
+
+  if (options?.unreadOnly) {
+    sql += ' AND is_read = 0';
+  }
+
+  sql += ' ORDER BY created_at DESC';
+
+  const limit = options?.limit || 50;
+  sql += ' LIMIT ?';
+  params.push(limit);
+
+  const rows = db.prepare(sql).all(...params) as any[];
+  return rows.map((r) => ({
+    id: r.id,
+    user_id: r.user_id,
+    role: r.role,
+    title: r.title,
+    title_km: r.title_km,
+    message: r.message,
+    message_km: r.message_km,
+    type: r.type,
+    link: r.link,
+    is_read: Boolean(r.is_read),
+    created_at: r.created_at,
+  }));
+}
+
+export function getUnreadNotificationsCount(options?: {
+  userId?: string | null;
+  role?: string;
+}): number {
+  const db = getDb();
+  let sql = 'SELECT count(*) as count FROM notifications WHERE is_read = 0';
+  const params: any[] = [];
+
+  if (options?.role && options.role !== 'All') {
+    if (options.userId) {
+      sql += ' AND (user_id IS NULL OR user_id = ? OR role = "All" OR role = ?)';
+      params.push(options.userId, options.role);
+    } else {
+      sql += ' AND (role = "All" OR role = ?)';
+      params.push(options.role);
+    }
+  } else if (options?.userId) {
+    sql += ' AND (user_id IS NULL OR user_id = ?)';
+    params.push(options.userId);
+  }
+
+  const row = db.prepare(sql).get(...params) as { count: number } | undefined;
+  return row?.count || 0;
+}
+
+export function markNotificationAsRead(id: string, isRead: boolean = true): boolean {
+  const db = getDb();
+  const res = db.prepare('UPDATE notifications SET is_read = ? WHERE id = ?').run(isRead ? 1 : 0, id);
+  return res.changes > 0;
+}
+
+export function markAllNotificationsAsRead(options?: {
+  userId?: string | null;
+  role?: string;
+}): number {
+  const db = getDb();
+  let sql = 'UPDATE notifications SET is_read = 1 WHERE is_read = 0';
+  const params: any[] = [];
+
+  if (options?.role && options.role !== 'All') {
+    if (options.userId) {
+      sql += ' AND (user_id IS NULL OR user_id = ? OR role = "All" OR role = ?)';
+      params.push(options.userId, options.role);
+    } else {
+      sql += ' AND (role = "All" OR role = ?)';
+      params.push(options.role);
+    }
+  } else if (options?.userId) {
+    sql += ' AND (user_id IS NULL OR user_id = ?)';
+    params.push(options.userId);
+  }
+
+  const res = db.prepare(sql).run(...params);
+  return res.changes;
+}
+
+export function deleteNotification(id: string): boolean {
+  const db = getDb();
+  const res = db.prepare('DELETE FROM notifications WHERE id = ?').run(id);
+  return res.changes > 0;
+}
+
+export function clearAllNotifications(options?: {
+  userId?: string | null;
+  role?: string;
+}): number {
+  const db = getDb();
+  let sql = 'DELETE FROM notifications WHERE 1=1';
+  const params: any[] = [];
+
+  if (options?.role && options.role !== 'All') {
+    if (options.userId) {
+      sql += ' AND (user_id IS NULL OR user_id = ? OR role = "All" OR role = ?)';
+      params.push(options.userId, options.role);
+    } else {
+      sql += ' AND (role = "All" OR role = ?)';
+      params.push(options.role);
+    }
+  } else if (options?.userId) {
+    sql += ' AND (user_id IS NULL OR user_id = ?)';
+    params.push(options.userId);
+  }
+
+  const res = db.prepare(sql).run(...params);
+  return res.changes;
+}
+
+export function createNotification(data: {
+  id?: string;
+  user_id?: string | null;
+  role?: 'All' | 'Admin' | 'Manager' | 'Employee';
+  title: string;
+  title_km?: string;
+  message?: string;
+  message_km?: string;
+  type: NotificationType;
+  link?: string;
+  is_read?: boolean;
+  created_at?: string;
+}): NotificationItem {
+  const db = getDb();
+  const id = data.id || `notif-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+  const now = data.created_at || new Date().toISOString();
+  const role = data.role || 'All';
+  const link = data.link || '/';
+  const is_read = data.is_read ? 1 : 0;
+
+  db.prepare(`
+    INSERT INTO notifications (
+      id, user_id, role, title, title_km, message, message_km, type, link, is_read, created_at
+    ) VALUES (
+      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+    )
+  `).run(
+    id,
+    data.user_id || null,
+    role,
+    data.title,
+    data.title_km || null,
+    data.message || null,
+    data.message_km || null,
+    data.type,
+    link,
+    is_read,
+    now
+  );
+
+  return {
+    id,
+    user_id: data.user_id || null,
+    role,
+    title: data.title,
+    title_km: data.title_km,
+    message: data.message,
+    message_km: data.message_km,
+    type: data.type,
+    link,
+    is_read: Boolean(is_read),
+    created_at: now,
+  };
+}
+
+export function seedInitialNotificationsIfEmpty(db: Database.Database) {
+  try {
+    const row = db.prepare('SELECT count(*) as count FROM notifications').get() as { count: number } | undefined;
+    if (row && row.count > 0) {
+      return;
+    }
+
+    const now = Date.now();
+    const isoMinutesAgo = (m: number) => new Date(now - m * 60 * 1000).toISOString();
+    const isoHoursAgo = (h: number) => new Date(now - h * 3600 * 1000).toISOString();
+    const isoDaysAgo = (d: number) => new Date(now - d * 86400 * 1000).toISOString();
+
+    const initialNotifications = [
+      {
+        id: 'notif-req-001',
+        user_id: null,
+        role: 'Admin',
+        title: 'New Material Request REQ-2026-001 awaiting HR review',
+        title_km: 'សំណើទិញសម្ភារៈថ្មី REQ-2026-001 កំពុងរង់ចាំការពិនិត្យពី HR',
+        message: 'MacBook Pro 16" M3 Max submitted by IT Department',
+        message_km: 'សំណើ MacBook Pro 16" M3 Max បញ្ជូនដោយផ្នែកបច្ចេកវិទ្យា',
+        type: 'request',
+        link: '/requests',
+        is_read: 0,
+        created_at: isoMinutesAgo(15),
+      },
+      {
+        id: 'notif-leave-001',
+        user_id: null,
+        role: 'All',
+        title: 'Leave request pending approval: Dy Vuthey',
+        title_km: 'សំណើសុំច្បាប់រង់ចាំការអនុម័ត៖ ឌី វុទ្ធី',
+        message: 'Annual leave request for 3 days starting next Monday',
+        message_km: 'សំណើសុំច្បាប់ប្រចាំឆ្នាំរយៈពេល ៣ ថ្ងៃ ចាប់ពីថ្ងៃច័ន្ទក្រោយ',
+        type: 'leave',
+        link: '/leaves',
+        is_read: 0,
+        created_at: isoMinutesAgo(55),
+      },
+      {
+        id: 'notif-rec-001',
+        user_id: null,
+        role: 'Admin',
+        title: 'Candidate reached Offer stage: Dy Vuthey',
+        title_km: 'បេក្ខជនដល់វគ្គផ្តល់ការងារ៖ ឌី វុទ្ធី',
+        message: 'Senior Full Stack Developer recruitment pipeline update',
+        message_km: 'ការជ្រើសរើសបុគ្គលិកតំណែង Senior Full Stack Developer',
+        type: 'recruitment',
+        link: '/recruitment',
+        is_read: 0,
+        created_at: isoHoursAgo(2),
+      },
+      {
+        id: 'notif-pay-001',
+        user_id: null,
+        role: 'Admin',
+        title: 'Monthly payroll draft is ready for review',
+        title_km: 'ព្រាងបញ្ជីប្រាក់បៀវត្សរ៍ប្រចាំខែត្រូវបានបង្កើតរួចរាល់',
+        message: 'Review staff payroll, tax deductions, and NSSF contributions',
+        message_km: 'ពិនិត្យបញ្ជីប្រាក់ខែបុគ្គលិក ពន្ធលើប្រាក់បៀវត្ស និងការបង់ភាគទាន ប.ស.ស',
+        type: 'payroll',
+        link: '/payroll',
+        is_read: 1,
+        created_at: isoHoursAgo(6),
+      },
+      {
+        id: 'notif-ann-001',
+        user_id: null,
+        role: 'All',
+        title: 'Company Announcement: Khmer New Year Holiday Notice',
+        title_km: 'សេចក្តីជូនដំណឹងក្រុមហ៊ុន៖ ថ្ងៃឈប់សម្រាកបុណ្យចូលឆ្នាំថ្មីប្រពៃណីជាតិ',
+        message: 'Office will be closed from April 13 to April 16',
+        message_km: 'ការិយាល័យនឹងឈប់សម្រាកចាប់ពីថ្ងៃទី ១៣ ដល់ ថ្ងៃទី ១៦ ខែមេសា',
+        type: 'announcement',
+        link: '/announcements',
+        is_read: 1,
+        created_at: isoDaysAgo(1),
+      },
+    ];
+
+    const insert = db.prepare(`
+      INSERT INTO notifications (
+        id, user_id, role, title, title_km, message, message_km, type, link, is_read, created_at
+      ) VALUES (
+        @id, @user_id, @role, @title, @title_km, @message, @message_km, @type, @link, @is_read, @created_at
+      )
+    `);
+
+    for (const item of initialNotifications) {
+      insert.run(item);
+    }
+  } catch (err) {
+    console.error('Error seeding initial notifications:', err);
+  }
 }
 

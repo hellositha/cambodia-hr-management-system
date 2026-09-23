@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { getDb } from '@/lib/db';
+import { getDb, createNotification } from '@/lib/db';
 import { ApprovalRequest } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -218,6 +218,20 @@ export async function POST(request: Request) {
       now,
       now
     );
+
+    try {
+      createNotification({
+        title: `New ${request_type}: ${item_name} (${requestNumber})`,
+        title_km: `សំណើ${request_type}ថ្មី៖ ${item_name} (${requestNumber})`,
+        message: `Submitted by ${emp ? emp.first_name + ' ' + emp.last_name : 'Staff Member'} - Urgency: ${urgency}`,
+        message_km: `បញ្ជូនដោយ ${emp ? emp.first_name + ' ' + emp.last_name : 'បុគ្គលិក'} - កម្រិតបន្ទាន់៖ ${urgency}`,
+        type: 'request',
+        link: '/requests',
+        role: 'Admin',
+      });
+    } catch (err) {
+      console.error('Error creating request notification:', err);
+    }
 
     const createdRecord = db.prepare('SELECT * FROM approval_requests WHERE id = ?').get(id);
     return NextResponse.json(createdRecord, { status: 201 });

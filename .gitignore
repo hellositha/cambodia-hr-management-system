@@ -26,3 +26,4 @@ data/*.db-wal
 .DS_Store
 .vscode/
 .idea/
+*.tsbuildinfo
