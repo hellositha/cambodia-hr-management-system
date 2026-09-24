@@ -112,3 +112,4 @@ The application includes a multi-stage Docker build with native SQLite support a
 docker compose up -d --build
 ```
 
+# kh_HRM
