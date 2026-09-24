@@ -6,6 +6,8 @@ import { DutyRosterEntry, Department, Employee, ShiftType } from '@/lib/types';
 import {
   SHIFTS,
   SHIFT_LIST,
+  getShiftConfig,
+  getShiftList,
   getMondayOfWeek,
   formatDateISO,
   getWeekDays,
@@ -15,6 +17,7 @@ import { formatLocalizedText } from '@/lib/translations';
 import RosterShiftModal from '@/components/RosterShiftModal';
 import RosterAutoScheduleModal from '@/components/RosterAutoScheduleModal';
 import RosterPrintModal from '@/components/RosterPrintModal';
+import ShiftTemplateEditModal from '@/components/ShiftTemplateEditModal';
 import {
   CalendarDays,
   ChevronLeft,
@@ -39,7 +42,7 @@ import {
 } from 'lucide-react';
 
 export default function RosterPage() {
-  const { currentPersona, language, showToast, refreshKey, triggerRefresh } = useApp();
+  const { currentPersona, language, showToast, refreshKey, triggerRefresh, shiftSettings } = useApp();
   const isManagerOrAdmin = currentPersona.role === 'Manager' || currentPersona.role === 'Admin';
 
   // Current working date
@@ -66,6 +69,7 @@ export default function RosterPage() {
   const [shiftModalOpen, setShiftModalOpen] = useState(false);
   const [autoScheduleModalOpen, setAutoScheduleModalOpen] = useState(false);
   const [printModalOpen, setPrintModalOpen] = useState(false);
+  const [templateModalOpen, setTemplateModalOpen] = useState(false);
 
   // Active cell state for shift editing
   const [activeCell, setActiveCell] = useState<{
@@ -195,7 +199,7 @@ export default function RosterPage() {
         if (shiftType === 'off') {
           offDaysCount++;
         } else {
-          totalHours += entry?.hours !== undefined ? Number(entry.hours) : (SHIFTS[shiftType]?.default_hours || 8.0);
+          totalHours += entry?.hours !== undefined ? Number(entry.hours) : (getShiftConfig(shiftType, shiftSettings?.shifts).default_hours || 8.0);
         }
       });
 
@@ -339,7 +343,7 @@ export default function RosterPage() {
       const dayCells = weekDays.map((d) => {
         const s = r.shifts[d.dateStr];
         if (!s || s.shift_type === 'off') return 'OFF';
-        const def = SHIFTS[s.shift_type];
+        const def = getShiftConfig(s.shift_type, shiftSettings?.shifts);
         return `${def?.short_code || s.shift_type} (${s.start_time || def?.start_time}-${s.end_time || def?.end_time})`;
       });
 
@@ -416,6 +420,17 @@ export default function RosterPage() {
               {language === 'km' ? 'វេនរបស់ខ្ញុំ (My Shifts)' : 'My Shifts'}
             </button>
           </div>
+
+          {/* Shift Templates & Legend (Admin/Manager) */}
+          {isManagerOrAdmin && (
+            <button
+              onClick={() => setTemplateModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xs transition-colors cursor-pointer"
+            >
+              <Layers size={14} className="text-indigo-600 dark:text-indigo-400" />
+              <span>{language === 'km' ? 'គំរូវេន & សម្គាល់' : 'Shift Templates'}</span>
+            </button>
+          )}
 
           {/* Auto Schedule (Admin/Manager) */}
           {isManagerOrAdmin && (
@@ -755,7 +770,7 @@ export default function RosterPage() {
                       {weekDays.map((day) => {
                         const shiftEntry = row.shifts[day.dateStr];
                         const shiftType: ShiftType = shiftEntry?.shift_type || 'off';
-                        const def = SHIFTS[shiftType] || SHIFTS.off;
+                        const def = getShiftConfig(shiftType, shiftSettings?.shifts);
                         const isOff = shiftType === 'off';
 
                         return (
@@ -841,17 +856,36 @@ export default function RosterPage() {
 
       {/* Shift Legend & Cambodian Compliance Footer */}
       <div className="p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">
-            {language === 'km' ? 'កំណត់សម្គាល់វេនការងារ (Shift Legend)' : 'Shift Templates & Legend'}
-          </span>
-          <span className="text-[11px] text-slate-500 dark:text-slate-400">
-            {language === 'km' ? 'ចុចលើប្រអប់វេនណាមួយដើម្បីកែសម្រួល ឬចាត់តាំង' : 'Click any grid cell to assign or modify shifts'}
-          </span>
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">
+              {language === 'km' ? 'កំណត់សម្គាល់វេនការងារ (Shift Legend)' : 'Shift Templates & Legend'}
+            </span>
+            {shiftSettings?.isCustomized && (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                {language === 'km' ? 'កែប្រែផ្ទាល់ខ្លួន' : 'Customized'}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2.5">
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">
+              {language === 'km' ? 'ចុចលើប្រអប់វេនណាមួយដើម្បីកែសម្រួល ឬចាត់តាំង' : 'Click any grid cell to assign or modify shifts'}
+            </span>
+            {isManagerOrAdmin && (
+              <button
+                type="button"
+                onClick={() => setTemplateModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800 rounded-xl transition-all cursor-pointer shadow-2xs"
+              >
+                <Layers size={13} />
+                <span>{language === 'km' ? 'កែប្រែគំរូវេន (Edit Templates)' : 'Edit Shift Templates'}</span>
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-          {SHIFT_LIST.map((s) => (
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+          {getShiftList(shiftSettings?.shifts).map((s) => (
             <div
               key={s.id}
               className={`p-2 rounded-xl border flex items-center gap-2 ${s.badgeBg} ${s.badgeBorder}`}
@@ -907,6 +941,13 @@ export default function RosterPage() {
               : 'All Divisions'
             : departments.find((d) => d.id === selectedDepartment)?.name || 'General'
         }
+      />
+
+      {/* Shift Templates & Legend Edit Modal */}
+      <ShiftTemplateEditModal
+        isOpen={templateModalOpen}
+        onClose={() => setTemplateModalOpen(false)}
+        onSuccess={fetchRoster}
       />
     </div>
   );

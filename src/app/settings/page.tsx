@@ -15,10 +15,30 @@ import {
   MapPin,
   Save,
   Loader2,
+  Shield,
+  Edit2,
+  Scale,
+  Layers,
 } from 'lucide-react';
+import OvertimeRateEditModal from '@/components/OvertimeRateEditModal';
+import ShiftTemplateEditModal from '@/components/ShiftTemplateEditModal';
+import { OVERTIME_RATES, STANDARD_MONTHLY_HOURS } from '@/lib/overtime-calc';
+import { getShiftList } from '@/lib/roster-shifts';
 
 export default function SettingsPage() {
-  const { showToast, language, openModal, currentPersona, companySettings, updateCompanySettingsContext } = useApp();
+  const {
+    showToast,
+    language,
+    openModal,
+    currentPersona,
+    companySettings,
+    updateCompanySettingsContext,
+    overtimeSettings,
+    shiftSettings,
+  } = useApp();
+  const [isOvertimeModalOpen, setIsOvertimeModalOpen] = useState(false);
+  const [isShiftModalOpen, setIsShiftModalOpen] = useState(false);
+  const isManagerOrAdmin = currentPersona.role === 'Manager' || currentPersona.role === 'Admin';
 
   const [formData, setFormData] = useState({
     name: companySettings?.name || 'HESTRA HRM Technologies Inc.',
@@ -326,6 +346,158 @@ export default function SettingsPage() {
         </div>
       </form>
 
+      {/* Cambodian Labor Law Statutory Overtime Rates Configuration */}
+      <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-700">
+          <div className="flex items-start gap-3">
+            <div className="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 shrink-0">
+              <Scale size={20} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                  {language === 'km'
+                    ? 'អត្រាប្រាក់ថែមម៉ោងស្របច្បាប់កម្ពុជា & ម៉ោងស្តង់ដារ'
+                    : 'Cambodian Labor Law Statutory Overtime Rates'}
+                </h2>
+                {overtimeSettings?.isCustomized ? (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                    {language === 'km' ? 'អត្រាកែប្រែផ្ទាល់ខ្លួន' : 'Customized'}
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    {language === 'km' ? 'អត្រាច្បាប់ស្តង់ដារ' : 'Statutory Standard'}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                {language === 'km'
+                  ? 'កំណត់អត្រាគុណប្រាក់ឈ្នួលថែមម៉ោង (មាត្រា ១៣៩, ១៤៤, ១៤៧, ១៦២) និងចំនួនម៉ោងស្តង់ដារប្រចាំខែ (២០៨ ម៉ោង)'
+                  : 'Statutory overtime multipliers (Articles 139, 144, 147, 162) and standard monthly divisor (208 hrs)'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <span className="text-xs font-mono font-semibold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/60 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600">
+              {overtimeSettings?.standardMonthlyHours || STANDARD_MONTHLY_HOURS}h / month
+            </span>
+            {isManagerOrAdmin && (
+              <button
+                type="button"
+                onClick={() => setIsOvertimeModalOpen(true)}
+                className="px-3.5 py-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              >
+                <Edit2 size={13} />
+                <span>{language === 'km' ? 'កែប្រែអត្រា (Edit Rates)' : 'Edit Overtime Rates'}</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* 4 Statutory Rate Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {Object.values(overtimeSettings?.rates || OVERTIME_RATES).map((rate) => (
+            <div
+              key={rate.id}
+              className={`p-3.5 rounded-xl border flex flex-col justify-between ${rate.badgeBg} ${rate.badgeBorder}`}
+            >
+              <div>
+                <div className="flex items-center justify-between">
+                  <span className={`text-base font-extrabold ${rate.badgeText}`}>
+                    {Math.round(rate.multiplier * 100)}%
+                  </span>
+                  <span className="text-[10px] font-semibold text-slate-500 font-mono">
+                    {rate.law_reference}
+                  </span>
+                </div>
+                <div className="text-xs font-bold text-slate-800 dark:text-slate-200 mt-1">
+                  {language === 'km' ? rate.label_km : rate.label_en}
+                </div>
+                <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                  {language === 'km' ? rate.description_km : rate.description_en}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Duty Roster Shift Templates & Legend Configuration */}
+      <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-700">
+          <div className="flex items-start gap-3">
+            <div className="p-2.5 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 shrink-0">
+              <Layers size={20} />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                  {language === 'km'
+                    ? 'គំរូវេនការងារ & កំណត់សម្គាល់ (Shift Templates & Legend)'
+                    : 'Duty Roster Shift Templates & Legend'}
+                </h2>
+                {shiftSettings?.isCustomized ? (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                    {language === 'km' ? 'កែប្រែផ្ទាល់ខ្លួន' : 'Customized'}
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                    {language === 'km' ? 'គំរូស្តង់ដារ' : 'Standard Templates'}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                {language === 'km'
+                  ? 'កំណត់កាលវិភាគវេន ម៉ោងការងារស្តង់ដារ កូដកាត់ និងពណ៌សម្គាល់សម្រាប់តារាងវេន'
+                  : 'Configure shift timings, standard hours, short codes, and color legend for team roster'}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <span className="text-xs font-mono font-semibold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/60 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600">
+              {Object.keys(shiftSettings?.shifts || {}).length} {language === 'km' ? 'វេន' : 'Shifts'}
+            </span>
+            {isManagerOrAdmin && (
+              <button
+                type="button"
+                onClick={() => setIsShiftModalOpen(true)}
+                className="px-3.5 py-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              >
+                <Edit2 size={13} />
+                <span>{language === 'km' ? 'កែប្រែវេន (Edit Shifts)' : 'Edit Shift Templates'}</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Shift Template Chips */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+          {getShiftList(shiftSettings?.shifts).map((s) => (
+            <div
+              key={s.id}
+              className={`p-2.5 rounded-xl border flex flex-col justify-between ${s.badgeBg} ${s.badgeBorder}`}
+            >
+              <div className="flex items-center justify-between gap-1">
+                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
+                <span className={`text-[11px] font-bold font-mono px-1.5 py-0.5 rounded ${s.badgeText}`}>
+                  {s.short_code}
+                </span>
+              </div>
+              <div className="mt-1.5">
+                <div className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
+                  {language === 'km' ? s.name_km : s.name_en}
+                </div>
+                <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+                  {s.start_time ? `${s.start_time}-${s.end_time}` : '0.0h OFF'}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Technology Stack Callout */}
       <div className="p-6 rounded-2xl bg-gradient-to-r from-slate-900 to-indigo-950 text-white space-y-3 shadow-md">
         <div className="flex items-center gap-2">
@@ -336,6 +508,16 @@ export default function SettingsPage() {
           Built natively with Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS, and better-sqlite3 with WAL journaling. Features RESTful micro-endpoints, role simulations, real-time punch clocks, itemized payslip generation with browser print support, and full-fidelity applicant tracking.
         </p>
       </div>
+
+      <OvertimeRateEditModal
+        isOpen={isOvertimeModalOpen}
+        onClose={() => setIsOvertimeModalOpen(false)}
+      />
+
+      <ShiftTemplateEditModal
+        isOpen={isShiftModalOpen}
+        onClose={() => setIsShiftModalOpen(false)}
+      />
     </div>
   );
 }

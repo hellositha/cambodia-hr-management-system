@@ -252,7 +252,6 @@ export default function Sidebar() {
                 <button
                   onClick={() => {
                     logout();
-                    window.location.href = '/login';
                   }}
                   title={language === 'km' ? 'ចាកចេញ (Sign Out)' : 'Sign Out'}
                   className="text-slate-400 hover:text-rose-600 p-1 hover:bg-rose-50 rounded-md transition-colors cursor-pointer"
@@ -300,7 +299,6 @@ export default function Sidebar() {
             <button
               onClick={() => {
                 logout();
-                window.location.href = '/login';
               }}
               title={language === 'km' ? 'ចាកចេញ (Sign Out)' : 'Sign Out'}
               className="text-slate-400 hover:text-rose-600 p-1.5 hover:bg-rose-50 rounded-md transition-colors cursor-pointer"

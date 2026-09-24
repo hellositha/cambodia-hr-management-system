@@ -9,7 +9,9 @@ import {
   INITIAL_ANNOUNCEMENTS,
   INITIAL_PERFORMANCE_REVIEWS,
 } from './seed-data';
-import { CompanySettings, DEFAULT_COMPANY_SETTINGS, NotificationItem, NotificationType } from './types';
+import { CompanySettings, DEFAULT_COMPANY_SETTINGS, NotificationItem, NotificationType, OvertimeRateType, OvertimeSettings, ShiftDefinition, ShiftSettings } from './types';
+import { DEFAULT_OVERTIME_SETTINGS } from './overtime-calc';
+import { DEFAULT_SHIFTS, DEFAULT_SHIFT_SETTINGS } from './roster-shifts';
 
 const DB_DIR = path.join(process.cwd(), 'data');
 if (!fs.existsSync(DB_DIR)) {
@@ -992,6 +994,136 @@ export function updateCompanySettings(settings: Partial<CompanySettings>): Compa
   return updated;
 }
 
+export function getOvertimeSettings(): OvertimeSettings {
+  const db = getDb();
+  try {
+    const row = db.prepare('SELECT value FROM system_meta WHERE key = ?').get('overtime_settings') as { value: string } | undefined;
+    if (row && row.value) {
+      const parsed = JSON.parse(row.value);
+      const mergedRates: Record<OvertimeRateType, any> = { ...DEFAULT_OVERTIME_SETTINGS.rates };
+      if (parsed.rates) {
+        for (const [k, v] of Object.entries(parsed.rates)) {
+          if (v && mergedRates[k as OvertimeRateType]) {
+            mergedRates[k as OvertimeRateType] = {
+              ...mergedRates[k as OvertimeRateType],
+              ...(v as any),
+            };
+          }
+        }
+      }
+      return {
+        ...DEFAULT_OVERTIME_SETTINGS,
+        ...parsed,
+        isCustomized: true,
+        rates: mergedRates,
+      };
+    }
+  } catch (err) {
+    console.error('Error reading overtime_settings from system_meta:', err);
+  }
+  return DEFAULT_OVERTIME_SETTINGS;
+}
+
+export function updateOvertimeSettings(settings: Partial<OvertimeSettings>): OvertimeSettings {
+  const db = getDb();
+  const current = getOvertimeSettings();
+  const mergedRates: Record<OvertimeRateType, any> = { ...current.rates };
+  if (settings.rates) {
+    for (const [k, v] of Object.entries(settings.rates)) {
+      if (v && mergedRates[k as OvertimeRateType]) {
+        mergedRates[k as OvertimeRateType] = {
+          ...mergedRates[k as OvertimeRateType],
+          ...(v as any),
+        };
+      }
+    }
+  }
+  const updated: OvertimeSettings = {
+    ...current,
+    ...settings,
+    isCustomized: true,
+    updated_at: new Date().toISOString(),
+    rates: mergedRates,
+  };
+  db.prepare(`
+    INSERT INTO system_meta (key, value)
+    VALUES ('overtime_settings', ?)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value
+  `).run(JSON.stringify(updated));
+  return updated;
+}
+
+export function resetOvertimeSettings(): OvertimeSettings {
+  const db = getDb();
+  db.prepare('DELETE FROM system_meta WHERE key = ?').run('overtime_settings');
+  return DEFAULT_OVERTIME_SETTINGS;
+}
+
+export function getShiftSettings(): ShiftSettings {
+  const db = getDb();
+  try {
+    const row = db.prepare('SELECT value FROM system_meta WHERE key = ?').get('shift_settings') as { value: string } | undefined;
+    if (row && row.value) {
+      const parsed = JSON.parse(row.value);
+      const mergedShifts: Record<string, ShiftDefinition> = { ...DEFAULT_SHIFTS };
+      if (parsed.shifts) {
+        for (const [k, v] of Object.entries(parsed.shifts)) {
+          if (v) {
+            mergedShifts[k] = {
+              ...(mergedShifts[k] || {}),
+              ...(v as any),
+            };
+          }
+        }
+      }
+      return {
+        ...DEFAULT_SHIFT_SETTINGS,
+        ...parsed,
+        isCustomized: true,
+        shifts: mergedShifts,
+      };
+    }
+  } catch (err) {
+    console.error('Error reading shift_settings from system_meta:', err);
+  }
+  return DEFAULT_SHIFT_SETTINGS;
+}
+
+export function updateShiftSettings(settings: Partial<ShiftSettings>): ShiftSettings {
+  const db = getDb();
+  const current = getShiftSettings();
+  const mergedShifts: Record<string, ShiftDefinition> = { ...current.shifts };
+  if (settings.shifts) {
+    for (const [k, v] of Object.entries(settings.shifts)) {
+      if (v) {
+        mergedShifts[k] = {
+          ...(mergedShifts[k] || {}),
+          ...(v as any),
+        };
+      }
+    }
+  }
+  const updated: ShiftSettings = {
+    ...current,
+    ...settings,
+    isCustomized: true,
+    updated_at: new Date().toISOString(),
+    shifts: mergedShifts,
+  };
+  db.prepare(`
+    INSERT INTO system_meta (key, value)
+    VALUES ('shift_settings', ?)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value
+  `).run(JSON.stringify(updated));
+  return updated;
+}
+
+export function resetShiftSettings(): ShiftSettings {
+  const db = getDb();
+  db.prepare('DELETE FROM system_meta WHERE key = ?').run('shift_settings');
+  return DEFAULT_SHIFT_SETTINGS;
+}
+
 export function getNotifications(options?: {
   userId?: string | null;
   role?: string;
@@ -1004,10 +1136,10 @@ export function getNotifications(options?: {
 
   if (options?.role && options.role !== 'All') {
     if (options.userId) {
-      sql += ' AND (user_id IS NULL OR user_id = ? OR role = "All" OR role = ?)';
+      sql += " AND (user_id IS NULL OR user_id = ? OR role = 'All' OR role = ?)";
       params.push(options.userId, options.role);
     } else {
-      sql += ' AND (role = "All" OR role = ?)';
+      sql += " AND (role = 'All' OR role = ?)";
       params.push(options.role);
     }
   } else if (options?.userId) {
@@ -1051,10 +1183,10 @@ export function getUnreadNotificationsCount(options?: {
 
   if (options?.role && options.role !== 'All') {
     if (options.userId) {
-      sql += ' AND (user_id IS NULL OR user_id = ? OR role = "All" OR role = ?)';
+      sql += " AND (user_id IS NULL OR user_id = ? OR role = 'All' OR role = ?)";
       params.push(options.userId, options.role);
     } else {
-      sql += ' AND (role = "All" OR role = ?)';
+      sql += " AND (role = 'All' OR role = ?)";
       params.push(options.role);
     }
   } else if (options?.userId) {
@@ -1082,10 +1214,10 @@ export function markAllNotificationsAsRead(options?: {
 
   if (options?.role && options.role !== 'All') {
     if (options.userId) {
-      sql += ' AND (user_id IS NULL OR user_id = ? OR role = "All" OR role = ?)';
+      sql += " AND (user_id IS NULL OR user_id = ? OR role = 'All' OR role = ?)";
       params.push(options.userId, options.role);
     } else {
-      sql += ' AND (role = "All" OR role = ?)';
+      sql += " AND (role = 'All' OR role = ?)";
       params.push(options.role);
     }
   } else if (options?.userId) {
@@ -1113,10 +1245,10 @@ export function clearAllNotifications(options?: {
 
   if (options?.role && options.role !== 'All') {
     if (options.userId) {
-      sql += ' AND (user_id IS NULL OR user_id = ? OR role = "All" OR role = ?)';
+      sql += " AND (user_id IS NULL OR user_id = ? OR role = 'All' OR role = ?)";
       params.push(options.userId, options.role);
     } else {
-      sql += ' AND (role = "All" OR role = ?)';
+      sql += " AND (role = 'All' OR role = ?)";
       params.push(options.role);
     }
   } else if (options?.userId) {

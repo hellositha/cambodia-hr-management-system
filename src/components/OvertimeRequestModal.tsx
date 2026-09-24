@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { Employee, OvertimeRateType } from '@/lib/types';
-import { OVERTIME_RATE_LIST, calculateOvertimePay } from '@/lib/overtime-calc';
+import { OVERTIME_RATES, calculateOvertimePay } from '@/lib/overtime-calc';
 import { formatLocalizedText } from '@/lib/translations';
 import { X, Clock, Calendar, AlertTriangle, Shield, CheckCircle2, DollarSign, Briefcase } from 'lucide-react';
 
@@ -20,7 +20,7 @@ export default function OvertimeRequestModal({
   employees,
   onSuccess,
 }: OvertimeRequestModalProps) {
-  const { currentPersona, language, showToast } = useApp();
+  const { currentPersona, language, showToast, overtimeSettings } = useApp();
   const isManagerOrAdmin = currentPersona.role === 'Manager' || currentPersona.role === 'Admin';
 
   const [selectedEmployeeId, setSelectedEmployeeId] = useState(currentPersona.id || '');
@@ -44,7 +44,10 @@ export default function OvertimeRequestModal({
   const targetEmp = employees.find((e) => e.id === selectedEmployeeId);
   const salary = targetEmp?.salary || 1000;
   const numHours = Number(hours) || 0;
-  const calculation = calculateOvertimePay(salary, numHours, rateType);
+  const activeRates = overtimeSettings?.rates || OVERTIME_RATES;
+  const activeRateList = Object.values(activeRates);
+  const activeDivisor = overtimeSettings?.standardMonthlyHours || 208;
+  const calculation = calculateOvertimePay(salary, numHours, rateType, activeRates, activeDivisor);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -222,7 +225,7 @@ export default function OvertimeRequestModal({
               {language === 'km' ? 'អត្រាគិតប្រាក់ថែមម៉ោង (OT Rate Multiplier)' : 'Overtime Rate Multiplier'}
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {OVERTIME_RATE_LIST.map((rate) => {
+              {activeRateList.map((rate) => {
                 const isSelected = rateType === rate.id;
                 return (
                   <button
@@ -237,7 +240,7 @@ export default function OvertimeRequestModal({
                   >
                     <div className="flex items-center justify-between">
                       <span className={`text-xs font-bold ${rate.badgeText}`}>
-                        {rate.multiplier * 100}%
+                        {Math.round(rate.multiplier * 100)}%
                       </span>
                       <span className="text-[10px] text-slate-400">{rate.law_reference}</span>
                     </div>

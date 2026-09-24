@@ -3,7 +3,7 @@
 import React from 'react';
 import { useApp } from '@/context/AppContext';
 import { DutyRosterEntry, ShiftType } from '@/lib/types';
-import { SHIFTS, DayColumn } from '@/lib/roster-shifts';
+import { getShiftConfig, getShiftList, SHIFTS, DayColumn } from '@/lib/roster-shifts';
 import { formatLocalizedText } from '@/lib/translations';
 import { Printer, X, Shield, CheckCircle2, Download } from 'lucide-react';
 
@@ -37,7 +37,7 @@ export default function RosterPrintModal({
   weekStart,
   departmentName,
 }: RosterPrintModalProps) {
-  const { language } = useApp();
+  const { language, shiftSettings } = useApp();
 
   if (!isOpen) return null;
 
@@ -159,7 +159,7 @@ export default function RosterPrintModal({
                       {weekDays.map((day) => {
                         const shift = row.shifts[day.dateStr];
                         const shiftType = shift?.shift_type || 'off';
-                        const def = SHIFTS[shiftType as ShiftType] || SHIFTS.off;
+                        const def = getShiftConfig(shiftType, shiftSettings?.shifts);
                         const isOff = shiftType === 'off';
 
                         return (
@@ -235,7 +235,10 @@ export default function RosterPrintModal({
           {/* Cambodian Shift Legend */}
           <div className="mt-3 flex items-center justify-between text-[11px] text-slate-600 px-1">
             <span>
-              <strong>កំណត់សម្គាល់វេន៖</strong> DAY: ០៨:៣០-១៧:៣០ | MOR: ០៧:០០-១៥:៣០ | EVE: ១៤:០០-២២:៣០ | NGT: ២២:០០-០៦:៣០ | DUTY: វេនប្រចាំការ | OFF: សម្រាក
+              <strong>{language === 'km' ? 'កំណត់សម្គាល់វេន៖' : 'Shift Legend:'}</strong>{' '}
+              {getShiftList(shiftSettings?.shifts)
+                .map((s) => `${s.short_code}: ${s.start_time ? `${s.start_time}-${s.end_time}` : (language === 'km' ? 'សម្រាក' : 'OFF')}`)
+                .join(' | ')}
             </span>
           </div>
 

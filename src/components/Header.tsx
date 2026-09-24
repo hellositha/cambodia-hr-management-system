@@ -744,7 +744,6 @@ export default function Header() {
                   onClick={() => {
                     setPersonaOpen(false);
                     logout();
-                    window.location.href = '/login';
                   }}
                   className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
                 >

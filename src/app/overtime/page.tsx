@@ -9,6 +9,7 @@ import OvertimeRequestModal from '@/components/OvertimeRequestModal';
 import OvertimeCalculatorModal from '@/components/OvertimeCalculatorModal';
 import OvertimeApprovalModal from '@/components/OvertimeApprovalModal';
 import OvertimePrintModal from '@/components/OvertimePrintModal';
+import OvertimeRateEditModal from '@/components/OvertimeRateEditModal';
 import {
   Timer,
   Plus,
@@ -32,10 +33,12 @@ import {
   Eye,
   Check,
   XCircle,
+  Edit2,
 } from 'lucide-react';
+import { getOvertimeRateConfig } from '@/lib/overtime-calc';
 
 export default function OvertimePage() {
-  const { currentPersona, language, showToast, refreshKey, triggerRefresh } = useApp();
+  const { currentPersona, language, showToast, refreshKey, triggerRefresh, overtimeSettings } = useApp();
   const isManagerOrAdmin = currentPersona.role === 'Manager' || currentPersona.role === 'Admin';
 
   // State & Filters
@@ -55,6 +58,7 @@ export default function OvertimePage() {
   const [calcModalOpen, setCalcModalOpen] = useState(false);
   const [approvalModalOpen, setApprovalModalOpen] = useState(false);
   const [printModalOpen, setPrintModalOpen] = useState(false);
+  const [rateEditModalOpen, setRateEditModalOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<OvertimeRequest | null>(null);
 
   // If user is employee, default to 'my' tab
@@ -543,7 +547,7 @@ export default function OvertimePage() {
                 </tr>
               ) : (
                 filteredRequests.map((req) => {
-                  const rateConfig = OVERTIME_RATES[req.ot_rate_type] || OVERTIME_RATES.normal_day_150;
+                  const rateConfig = getOvertimeRateConfig(req.ot_rate_type, overtimeSettings?.rates);
                   const isPending = req.status === 'Pending' || req.status === 'Pending Manager' || req.status === 'Pending Admin';
                   const isApproved = req.status === 'Approved';
 
@@ -675,20 +679,31 @@ export default function OvertimePage() {
 
       {/* Cambodian Overtime Rates Legal Reference Cards */}
       <div className="p-5 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <Shield size={16} className="text-indigo-600 dark:text-indigo-400" />
             <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
               {language === 'km' ? 'កម្រងអត្រាប្រាក់ថែមម៉ោងស្របច្បាប់កម្ពុជា' : 'Cambodian Labor Law Statutory Overtime Rates'}
             </h3>
           </div>
-          <span className="text-[11px] text-slate-500 font-mono">
-            {STANDARD_MONTHLY_HOURS}h / month standard divisor
-          </span>
+          <div className="flex items-center gap-2.5">
+            <span className="text-[11px] text-slate-500 font-mono">
+              {overtimeSettings?.standardMonthlyHours || STANDARD_MONTHLY_HOURS}h / month standard divisor
+            </span>
+            {isManagerOrAdmin && (
+              <button
+                onClick={() => setRateEditModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200 dark:border-indigo-800 rounded-xl transition-all cursor-pointer shadow-2xs"
+              >
+                <Edit2 size={13} />
+                <span>{language === 'km' ? 'កែប្រែអត្រា (Edit Rates)' : 'Edit Rates'}</span>
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {OVERTIME_RATE_LIST.map((rate) => (
+          {Object.values(overtimeSettings?.rates || OVERTIME_RATES).map((rate) => (
             <div
               key={rate.id}
               className={`p-3.5 rounded-xl border flex flex-col justify-between ${rate.badgeBg} ${rate.badgeBorder}`}
@@ -696,7 +711,7 @@ export default function OvertimePage() {
               <div>
                 <div className="flex items-center justify-between">
                   <span className={`text-base font-extrabold ${rate.badgeText}`}>
-                    {rate.multiplier * 100}%
+                    {Math.round(rate.multiplier * 100)}%
                   </span>
                   <span className="text-[10px] font-semibold text-slate-500">
                     {rate.law_reference}
@@ -744,6 +759,12 @@ export default function OvertimePage() {
           setSelectedRequest(null);
         }}
         request={selectedRequest}
+      />
+
+      <OvertimeRateEditModal
+        isOpen={rateEditModalOpen}
+        onClose={() => setRateEditModalOpen(false)}
+        onSuccess={fetchOvertime}
       />
     </div>
   );

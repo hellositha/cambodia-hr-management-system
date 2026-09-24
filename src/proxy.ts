@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { verifySessionToken } from '@/lib/auth-session';
 
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Allow static assets, Next.js internal bundles, and public files
@@ -15,8 +16,12 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const authCookie = request.cookies.get('hestra_auth')?.value;
-  const roleCookie = request.cookies.get('hestra_role')?.value;
+  const sessionCookie = request.cookies.get('hestra_session')?.value;
+  const verifiedSession = await verifySessionToken(sessionCookie);
+
+  const authCookie = verifiedSession?.userId || request.cookies.get('hestra_auth')?.value;
+  // If cryptographically verified session exists, enforce verified session role
+  const roleCookie = verifiedSession?.role || request.cookies.get('hestra_role')?.value;
 
   // API RBAC Checks
   if (pathname.startsWith('/api/')) {
@@ -48,8 +53,17 @@ export function proxy(request: NextRequest) {
 
   // If user is accessing the login page
   if (pathname === '/login') {
+    // If logout is requested via query param, clear all auth cookies and allow login page to render
+    if (request.nextUrl.searchParams.has('logout')) {
+      const response = NextResponse.next();
+      response.cookies.set('hestra_session', '', { path: '/', maxAge: 0, expires: new Date(0) });
+      response.cookies.set('hestra_auth', '', { path: '/', maxAge: 0, expires: new Date(0) });
+      response.cookies.set('hestra_role', '', { path: '/', maxAge: 0, expires: new Date(0) });
+      return response;
+    }
+
     // If already authenticated, redirect to portal or dashboard
-    if (authCookie) {
+    if (authCookie && sessionCookie && verifiedSession) {
       if (roleCookie === 'Employee') {
         return NextResponse.redirect(new URL('/portal/staff', request.url));
       }

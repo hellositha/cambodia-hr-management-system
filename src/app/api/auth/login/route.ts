@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { createSessionToken } from '@/lib/auth-session';
 
 export const dynamic = 'force-dynamic';
 
@@ -208,14 +209,22 @@ export async function POST(request: Request) {
     // Return authenticated user profile (excluding password)
     const { password: _, ...safeUser } = user;
 
+    const sessionToken = await createSessionToken(user.id, user.role);
+
     const response = NextResponse.json({
       success: true,
       user: safeUser,
       redirectUrl,
       portalWarning,
-      token: `hestra_tok_${Date.now()}_${user.id}`,
+      token: sessionToken,
     });
 
+    response.cookies.set('hestra_session', sessionToken, {
+      path: '/',
+      httpOnly: true,
+      maxAge: 60 * 60 * 24 * 7,
+      sameSite: 'lax',
+    });
     response.cookies.set('hestra_auth', user.id, {
       path: '/',
       httpOnly: false,

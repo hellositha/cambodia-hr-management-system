@@ -92,7 +92,12 @@ export async function POST(request: Request) {
       if (activeShift.clock_in) {
         const [inH, inM] = activeShift.clock_in.split(':').map(Number);
         const [outH, outM] = timeString.split(':').map(Number);
-        const diffHours = (outH * 60 + outM - (inH * 60 + inM)) / 60;
+        let diffMinutes = (outH * 60 + outM) - (inH * 60 + inM);
+        if (diffMinutes < 0) {
+          // Overnight shift that crossed midnight (e.g. 22:00 -> 06:00)
+          diffMinutes += 24 * 60;
+        }
+        const diffHours = diffMinutes / 60;
         workHours = Math.max(0.1, Math.round(diffHours * 10) / 10);
       }
 

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getDb, getShiftSettings } from '@/lib/db';
 import { SHIFTS } from '@/lib/roster-shifts';
 
 export const dynamic = 'force-dynamic';
@@ -47,6 +47,7 @@ export async function POST(request: Request) {
 
     let generatedCount = 0;
     const createdAt = new Date().toISOString();
+    const shiftSettings = getShiftSettings();
 
     const runBatch = db.transaction(() => {
       employees.forEach((emp, empIdx) => {
@@ -116,10 +117,10 @@ export async function POST(request: Request) {
             }
           }
 
-          const def = SHIFTS[shiftType as keyof typeof SHIFTS];
-          const startTime = def.start_time || '';
-          const endTime = def.end_time || '';
-          const hours = def.default_hours;
+          const def = shiftSettings.shifts[shiftType] || SHIFTS[shiftType as keyof typeof SHIFTS];
+          const startTime = def?.start_time || '';
+          const endTime = def?.end_time || '';
+          const hours = def?.default_hours ?? 8.0;
           const id = `rst-${emp.id}-${dateStr}`;
 
           upsertStmt.run(id, emp.id, dateStr, shiftType, startTime, endTime, hours, 'Head Office', notes, createdAt);

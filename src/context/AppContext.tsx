@@ -2,7 +2,9 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Language, TRANSLATIONS, formatLocalizedText } from '@/lib/translations';
-import { Theme, CompanySettings, DEFAULT_COMPANY_SETTINGS, NotificationItem } from '@/lib/types';
+import { Theme, CompanySettings, DEFAULT_COMPANY_SETTINGS, NotificationItem, OvertimeSettings, ShiftSettings } from '@/lib/types';
+import { DEFAULT_OVERTIME_SETTINGS } from '@/lib/overtime-calc';
+import { DEFAULT_SHIFT_SETTINGS } from '@/lib/roster-shifts';
 
 export interface Persona {
   id: string;
@@ -34,7 +36,7 @@ interface AppContextType {
   currentPersona: Persona;
   switchPersona: (personaId: string) => void;
   loginAs: (user: { id: string; name: string; email: string; role: 'Admin' | 'Manager' | 'Employee'; avatar?: string; title?: string }) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   isClockedIn: boolean;
   clockInTime: string | null;
   toggleClock: () => Promise<void>;
@@ -58,6 +60,12 @@ interface AppContextType {
   setTheme: (theme: Theme) => void;
   companySettings: CompanySettings;
   updateCompanySettingsContext: (newSettings: Partial<CompanySettings>) => Promise<boolean>;
+  overtimeSettings: OvertimeSettings;
+  updateOvertimeSettingsContext: (newSettings: Partial<OvertimeSettings>) => Promise<boolean>;
+  resetOvertimeSettingsContext: () => Promise<boolean>;
+  shiftSettings: ShiftSettings;
+  updateShiftSettingsContext: (newSettings: Partial<ShiftSettings>) => Promise<boolean>;
+  resetShiftSettingsContext: () => Promise<boolean>;
   notifications: NotificationItem[];
   unreadNotificationsCount: number;
   loadingNotifications: boolean;
@@ -72,7 +80,18 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [currentPersona, setCurrentPersona] = useState<Persona>(PERSONAS[0]);
+  const [currentPersona, setCurrentPersona] = useState<Persona>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedUser = localStorage.getItem('hestra_current_user');
+        if (savedUser) {
+          const parsed = JSON.parse(savedUser);
+          if (parsed && parsed.name && parsed.role) return parsed;
+        }
+      } catch {}
+    }
+    return PERSONAS[0];
+  });
   const [isClockedIn, setIsClockedIn] = useState<boolean>(false);
   const [clockInTime, setClockInTime] = useState<string | null>(null);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -80,9 +99,51 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [refreshKey, setRefreshKey] = useState<number>(0);
   const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
-  const [language, setLanguageState] = useState<Language>('en');
-  const [theme, setThemeState] = useState<Theme>('nordic');
-  const [companySettings, setCompanySettings] = useState<CompanySettings>(DEFAULT_COMPANY_SETTINGS);
+  const [language, setLanguageState] = useState<Language>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = (localStorage.getItem('hestra_lang') || localStorage.getItem('pulsehr_lang')) as Language | null;
+        if (saved === 'en' || saved === 'km') return saved;
+      } catch {}
+    }
+    return 'km';
+  });
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedTheme = (localStorage.getItem('hestra_theme') || localStorage.getItem('pulsehr_theme')) as Theme | null;
+        if (savedTheme === 'nordic' || savedTheme === 'midnight' || savedTheme === 'indigo') return savedTheme;
+      } catch {}
+    }
+    return 'nordic';
+  });
+  const [companySettings, setCompanySettings] = useState<CompanySettings>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cachedComp = localStorage.getItem('hestra_company_settings');
+        if (cachedComp) return { ...DEFAULT_COMPANY_SETTINGS, ...JSON.parse(cachedComp) };
+      } catch {}
+    }
+    return DEFAULT_COMPANY_SETTINGS;
+  });
+  const [overtimeSettings, setOvertimeSettings] = useState<OvertimeSettings>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cachedOt = localStorage.getItem('hestra_overtime_settings');
+        if (cachedOt) return { ...DEFAULT_OVERTIME_SETTINGS, ...JSON.parse(cachedOt) };
+      } catch {}
+    }
+    return DEFAULT_OVERTIME_SETTINGS;
+  });
+  const [shiftSettings, setShiftSettings] = useState<ShiftSettings>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const cachedShift = localStorage.getItem('hestra_shift_settings');
+        if (cachedShift) return { ...DEFAULT_SHIFT_SETTINGS, ...JSON.parse(cachedShift) };
+      } catch {}
+    }
+    return DEFAULT_SHIFT_SETTINGS;
+  });
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadNotificationsCount, setUnreadNotificationsCount] = useState<number>(0);
   const [loadingNotifications, setLoadingNotifications] = useState<boolean>(false);
@@ -100,23 +161,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    try {
-      const saved = (localStorage.getItem('hestra_lang') || localStorage.getItem('pulsehr_lang')) as Language | null;
-      if (saved === 'en' || saved === 'km') {
-        setLanguageState(saved);
-      }
-      const savedTheme = (localStorage.getItem('hestra_theme') || localStorage.getItem('pulsehr_theme')) as Theme | null;
-      if (savedTheme === 'nordic' || savedTheme === 'midnight' || savedTheme === 'indigo') {
-        setThemeState(savedTheme);
-      }
-      const cachedComp = localStorage.getItem('hestra_company_settings');
-      if (cachedComp) {
-        setCompanySettings((prev) => ({ ...prev, ...JSON.parse(cachedComp) }));
-      }
-    } catch {
-      // localStorage may fail in SSR or restricted environments
-    }
-
     fetch('/api/settings')
       .then((res) => res.json())
       .then((data) => {
@@ -124,6 +168,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           setCompanySettings(data);
           try {
             localStorage.setItem('hestra_company_settings', JSON.stringify(data));
+          } catch {}
+        }
+      })
+      .catch(() => {});
+
+    fetch('/api/overtime/settings')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.rates) {
+          setOvertimeSettings(data);
+          try {
+            localStorage.setItem('hestra_overtime_settings', JSON.stringify(data));
+          } catch {}
+        }
+      })
+      .catch(() => {});
+
+    fetch('/api/roster/shifts')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.shifts) {
+          setShiftSettings(data);
+          try {
+            localStorage.setItem('hestra_shift_settings', JSON.stringify(data));
           } catch {}
         }
       })
@@ -252,19 +320,40 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     try {
       const savedUser = localStorage.getItem('hestra_current_user');
       if (savedUser) {
-        const parsed = JSON.parse(savedUser);
-        if (parsed && parsed.name && parsed.role) {
-          setCurrentPersona(parsed);
-          document.cookie = `hestra_auth=${encodeURIComponent(parsed.id)}; path=/; max-age=604800; SameSite=Lax`;
-          document.cookie = `hestra_role=${encodeURIComponent(parsed.role)}; path=/; max-age=604800; SameSite=Lax`;
-          checkClockStatus(parsed.id);
-          return;
-        }
+        document.cookie = `hestra_auth=${encodeURIComponent(currentPersona.id)}; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `hestra_role=${encodeURIComponent(currentPersona.role)}; path=/; max-age=604800; SameSite=Lax`;
       }
     } catch {}
-    // If no saved user, check default persona
-    checkClockStatus(PERSONAS[0].id);
-  }, [checkClockStatus]);
+
+    if (currentPersona?.id) {
+      let isMounted = true;
+      fetch(`/api/attendance/clock?employee_id=${encodeURIComponent(currentPersona.id)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (!isMounted) return;
+          if (data && data.isClockedIn && data.record && data.record.clock_in) {
+            setIsClockedIn(true);
+            const timeParts = data.record.clock_in.split(':');
+            let displayTime = data.record.clock_in;
+            if (timeParts.length >= 2) {
+              const h = parseInt(timeParts[0], 10);
+              const m = timeParts[1];
+              const ampm = h >= 12 ? 'PM' : 'AM';
+              const h12 = h % 12 || 12;
+              displayTime = `${String(h12).padStart(2, '0')}:${m} ${ampm}`;
+            }
+            setClockInTime(displayTime);
+          } else {
+            setIsClockedIn(false);
+            setClockInTime(null);
+          }
+        })
+        .catch(() => {});
+      return () => {
+        isMounted = false;
+      };
+    }
+  }, [currentPersona.id, currentPersona.role]);
 
   const switchPersona = (personaId: string) => {
     const found = PERSONAS.find((p) => p.id === personaId);
@@ -276,6 +365,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('hestra_current_user', JSON.stringify(found));
         document.cookie = `hestra_auth=${encodeURIComponent(found.id)}; path=/; max-age=604800; SameSite=Lax`;
         document.cookie = `hestra_role=${encodeURIComponent(found.role)}; path=/; max-age=604800; SameSite=Lax`;
+        fetch('/api/auth/simulate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: found.id, role: found.role }),
+        }).catch(() => {});
       } catch {}
       checkClockStatus(found.id);
       showToast(`Switched view to ${found.name} (${found.role})`, 'info');
@@ -299,20 +393,29 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('hestra_current_user', JSON.stringify(newPersona));
       document.cookie = `hestra_auth=${encodeURIComponent(userData.id)}; path=/; max-age=604800; SameSite=Lax`;
       document.cookie = `hestra_role=${encodeURIComponent(userData.role)}; path=/; max-age=604800; SameSite=Lax`;
+      fetch('/api/auth/simulate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userData.id, role: userData.role }),
+      }).catch(() => {});
     } catch {}
     checkClockStatus(newPersona.id);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch {}
     try {
       localStorage.removeItem('hestra_current_user');
       document.cookie = 'hestra_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
       document.cookie = 'hestra_role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+      document.cookie = 'hestra_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
     } catch {}
     setIsClockedIn(false);
     setClockInTime(null);
-    setCurrentPersona(PERSONAS[0]);
     showToast(language === 'km' ? 'បានចាកចេញពីប្រព័ន្ធដោយជោគជ័យ' : 'Logged out successfully', 'info');
+    window.location.href = '/login?logout=1';
   };
 
   const toggleClock = async () => {
@@ -393,9 +496,139 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [companySettings, triggerRefresh]
   );
 
+  const updateOvertimeSettingsContext = useCallback(
+    async (newSettings: Partial<OvertimeSettings>): Promise<boolean> => {
+      try {
+        const merged: OvertimeSettings = {
+          ...overtimeSettings,
+          ...newSettings,
+          rates: {
+            ...overtimeSettings.rates,
+            ...(newSettings.rates || {}),
+          },
+        };
+        setOvertimeSettings(merged);
+        try {
+          localStorage.setItem('hestra_overtime_settings', JSON.stringify(merged));
+        } catch {}
+
+        const res = await fetch('/api/overtime/settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newSettings),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.settings) {
+            setOvertimeSettings(data.settings);
+            try {
+              localStorage.setItem('hestra_overtime_settings', JSON.stringify(data.settings));
+            } catch {}
+          }
+          triggerRefresh();
+          return true;
+        }
+        return false;
+      } catch (err) {
+        console.error('Error updating overtime settings:', err);
+        return false;
+      }
+    },
+    [overtimeSettings, triggerRefresh]
+  );
+
+  const resetOvertimeSettingsContext = useCallback(async (): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/overtime/settings?action=reset', {
+        method: 'POST',
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.settings) {
+          setOvertimeSettings(data.settings);
+          try {
+            localStorage.setItem('hestra_overtime_settings', JSON.stringify(data.settings));
+          } catch {}
+        }
+        triggerRefresh();
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Error resetting overtime settings:', err);
+      return false;
+    }
+  }, [triggerRefresh]);
+
+  const updateShiftSettingsContext = useCallback(
+    async (newSettings: Partial<ShiftSettings>): Promise<boolean> => {
+      try {
+        const merged: ShiftSettings = {
+          ...shiftSettings,
+          ...newSettings,
+          isCustomized: true,
+          shifts: {
+            ...shiftSettings.shifts,
+            ...(newSettings.shifts || {}),
+          },
+        };
+        setShiftSettings(merged);
+        try {
+          localStorage.setItem('hestra_shift_settings', JSON.stringify(merged));
+        } catch {}
+
+        const res = await fetch('/api/roster/shifts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newSettings),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.settings) {
+            setShiftSettings(data.settings);
+            try {
+              localStorage.setItem('hestra_shift_settings', JSON.stringify(data.settings));
+            } catch {}
+          }
+          triggerRefresh();
+          return true;
+        }
+        return false;
+      } catch (err) {
+        console.error('Error updating shift settings:', err);
+        return false;
+      }
+    },
+    [shiftSettings, triggerRefresh]
+  );
+
+  const resetShiftSettingsContext = useCallback(async (): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/roster/shifts?action=reset', {
+        method: 'POST',
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.settings) {
+          setShiftSettings(data.settings);
+          try {
+            localStorage.setItem('hestra_shift_settings', JSON.stringify(data.settings));
+          } catch {}
+        }
+        triggerRefresh();
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error('Error resetting shift settings:', err);
+      return false;
+    }
+  }, [triggerRefresh]);
+
   const fetchNotifications = useCallback(async () => {
     try {
-      setLoadingNotifications(true);
       const res = await fetch('/api/notifications');
       if (res.ok) {
         const data = await res.json();
@@ -505,10 +738,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [fetchNotifications]);
 
   useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 25000);
-    return () => clearInterval(interval);
-  }, [fetchNotifications, refreshKey, currentPersona.id]);
+    let isMounted = true;
+    const loadNotifications = () => {
+      fetch('/api/notifications')
+        .then((res) => res.json())
+        .then((data) => {
+          if (!isMounted) return;
+          setNotifications(data?.notifications || []);
+          setUnreadNotificationsCount(data?.unreadCount || 0);
+        })
+        .catch(() => {});
+    };
+
+    loadNotifications();
+    const interval = setInterval(loadNotifications, 25000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [refreshKey, currentPersona.id]);
 
   return (
     <AppContext.Provider
@@ -535,6 +783,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         closeMobileMenu,
         companySettings,
         updateCompanySettingsContext,
+        overtimeSettings,
+        updateOvertimeSettingsContext,
+        resetOvertimeSettingsContext,
+        shiftSettings,
+        updateShiftSettingsContext,
+        resetShiftSettingsContext,
         notifications,
         unreadNotificationsCount,
         loadingNotifications,

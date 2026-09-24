@@ -84,15 +84,31 @@ A modern, production-grade Human Resources Management System (HRMS / HRIS) built
 ## 🚀 Running Locally
 
 ```bash
-# Install dependencies
+# 1. Install dependencies
 npm install
 
-# Start production server
-npm run build
-npm start
+# 2. Configure environment
+cp .env.example .env
 
-# Or start development server
+# 3. Start development server (defaults to port 3000, or customize with PORT=...)
 npm run dev
+
+# 4. Or build and run production server
+npm run build
+npm run start
+# For port 80: npm run start:prod
 ```
 
-Visit `http://38.252.151.33:3000` in your browser.
+Visit `http://localhost:3000` (or `http://38.252.151.33:3000`) in your browser.
+
+---
+
+## 🐳 Docker Deployment
+
+The application includes a multi-stage Docker build with native SQLite support and volume persistence:
+
+```bash
+# Start container with Docker Compose
+docker compose up -d --build
+```
+

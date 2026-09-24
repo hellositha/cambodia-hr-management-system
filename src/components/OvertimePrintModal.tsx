@@ -3,7 +3,7 @@
 import React from 'react';
 import { useApp } from '@/context/AppContext';
 import { OvertimeRequest } from '@/lib/types';
-import { OVERTIME_RATES } from '@/lib/overtime-calc';
+import { getOvertimeRateConfig } from '@/lib/overtime-calc';
 import { Printer, X, Shield, FileText } from 'lucide-react';
 
 interface OvertimePrintModalProps {
@@ -17,11 +17,11 @@ export default function OvertimePrintModal({
   onClose,
   request,
 }: OvertimePrintModalProps) {
-  const { language } = useApp();
+  const { language, overtimeSettings } = useApp();
 
   if (!isOpen || !request) return null;
 
-  const rateConfig = OVERTIME_RATES[request.ot_rate_type] || OVERTIME_RATES.normal_day_150;
+  const rateConfig = getOvertimeRateConfig(request.ot_rate_type, overtimeSettings?.rates);
   const khrAmount = Math.round(request.estimated_pay * 4100);
 
   const handlePrint = () => {
@@ -139,7 +139,7 @@ export default function OvertimePrintModal({
                   <td className="border border-slate-300 p-2 font-bold font-mono">{request.hours} ម៉ោង (hrs)</td>
                   <td className="border border-slate-300 p-2 bg-slate-50 font-semibold">អត្រាថែមម៉ោង (Rate Multiplier):</td>
                   <td className="border border-slate-300 p-2 font-bold text-indigo-700">
-                    {rateConfig.multiplier * 100}% ({rateConfig.label_km})
+                    {Math.round(rateConfig.multiplier * 100)}% ({language === 'km' ? rateConfig.label_km : rateConfig.label_en})
                   </td>
                 </tr>
                 <tr>

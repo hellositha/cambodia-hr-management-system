@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { OvertimeRequest } from '@/lib/types';
-import { OVERTIME_RATES } from '@/lib/overtime-calc';
+import { getOvertimeRateConfig } from '@/lib/overtime-calc';
 import { formatLocalizedText } from '@/lib/translations';
 import { X, CheckCircle2, XCircle, Clock, Calendar, DollarSign, Shield, FileText, UserCheck } from 'lucide-react';
 
@@ -20,7 +20,7 @@ export default function OvertimeApprovalModal({
   request,
   onActionComplete,
 }: OvertimeApprovalModalProps) {
-  const { currentPersona, language, showToast } = useApp();
+  const { currentPersona, language, showToast, overtimeSettings } = useApp();
   const [comment, setComment] = useState('');
   const [processing, setProcessing] = useState(false);
 
@@ -28,7 +28,7 @@ export default function OvertimeApprovalModal({
 
   const isAdmin = currentPersona.role === 'Admin';
   const isManager = currentPersona.role === 'Manager';
-  const rateConfig = OVERTIME_RATES[request.ot_rate_type] || OVERTIME_RATES.normal_day_150;
+  const rateConfig = getOvertimeRateConfig(request.ot_rate_type, overtimeSettings?.rates);
 
   const handleAction = async (action: 'manager_approve' | 'manager_reject' | 'admin_approve' | 'admin_reject') => {
     setProcessing(true);
@@ -102,7 +102,7 @@ export default function OvertimeApprovalModal({
                 <span>{request.date}</span>
               </div>
               <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${rateConfig.badgeBg} ${rateConfig.badgeBorder} ${rateConfig.badgeText}`}>
-                {rateConfig.multiplier * 100}% - {language === 'km' ? rateConfig.label_km : rateConfig.label_en}
+                {Math.round(rateConfig.multiplier * 100)}% - {language === 'km' ? rateConfig.label_km : rateConfig.label_en}
               </span>
             </div>
 

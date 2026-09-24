@@ -91,14 +91,36 @@ export async function POST(request: Request) {
           Number(emp.housing_allowance || 0) +
           Number(emp.attendance_allowance || 0);
 
-        // Fetch approved overtime pay for this employee
+        // Fetch approved overtime pay for this employee within this pay period month
         let otEarnings = 0;
         try {
-          const otRow = db.prepare(`
-            SELECT COALESCE(SUM(estimated_pay), 0) as total_ot
-            FROM overtime_requests
-            WHERE employee_id = ? AND status = 'Approved'
-          `).get(emp.id) as { total_ot: number } | undefined;
+          let ym = payment_date ? payment_date.slice(0, 7) : '';
+          if (!ym && payPeriod) {
+            const monthsMap: Record<string, string> = {
+              january: '01', february: '02', march: '03', april: '04',
+              may: '05', june: '06', july: '07', august: '08',
+              september: '09', october: '10', november: '11', december: '12',
+            };
+            const parts = payPeriod.trim().toLowerCase().split(/\s+/);
+            const m = monthsMap[parts[0]];
+            const y = parts[1];
+            if (m && y) ym = `${y}-${m}`;
+          }
+
+          let otRow: { total_ot: number } | undefined;
+          if (ym) {
+            otRow = db.prepare(`
+              SELECT COALESCE(SUM(estimated_pay), 0) as total_ot
+              FROM overtime_requests
+              WHERE employee_id = ? AND status = 'Approved' AND date LIKE ?
+            `).get(emp.id, `${ym}%`) as { total_ot: number } | undefined;
+          } else {
+            otRow = db.prepare(`
+              SELECT COALESCE(SUM(estimated_pay), 0) as total_ot
+              FROM overtime_requests
+              WHERE employee_id = ? AND status = 'Approved'
+            `).get(emp.id) as { total_ot: number } | undefined;
+          }
           otEarnings = otRow ? Number(otRow.total_ot || 0) : 0;
         } catch (e) {}
 

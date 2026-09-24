@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
 import { DutyRosterEntry, ShiftType } from '@/lib/types';
-import { SHIFTS, SHIFT_LIST } from '@/lib/roster-shifts';
+import { getShiftConfig, getShiftList, SHIFTS } from '@/lib/roster-shifts';
 import { formatLocalizedText } from '@/lib/translations';
 import { X, Clock, Calendar, MapPin, FileText, Trash2, CheckCircle2, Shield } from 'lucide-react';
 
@@ -28,7 +28,7 @@ export default function RosterShiftModal({
   onSave,
   onDelete,
 }: RosterShiftModalProps) {
-  const { language } = useApp();
+  const { language, shiftSettings } = useApp();
   const [selectedShift, setSelectedShift] = useState<ShiftType>('office');
   const [startTime, setStartTime] = useState('08:30');
   const [endTime, setEndTime] = useState('17:30');
@@ -47,7 +47,7 @@ export default function RosterShiftModal({
       setNotes(entry.notes || '');
     } else {
       // Default to office
-      const def = SHIFTS.office;
+      const def = getShiftConfig('office', shiftSettings?.shifts);
       setSelectedShift('office');
       setStartTime(def.start_time);
       setEndTime(def.end_time);
@@ -55,13 +55,13 @@ export default function RosterShiftModal({
       setLocation('Head Office');
       setNotes('');
     }
-  }, [entry, isOpen]);
+  }, [entry, isOpen, shiftSettings]);
 
   if (!isOpen || !employeeInfo) return null;
 
-  const handleSelectShiftType = (type: ShiftType) => {
-    setSelectedShift(type);
-    const def = SHIFTS[type];
+  const handleSelectShiftType = (type: string) => {
+    setSelectedShift(type as ShiftType);
+    const def = getShiftConfig(type, shiftSettings?.shifts);
     setStartTime(def.start_time);
     setEndTime(def.end_time);
     setHours(String(def.default_hours));
@@ -139,7 +139,7 @@ export default function RosterShiftModal({
               {language === 'km' ? 'ជ្រើសរើសប្រភេទវេនការងារ' : 'Select Shift Template'}
             </label>
             <div className="grid grid-cols-2 gap-2.5 max-h-48 overflow-y-auto pr-1">
-              {SHIFT_LIST.map((shift) => {
+              {getShiftList(shiftSettings?.shifts).map((shift) => {
                 const isSelected = selectedShift === shift.id;
                 return (
                   <button

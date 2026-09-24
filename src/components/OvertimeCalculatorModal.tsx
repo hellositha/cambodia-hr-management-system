@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { OvertimeRateType } from '@/lib/types';
-import { OVERTIME_RATE_LIST, calculateOvertimePay, STANDARD_MONTHLY_HOURS } from '@/lib/overtime-calc';
+import { OVERTIME_RATES, calculateOvertimePay, STANDARD_MONTHLY_HOURS } from '@/lib/overtime-calc';
 import { X, Calculator, Shield, DollarSign, HelpCircle, ArrowRight, Check } from 'lucide-react';
 
 interface OvertimeCalculatorModalProps {
@@ -15,16 +15,20 @@ export default function OvertimeCalculatorModal({
   isOpen,
   onClose,
 }: OvertimeCalculatorModalProps) {
-  const { language } = useApp();
+  const { language, overtimeSettings } = useApp();
   const [salary, setSalary] = useState('800');
   const [hours, setHours] = useState('2.5');
   const [rateType, setRateType] = useState<OvertimeRateType>('normal_day_150');
 
   if (!isOpen) return null;
 
+  const activeRates = overtimeSettings?.rates || OVERTIME_RATES;
+  const activeRateList = Object.values(activeRates);
+  const activeDivisor = overtimeSettings?.standardMonthlyHours || STANDARD_MONTHLY_HOURS;
+
   const numSalary = Math.max(0, Number(salary) || 0);
   const numHours = Math.max(0, Number(hours) || 0);
-  const result = calculateOvertimePay(numSalary, numHours, rateType);
+  const result = calculateOvertimePay(numSalary, numHours, rateType, activeRates, activeDivisor);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
@@ -97,7 +101,7 @@ export default function OvertimeCalculatorModal({
               {language === 'km' ? 'ជ្រើសរើសប្រភេទម៉ោងថែម (Rate)' : 'Select Overtime Rate Multiplier'}
             </label>
             <div className="grid grid-cols-2 gap-2">
-              {OVERTIME_RATE_LIST.map((rate) => {
+              {activeRateList.map((rate) => {
                 const isSelected = rateType === rate.id;
                 return (
                   <button
@@ -112,7 +116,7 @@ export default function OvertimeCalculatorModal({
                   >
                     <div className="flex items-center justify-between">
                       <span className={`text-xs font-bold ${rate.badgeText}`}>
-                        {rate.multiplier * 100}%
+                        {Math.round(rate.multiplier * 100)}%
                       </span>
                       <span className="text-[10px] text-slate-400 font-mono">
                         {rate.multiplier}x
@@ -135,16 +139,16 @@ export default function OvertimeCalculatorModal({
 
             <div className="flex items-center justify-between text-xs">
               <span className="text-slate-500">
-                {language === 'km' ? '១. ចំនួនម៉ោងស្តង់ដារប្រចាំខែ (២៦ថ្ងៃ x ៨ម៉ោង):' : '1. Standard Monthly Hours (26d x 8h):'}
+                {language === 'km' ? '១. ចំនួនម៉ោងស្តង់ដារប្រចាំខែ:' : '1. Standard Monthly Hours Divisor:'}
               </span>
               <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">
-                {STANDARD_MONTHLY_HOURS} ម៉ោង (hrs)
+                {activeDivisor} ម៉ោង (hrs)
               </span>
             </div>
 
             <div className="flex items-center justify-between text-xs">
               <span className="text-slate-500">
-                {language === 'km' ? '២. ប្រាក់ឈ្នួលគោលក្នុងមួយម៉ោង (Base Rate):' : '2. Base Hourly Rate ($Salary / 208):'}
+                {language === 'km' ? `២. ប្រាក់ឈ្នួលគោលក្នុងមួយម៉ោង ($Salary / ${activeDivisor}):` : `2. Base Hourly Rate ($Salary / ${activeDivisor}):`}
               </span>
               <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">
                 ${result.hourlyRate.toFixed(4)} / ម៉ោង

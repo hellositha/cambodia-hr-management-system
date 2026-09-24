@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getDb, getShiftSettings } from '@/lib/db';
 import { DutyRosterEntry } from '@/lib/types';
 import { SHIFTS } from '@/lib/roster-shifts';
 
@@ -87,8 +87,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, cleared: true });
     }
 
-    // Default times & hours from SHIFTS config if not provided
-    const shiftDef = SHIFTS[shift_type as keyof typeof SHIFTS];
+    // Default times & hours from dynamic shift settings config if not provided
+    const shiftSettings = getShiftSettings();
+    const shiftDef = shiftSettings.shifts[shift_type] || SHIFTS[shift_type as keyof typeof SHIFTS];
     const finalStart = start_time !== undefined ? start_time : (shiftDef?.start_time || '');
     const finalEnd = end_time !== undefined ? end_time : (shiftDef?.end_time || '');
     const finalHours = hours !== undefined ? Number(hours) : (shiftDef?.default_hours ?? 8.0);

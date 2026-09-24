@@ -1,18 +1,6 @@
-import { OvertimeRateType } from './types';
+import { OvertimeRateType, OvertimeRateConfig, OvertimeSettings } from './types';
 
-export interface OvertimeRateConfig {
-  id: OvertimeRateType;
-  multiplier: number;
-  label_km: string;
-  label_en: string;
-  short_label: string;
-  badgeBg: string;
-  badgeText: string;
-  badgeBorder: string;
-  law_reference: string;
-  description_km: string;
-  description_en: string;
-}
+export type { OvertimeRateConfig };
 
 export const OVERTIME_RATES: Record<OvertimeRateType, OvertimeRateConfig> = {
   normal_day_150: {
@@ -77,27 +65,52 @@ export const OVERTIME_RATE_LIST = Object.values(OVERTIME_RATES);
  */
 export const STANDARD_MONTHLY_HOURS = 208;
 
+export const DEFAULT_OVERTIME_SETTINGS: OvertimeSettings = {
+  standardMonthlyHours: STANDARD_MONTHLY_HOURS,
+  rates: OVERTIME_RATES,
+  isCustomized: false,
+};
+
 /**
- * Computes base hourly rate from monthly base salary
+ * Computes base hourly rate from monthly base salary using standard or customized divisor
  */
-export function getBaseHourlyRate(monthlySalary: number): number {
+export function getBaseHourlyRate(monthlySalary: number, customDivisor: number = STANDARD_MONTHLY_HOURS): number {
   if (!monthlySalary || monthlySalary <= 0) return 0;
-  return Number((monthlySalary / STANDARD_MONTHLY_HOURS).toFixed(4));
+  const divisor = customDivisor > 0 ? customDivisor : STANDARD_MONTHLY_HOURS;
+  return Number((monthlySalary / divisor).toFixed(4));
+}
+
+/**
+ * Helper to retrieve specific rate config with fallback to custom settings or defaults
+ */
+export function getOvertimeRateConfig(
+  rateType: OvertimeRateType,
+  customRates?: Record<OvertimeRateType, OvertimeRateConfig>
+): OvertimeRateConfig {
+  const rates = customRates || OVERTIME_RATES;
+  return rates[rateType] || rates.normal_day_150 || OVERTIME_RATES.normal_day_150;
 }
 
 /**
  * Computes total overtime pay based on Cambodian Labor Law formula:
- * OT Pay = Hours * (Monthly Salary / 208) * Multiplier
+ * OT Pay = Hours * (Monthly Salary / Divisor) * Multiplier
  */
-export function calculateOvertimePay(monthlySalary: number, hours: number, rateType: OvertimeRateType): {
+export function calculateOvertimePay(
+  monthlySalary: number,
+  hours: number,
+  rateType: OvertimeRateType,
+  customRates?: Record<OvertimeRateType, OvertimeRateConfig>,
+  customDivisor?: number
+): {
   hourlyRate: number;
   otHourlyRate: number;
   multiplier: number;
   totalPay: number;
   khrPay: number;
 } {
-  const config = OVERTIME_RATES[rateType] || OVERTIME_RATES.normal_day_150;
-  const baseRate = getBaseHourlyRate(monthlySalary);
+  const config = getOvertimeRateConfig(rateType, customRates);
+  const divisor = customDivisor && customDivisor > 0 ? customDivisor : STANDARD_MONTHLY_HOURS;
+  const baseRate = getBaseHourlyRate(monthlySalary, divisor);
   const otHourlyRate = Number((baseRate * config.multiplier).toFixed(4));
   const totalPay = Number((hours * otHourlyRate).toFixed(2));
   const khrPay = Math.round(totalPay * 4100);

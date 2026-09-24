@@ -100,10 +100,10 @@ export interface AttendanceRecord {
   notes?: string;
 }
 
-export type ShiftType = 'morning' | 'office' | 'evening' | 'night' | 'weekend_duty' | 'on_call' | 'off' | 'custom';
+export type ShiftType = 'morning' | 'office' | 'evening' | 'night' | 'weekend_duty' | 'on_call' | 'off' | 'custom' | (string & {});
 
 export interface ShiftDefinition {
-  id: ShiftType;
+  id: string;
   name_en: string;
   name_km: string;
   short_code: string;
@@ -114,6 +114,13 @@ export interface ShiftDefinition {
   badgeBg: string;
   badgeText: string;
   badgeBorder: string;
+  is_active?: boolean;
+}
+
+export interface ShiftSettings {
+  shifts: Record<string, ShiftDefinition>;
+  isCustomized?: boolean;
+  updated_at?: string;
 }
 
 export interface DutyRosterEntry {
@@ -136,6 +143,27 @@ export interface DutyRosterEntry {
 
 export type OvertimeRateType = 'normal_day_150' | 'night_200' | 'weekend_200' | 'holiday_200';
 export type OvertimeStatus = 'Pending' | 'Pending Manager' | 'Pending Admin' | 'Approved' | 'Rejected';
+
+export interface OvertimeRateConfig {
+  id: OvertimeRateType;
+  multiplier: number;
+  label_km: string;
+  label_en: string;
+  short_label: string;
+  badgeBg: string;
+  badgeText: string;
+  badgeBorder: string;
+  law_reference: string;
+  description_km: string;
+  description_en: string;
+}
+
+export interface OvertimeSettings {
+  standardMonthlyHours: number;
+  rates: Record<OvertimeRateType, OvertimeRateConfig>;
+  isCustomized?: boolean;
+  updated_at?: string;
+}
 
 export interface OvertimeRequest {
   id: string;

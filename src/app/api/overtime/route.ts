@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getDb, getOvertimeSettings } from '@/lib/db';
 import { OvertimeRequest } from '@/lib/types';
 import { OVERTIME_RATES, getBaseHourlyRate, calculateOvertimePay } from '@/lib/overtime-calc';
 
@@ -91,7 +91,14 @@ export async function POST(request: Request) {
     // Look up employee salary
     const emp = db.prepare('SELECT salary, department_id, manager_id FROM employees WHERE id = ?').get(employee_id) as any;
     const salary = emp?.salary || 1000;
-    const rateCalc = calculateOvertimePay(salary, Number(hours), ot_rate_type);
+    const otSettings = getOvertimeSettings();
+    const rateCalc = calculateOvertimePay(
+      salary,
+      Number(hours),
+      ot_rate_type,
+      otSettings.rates,
+      otSettings.standardMonthlyHours
+    );
 
     const id = `ot-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     const createdAt = new Date().toISOString();
